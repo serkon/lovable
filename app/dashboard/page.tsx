@@ -59,7 +59,7 @@ export default function DashboardPage() {
       <div className="min-h-screen bg-slate-50 flex flex-col transition-colors duration-500">
 
         {/* Header - Reused for consistency */}
-        <header className={cn("py-2 px-3 shadow-sm flex justify-between items-center sticky top-0 z-30 transition-colors bg-white")}>
+        <header className={cn("h-20 px-4 shadow-sm flex justify-between items-center sticky top-0 z-30 transition-colors bg-white")}>
           <div className="flex items-center gap-2">
             <Typography variant="h3" className="transition-colors text-base font-bold text-purple-700">
               İkinci Bahar
@@ -130,7 +130,7 @@ export default function DashboardPage() {
     <div className={cn("min-h-screen bg-slate-50 flex flex-col pb-20 md:pb-0 transition-colors duration-500", isGhostMode && "bg-gray-900")}>
 
       {/* Header - Refined & Compact */}
-      <header className={cn("py-2 px-3 shadow-sm flex justify-between items-center sticky top-0 z-30 transition-colors", isGhostMode ? "bg-gray-800 border-gray-700" : "bg-white")}>
+      <header className={cn("h-20 px-4 shadow-sm flex justify-between items-center sticky top-0 z-30 transition-colors", isGhostMode ? "bg-gray-800 border-gray-700" : "bg-white")}>
         <div className="flex items-center gap-2">
           <Typography variant="h3" className={cn("transition-colors text-base font-bold", isGhostMode ? "text-white" : "text-purple-700")}>
             İkinci Bahar
