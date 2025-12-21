@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/Button";
 import { Typography } from "@/components/ui/Typography";
 import Link from "next/link";
 import { Heart, Shield, Users } from "lucide-react";
+import { Logo } from "@/components/ui/Logo";
 
 export default function Home() {
   return (
@@ -9,16 +10,14 @@ export default function Home() {
       {/* Hero Section */}
       <section className="bg-white py-20 px-6 text-center border-b border-gray-100 flex-1 flex flex-col justify-center items-center">
         <div className="max-w-3xl mx-auto space-y-8">
-          <div className="inline-flex items-center justify-center p-3 bg-purple-50 rounded-full mb-4">
-            <Heart className="w-8 h-8 text-purple-600" />
-          </div>
+          <Logo size={120} className="mb-4" />
           <Typography variant="h1" className="text-purple-900 leading-tight">
             Hayatın İkinci Baharı Sizi Bekliyor
           </Typography>
           <Typography variant="body-large" className="text-gray-600 max-w-2xl mx-auto">
             Karmaşık menüler yok. Sahte profiller yok. Sadece sizin gibi samimiyet arayan gerçek insanlar.
           </Typography>
-          
+
           <div className="pt-8 animate-pulse">
             <Link href="/onboarding">
               <Button size="lg" className="w-full sm:w-auto text-xl px-12 py-8 shadow-xl bg-purple-600 hover:bg-purple-700">
@@ -42,7 +41,7 @@ export default function Home() {
               Her profil tek tek kontrol edilir. Robotlara ve sahte hesaplara yer yok.
             </Typography>
           </div>
-          
+
           <div className="space-y-4">
             <div className="bg-white w-16 h-16 rounded-2xl flex items-center justify-center mx-auto shadow-sm">
               <Shield className="w-8 h-8 text-purple-600" />

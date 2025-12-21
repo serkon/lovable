@@ -51,12 +51,19 @@ const pickMultiple = <T>(arr: T[], count: number): T[] => {
   return shuffled.slice(0, count);
 };
 
+interface RandomUser {
+  name: { first: string };
+  location: { city: string };
+  dob: { age: number };
+  picture: { large: string };
+}
+
 export const fetchProfilesFromAPI = async (count: number = 20): Promise<Profile[]> => {
   try {
     const res = await fetch(`https://randomuser.me/api/?results=${count}&nat=tr&inc=name,location,dob,picture,login`);
     const data = await res.json();
 
-    return data.results.map((user: any, index: number) => {
+    return data.results.map((user: RandomUser, index: number) => {
       // Map API data to our Schema
       const city = user.location.city;
       // Capitalize city

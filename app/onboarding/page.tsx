@@ -1,12 +1,14 @@
-import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Typography } from "@/components/ui/Typography";
 import Link from "next/link";
 import { ArrowRight, User } from "lucide-react";
+import { Logo } from "@/components/ui/Logo";
 
 export default function OnboardingPage() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center py-10 px-4">
+      <Logo size={64} className="mb-8" />
+
       {/* Progress Bar (Visual only for now) */}
       <div className="w-full max-w-md bg-gray-200 rounded-full h-2.5 mb-10">
         <div className="bg-purple-600 h-2.5 rounded-full" style={{ width: '20%' }}></div>
@@ -47,11 +49,11 @@ export default function OnboardingPage() {
             </Card>
           </Link>
         </div>
-        
+
         <div className="text-center pt-8">
-           <Typography variant="caption" className="text-gray-400">
-             Adım 1 / 5
-           </Typography>
+          <Typography variant="caption" className="text-gray-400">
+            Adım 1 / 5
+          </Typography>
         </div>
       </div>
     </div>

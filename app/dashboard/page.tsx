@@ -9,6 +9,7 @@ import { FilterModal, FilterState } from "@/components/dashboard/FilterModal";
 import { useAppStore } from "@/context/AppStore"; // Use Store
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { Logo } from "@/components/ui/Logo";
 
 export default function DashboardPage() {
   const { profiles, sendLike, passProfile, matches, resetProfiles } = useAppStore(); // Get from context
@@ -60,11 +61,12 @@ export default function DashboardPage() {
 
         {/* Header - Reused for consistency */}
         <header className={cn("h-20 px-4 shadow-sm flex justify-between items-center sticky top-0 z-30 transition-colors bg-white")}>
-          <div className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2">
+            <Logo size={40} />
             <Typography variant="h3" className="transition-colors text-base font-bold text-purple-700">
               İkinci Bahar
             </Typography>
-          </div>
+          </Link>
 
           <div className="flex items-center gap-1">
             <Link href="/sent-requests">
@@ -131,12 +133,13 @@ export default function DashboardPage() {
 
       {/* Header - Refined & Compact */}
       <header className={cn("h-20 px-4 shadow-sm flex justify-between items-center sticky top-0 z-30 transition-colors", isGhostMode ? "bg-gray-800 border-gray-700" : "bg-white")}>
-        <div className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2">
+          <Logo size={40} className={isGhostMode ? "brightness-90 invert-[.15]" : ""} />
           <Typography variant="h3" className={cn("transition-colors text-base font-bold", isGhostMode ? "text-white" : "text-purple-700")}>
             İkinci Bahar
           </Typography>
-          {isGhostMode && <span className="text-[10px] bg-gray-700 text-gray-300 px-1.5 py-0.5 rounded-full">Gizli</span>}
-        </div>
+        </Link>
+        {isGhostMode && <span className="text-[10px] bg-gray-700 text-gray-300 px-1.5 py-0.5 rounded-full">Gizli</span>}
 
         <div className="flex items-center gap-1">
           <button
