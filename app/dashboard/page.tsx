@@ -187,9 +187,14 @@ export default function DashboardPage() {
       {/* Main Content */}
       <main className="flex-1 max-w-2xl mx-auto w-full flex flex-col items-center">
         
-        <Card data-testid="active-profile-card" className="shadow-2xl border-0 flex flex-col w-full h-auto animate-in slide-in-from-right duration-300 relative bg-white overflow-hidden rounded-[32px] my-6 mb-32" key={currentProfile.id}>
+        <Card data-testid="active-profile-card" className="border-0 flex flex-col w-full h-auto animate-in slide-in-from-right duration-300 relative rounded-[32px] my-6 mb-32" key={currentProfile.id}>
           
-          {/* Badge: Intention - Sticky relative to card */}
+
+
+          {/* Photo Area - Sticky Background */}
+          <div className="sticky top-12 h-[60vh] w-full bg-gray-200 z-0 rounded-t-[32px] overflow-hidden shadow-2xl ">
+
+                      {/* Badge: Intention - Sticky relative to card */}
           <div className="fixed top-12 left-2 z-20 bg-white/90 backdrop-blur px-2 py-0.5 rounded-full text-xs font-semibold text-purple-700 shadow-sm flex items-center gap-1 md:absolute md:top-4 md:left-4">
               <Heart className="w-3 h-3 fill-purple-700" />
               {currentProfile.intention}
@@ -200,9 +205,6 @@ export default function DashboardPage() {
               <MapPin className="w-3 h-3 text-white" />
               {currentProfile.distance} km
           </div>
-
-          {/* Photo Area - Standard Scroll */}
-          <div className="relative h-[60vh] w-full bg-gray-200">
              <img 
                src={currentProfile.imageUrl} 
                alt={currentProfile.name}
@@ -220,7 +222,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Details Area - Scrolls OVER the image */}
-          <div className="relative z-10 bg-white rounded-t-3xl -mt-4 p-5 space-y-5 min-h-0 shadow-[0_-5px_20px_rgba(0,0,0,0.1)]">
+          <div className="relative z-10 bg-white rounded-t-3xl rounded-b-[32px] -mt-4 p-5 space-y-5 min-h-0 shadow-[0_-5px_20px_rgba(0,0,0,0.1)]">
              {/* Tiny drag handle indicator for aesthetics */}
              <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-1 opacity-50" />
 
@@ -262,7 +264,7 @@ export default function DashboardPage() {
             
             <div className="space-y-1">
               <Typography variant="h3" className="text-base text-black">Hakkımda</Typography>
-              <p className="text-lg text-gray-600 leading-relaxed font-serif pb-4">
+              <p className="text-lg text-gray-600 leading-relaxed font-serif">
                 {currentProfile.bio}
               </p>
             </div>
