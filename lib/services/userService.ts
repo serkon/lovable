@@ -1,30 +1,57 @@
-import { Profile, Education, MaritalStatus, Intention } from "@/lib/mock-data";
+import {
+  Profile,
+  EducationId,
+  MaritalStatusId,
+  IntentionId,
+  EDUCATIONS,
+  MARITAL_STATUSES,
+  INTENTIONS,
+} from "@/lib/mock-data";
 
 // Enrichment Data - Turkish Context
 const JOBS = [
-  "Emekli Öğretmen", "Mühendis", "Doktor", "Hemşire", "Bankacı", 
-  "Muhasebeci", "Avukat", "Mimar", "Emekli Subay", "Yazar", 
-  "Akademisyen", "Eczacı", "Terzi", "Aşçı", "Esnaf"
+  "Emekli Öğretmen",
+  "Mühendis",
+  "Doktor",
+  "Hemşire",
+  "Bankacı",
+  "Muhasebeci",
+  "Avukat",
+  "Mimar",
+  "Emekli Subay",
+  "Yazar",
+  "Akademisyen",
+  "Eczacı",
+  "Terzi",
+  "Aşçı",
+  "Esnaf",
 ];
 
 const HOBBIES_LIST = [
-  "Kitap Okuma", "Doğa Yürüyüşü", "Bahçe İşleri", "Yemek Yapmak", 
-  "Seyahat", "Balık Tutma", "Yoga", "Klasik Müzik", "Türk Sanat Müziği", 
-  "Bulmaca", "Satranç", "Fotoğrafçılık", "Gönüllü Çalışmalar", 
-  "Sinema", "Tiyatro", "Seramik", "Ahşap Boyama"
+  "Gezi, Doğa & Kamp",
+  "Kültür, Sanat & Kitap",
+  "Sinema & Tiyatro",
+  "Müzik & Dans",
+  "Yemek & Gurme",
+  "Spor, Yoga & Pilates",
+  "Psikoloji & Kişisel Gelişim",
+  "Tavla & Sosyal Oyunlar",
+  "Bahçe İşleri",
+  "Balık Tutma",
+  "El Sanatları",
 ];
 
 const BIOS = [
   "Hayatın tadını çıkarmayı seven, dürüst ve samimi biriyim.",
   "İkinci baharımı huzur ve güven içinde geçirmek istiyorum.",
-  "Doğayı, hayvanları ve seyahat etmeyi severim.",
-  "Emekliliğin tadını çıkarıyorum, yol arkadaşı arıyorum.",
+  "Doğayı, gezmeyi ve yeni insanlar tanımayı severim.",
+  "Samimi bir sohbet and gerçek bir dostluk arıyorum.",
   "Eskilerin dediği gibi, gönül kimi severse güzel odur.",
-  "Kitaplarım ve çiçeklerimle mutlu bir hayatım var ama paylaşmak güzeldir.",
-  "Müziği, sanatı ve kaliteli sohbeti severim.",
+  "Hayatı paylaşmak, birlikte gülmek ve anı yaşamak kıymetli.",
+  "Müzik, kültür ve kaliteli sosyal ortamlardan keyif alırım.",
   "Dürüstlük ve saygı benim için en önemli değerlerdir.",
-  "Hayat kısa, kuşlar uçuyor. Anı yaşamak lazım.",
-  "Ciddi, seviyeli ve güvenilir bir arkadaşlık arıyorum."
+  "Hayat kısa, anın tadını çıkarmak lazım.",
+  "Seviyeli ve güvenilir bir arkadaşlık arıyorum.",
 ];
 
 const ICE_BREAKERS = [
@@ -37,12 +64,12 @@ const ICE_BREAKERS = [
   "En sevdiğin seyahat rotası neresi?",
   "Bahçende en çok ne yetiştirmeyi seversin?",
   "Hangi müzik türü seni dinlendirir?",
-  "Çocukluğundan en sevdiğin anı nedir?"
+  "Çocukluğundan en sevdiğin anı nedir?",
 ];
 
-const EDU_OPTIONS: Education[] = ["Lise", "Ön Lisans", "Lisans", "Yüksek Lisans", "Doktora"];
-const MARITAL_OPTIONS: MaritalStatus[] = ["Hiç Evlenmemiş", "Boşanmış", "Eşi Vefat Etmiş"];
-const INTENTION_OPTIONS: Intention[] = ["Ciddi İlişki", "Arkadaşlık", "Sohbet", "Yol Arkadaşlığı"];
+const EDU_OPTIONS: EducationId[] = [...EDUCATIONS];
+const MARITAL_OPTIONS: MaritalStatusId[] = [...MARITAL_STATUSES];
+const INTENTION_OPTIONS: IntentionId[] = [...INTENTIONS];
 
 // Helper to pick random item
 const pick = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
@@ -60,7 +87,9 @@ interface RandomUser {
 
 export const fetchProfilesFromAPI = async (count: number = 20): Promise<Profile[]> => {
   try {
-    const res = await fetch(`https://randomuser.me/api/?results=${count}&nat=tr&inc=name,location,dob,picture,login`);
+    const res = await fetch(
+      `https://randomuser.me/api/?results=${count}&nat=tr&inc=name,location,dob,picture,login`
+    );
     const data = await res.json();
 
     return data.results.map((user: RandomUser, index: number) => {
@@ -79,7 +108,7 @@ export const fetchProfilesFromAPI = async (count: number = 20): Promise<Profile[
         // We will randomly pick a distract from Istanbul for realism since our user base is likely dense there.
         // Or just use the API city. API cities are "Adana", "Ankara" etc.
         // User wants proximity. Let's cheat a bit and say they are mostly nearby for this demo.
-        distance: Math.floor(Math.random() * 50) + 1, 
+        distance: Math.floor(Math.random() * 50) + 1,
         job: pick(JOBS),
         education: pick(EDU_OPTIONS),
         maritalStatus: pick(MARITAL_OPTIONS),
@@ -87,10 +116,9 @@ export const fetchProfilesFromAPI = async (count: number = 20): Promise<Profile[
         bio: pick(BIOS),
         hobbies: pickMultiple(HOBBIES_LIST, 3),
         imageUrl: user.picture.large,
-        iceBreaker: pick(ICE_BREAKERS)
+        iceBreaker: pick(ICE_BREAKERS),
       };
     });
-
   } catch (error) {
     console.error("Failed to fetch profiles:", error);
     return [];

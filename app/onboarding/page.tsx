@@ -1,58 +1,360 @@
+"use client";
+
+import { useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { Typography } from "@/components/ui/Typography";
-import Link from "next/link";
-import { ArrowRight, User } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import {
+  ArrowRight,
+  User,
+  Sparkles,
+  Heart,
+  GraduationCap,
+  BookOpen,
+  Check,
+  ChevronLeft,
+  Camera
+} from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
+import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { MARITAL_STATUSES, EDUCATIONS, INTENTIONS } from "@/lib/mock-data";
+import { useAppStore } from "@/context/AppStore";
+import { getLabel } from "@/lib/translations";
+
+type OnboardingData = {
+  gender: string;
+  bio: string;
+  intention: string;
+  education: string;
+  maritalStatus: string;
+  hobbies: string[];
+};
+
+const BIO_TEMPLATES = [
+  "Huzurlu bir hayat süren, doğa aşığı biriyim.",
+  "Yeni yerler keşfetmeyi ve seyahat etmeyi seviyorum.",
+  "Dürüstlük, samimiyet ve güven benim için her şeyden önce gelir.",
+  "Hayatın bu döneminde gerçek bir dost ve hayat arkadaşı arıyorum.",
+  "Mutfakta vakit geçirmeyi ve güzel sofralar kurmayı severim.",
+  "Kitap okumak, sinemaya gitmek ve derin sohbetler etmekten keyif alırım.",
+  "Aile değerlerine önem veren, sevdikleriyle vakit geçirmeyi seven biriyim.",
+  "Hayata pozitif bakmayı, gülmeyi ve anı yaşamayı seviyorum.",
+  "Sağlık, spor ve zinde kalmak benim için değerli."
+];
+
+const HOBBIES_LIST = [
+  "Gezi, Doğa & Kamp", "Kültür, Sanat & Kitap", "Sinema & Tiyatro",
+  "Müzik & Dans", "Yemek & Gurme", "Spor, Yoga & Pilates",
+  "Psikoloji & Kişisel Gelişim", "Tavla & Sosyal Oyunlar",
+  "Bahçe İşleri", "Balık Tutma", "El Sanatları"
+];
 
 export default function OnboardingPage() {
-  return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center py-10 px-4">
-      <Logo size={64} className="mb-8" />
+  const router = useRouter();
+  const { language } = useAppStore();
+  const [step, setStep] = useState(1);
+  const [data, setData] = useState<OnboardingData>({
+    gender: "",
+    bio: "",
+    intention: "",
+    education: "",
+    maritalStatus: "",
+    hobbies: [],
+  });
 
-      {/* Progress Bar (Visual only for now) */}
-      <div className="w-full max-w-md bg-gray-200 rounded-full h-2.5 mb-10">
-        <div className="bg-purple-600 h-2.5 rounded-full" style={{ width: '20%' }}></div>
+  const nextStep = () => setStep((s) => s + 1);
+  const prevStep = () => setStep((s) => s - 1);
+
+  const handleFinish = () => {
+    // In a real app, save data to backend/context here
+    router.push("/dashboard");
+  };
+
+  const toggleHobby = (hobby: string) => {
+    setData((prev) => ({
+      ...prev,
+      hobbies: prev.hobbies.includes(hobby)
+        ? prev.hobbies.filter((h) => h !== hobby)
+        : [...prev.hobbies, hobby],
+    }));
+  };
+
+  const toggleBioTemplate = (template: string) => {
+    setData((prev) => {
+      const exists = prev.bio.includes(template);
+      if (exists) {
+        // Remove template and clean up extra spaces
+        const newBio = prev.bio.replace(template, "").replace(/\s\s+/g, ' ').trim();
+        return { ...prev, bio: newBio };
+      } else {
+        // Add template
+        const newBio = prev.bio ? `${prev.bio} ${template}` : template;
+        return { ...prev, bio: newBio };
+      }
+    });
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center py-8 px-4">
+      <Logo size={48} className="mb-6" />
+
+      {/* Progress Stepper */}
+      <div className="w-full max-w-md flex items-center justify-between mb-8 px-2">
+        {[1, 2, 3, 4, 5].map((s) => (
+          <div key={s} className="flex items-center flex-1 last:flex-none">
+            <div
+              className={cn(
+                "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors",
+                step >= s ? "bg-purple-600 text-white" : "bg-gray-200 text-gray-400"
+              )}
+            >
+              {step > s ? <Check className="w-4 h-4" /> : s}
+            </div>
+            {s < 5 && (
+              <div
+                className={cn(
+                  "h-1 flex-1 mx-2 rounded-full",
+                  step > s ? "bg-purple-600" : "bg-gray-200"
+                )}
+              />
+            )}
+          </div>
+        ))}
       </div>
 
-      <div className="w-full max-w-lg space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <div className="text-center space-y-2">
-          <Typography variant="h2" className="text-purple-900">
-            Tanışalım!
-          </Typography>
-          <Typography variant="body-large" className="text-gray-600">
-            Cinsiyetiniz nedir?
-          </Typography>
-        </div>
+      <div className="w-full max-w-lg">
+        {step > 1 && step < 5 && (
+          <button
+            onClick={prevStep}
+            className="flex items-center gap-1 text-gray-500 hover:text-purple-600 mb-4 transition-colors text-sm font-medium"
+          >
+            <ChevronLeft className="w-4 h-4" /> Geri Dön
+          </button>
+        )}
 
-        <div className="grid gap-4">
-          <Link href="/dashboard" className="group">
-            <Card className="p-6 hover:border-purple-500 hover:shadow-md transition-all cursor-pointer flex items-center gap-6 group-hover:bg-purple-50">
-              <div className="bg-blue-100 p-4 rounded-full">
-                <User className="w-8 h-8 text-blue-600" />
-              </div>
-              <Typography variant="h3" className="text-gray-700 group-hover:text-purple-900">
-                Erkeğim
-              </Typography>
-              <ArrowRight className="ml-auto w-6 h-6 text-gray-300 group-hover:text-purple-600" />
-            </Card>
-          </Link>
+        {/* STEP 1: GENDER */}
+        {step === 1 && (
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="text-center space-y-2">
+              <Typography variant="h2" className="text-purple-900">Hoş Geldiniz</Typography>
+              <Typography variant="body-large" className="text-gray-600">Cinsiyetinizi seçerek başlayalım</Typography>
+            </div>
+            <div className="grid gap-4">
+              {["Kadın", "Erkek"].map((g) => (
+                <Card
+                  key={g}
+                  onClick={() => { setData({ ...data, gender: g }); nextStep(); }}
+                  className={cn(
+                    "p-6 cursor-pointer flex items-center gap-6 transition-all border-2",
+                    data.gender === g ? "border-purple-600 bg-purple-50" : "border-transparent hover:border-gray-200 hover:shadow-md"
+                  )}
+                >
+                  <div className={cn("p-4 rounded-full", g === "Erkek" ? "bg-blue-100" : "bg-pink-100")}>
+                    <User className={cn("w-8 h-8", g === "Erkek" ? "text-blue-600" : "text-pink-600")} />
+                  </div>
+                  <Typography variant="h3" className="text-gray-700">{g}</Typography>
+                  <ArrowRight className="ml-auto w-6 h-6 text-gray-300" />
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
 
-          <Link href="/dashboard" className="group">
-            <Card className="p-6 hover:border-purple-500 hover:shadow-md transition-all cursor-pointer flex items-center gap-6 group-hover:bg-purple-50">
-              <div className="bg-pink-100 p-4 rounded-full">
-                <User className="w-8 h-8 text-pink-600" />
-              </div>
-              <Typography variant="h3" className="text-gray-700 group-hover:text-purple-900">
-                Kadınım
+        {/* STEP 2: BIO / ABOUT ME */}
+        {step === 2 && (
+          <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
+            <div className="text-center space-y-2">
+              <Typography variant="h2" className="text-purple-900">Kendinizden Bahsedin</Typography>
+              <Typography variant="caption" className="text-gray-500">
+                Hazır cümlelere tıklayarak hızlıca oluşturabilirsiniz
               </Typography>
-              <ArrowRight className="ml-auto w-6 h-6 text-gray-300 group-hover:text-purple-600" />
+            </div>
+
+            <div className="space-y-4">
+              <textarea
+                value={data.bio}
+                onChange={(e) => setData({ ...data, bio: e.target.value })}
+                className="w-full h-28 p-4 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none text-gray-700 bg-white shadow-inner resize-none text-sm"
+                placeholder="Buraya yazabilir veya aşağıdan seçebilirsiniz..."
+              />
+
+              <div className="bg-slate-50 border border-gray-100 rounded-2xl p-3">
+                <Typography variant="caption" className="text-gray-400 mb-3 block px-1">Önerilen Cümleler (Tıklayarak Seçin)</Typography>
+                <div className="max-h-40 overflow-y-auto pr-2 custom-scrollbar">
+                  <div className="flex flex-wrap gap-2">
+                    {BIO_TEMPLATES.map((t, i) => {
+                      const isSelected = data.bio.includes(t);
+                      return (
+                        <button
+                          key={i}
+                          onClick={() => toggleBioTemplate(t)}
+                          className={cn(
+                            "px-3 py-1.5 rounded-full text-xs font-medium transition-all text-left border flex items-center gap-1.5",
+                            isSelected
+                              ? "bg-purple-600 text-white border-purple-600 shadow-sm"
+                              : "bg-white text-gray-600 border-gray-200 hover:border-purple-300 hover:bg-purple-50"
+                          )}
+                        >
+                          {isSelected ? <Check className="w-3 h-3" /> : <Sparkles className="w-3 h-3 text-purple-400 opacity-60" />}
+                          {t}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <Button onClick={nextStep} className="w-full h-14 rounded-2xl bg-purple-600 text-lg font-bold">
+              Devam Et
+            </Button>
+          </div>
+        )}
+
+        {/* STEP 3: DETAILS (Intention, Education, Marital) */}
+        {step === 3 && (
+          <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
+            <div className="text-center space-y-2">
+              <Typography variant="h2" className="text-purple-900">Biraz Daha Detay</Typography>
+              <Typography variant="caption" className="text-gray-500">Size en uygun kişileri bulmamıza yardımcı olun</Typography>
+            </div>
+
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                  <Heart className="w-4 h-4 text-purple-500" /> Tanışma Amacınız
+                </label>
+                <select
+                  value={data.intention}
+                  onChange={(e) => setData({ ...data, intention: e.target.value })}
+                  className="w-full p-4 rounded-xl border border-gray-200 bg-white"
+                >
+                  <option value="">{language === 'tr' ? 'Seçiniz' : 'Select'}</option>
+                  {INTENTIONS.map(i => <option key={i} value={i}>{getLabel(i, language)}</option>)}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                  <GraduationCap className="w-4 h-4 text-purple-500" /> {getLabel('education', language)}
+                </label>
+                <select
+                  value={data.education}
+                  onChange={(e) => setData({ ...data, education: e.target.value })}
+                  className="w-full p-4 rounded-xl border border-gray-200 bg-white"
+                >
+                  <option value="">{language === 'tr' ? 'Seçiniz' : 'Select'}</option>
+                  {EDUCATIONS.map(e => <option key={e} value={e}>{getLabel(e, language)}</option>)}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                  <BookOpen className="w-4 h-4 text-purple-500" /> {getLabel('maritalStatus', language)}
+                </label>
+                <select
+                  value={data.maritalStatus}
+                  onChange={(e) => setData({ ...data, maritalStatus: e.target.value })}
+                  className="w-full p-4 rounded-xl border border-gray-200 bg-white"
+                >
+                  <option value="">{language === 'tr' ? 'Seçiniz' : 'Select'}</option>
+                  {MARITAL_STATUSES.map(s => <option key={s} value={s}>{getLabel(s, language)}</option>)}
+                </select>
+              </div>
+            </div>
+
+            <Button
+              onClick={nextStep}
+              disabled={!data.intention || !data.education || !data.maritalStatus}
+              className="w-full h-14 rounded-2xl bg-purple-600 text-lg font-bold disabled:bg-gray-200"
+            >
+              Devam Et
+            </Button>
+          </div>
+        )}
+
+        {/* STEP 4: HOBBIES */}
+        {step === 4 && (
+          <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
+            <div className="text-center space-y-2">
+              <Typography variant="h2" className="text-purple-900">İlgi Alanlarınız</Typography>
+              <Typography variant="caption" className="text-gray-500">Ortak noktalarınızı keşfetmek için en az 3 hobi seçin</Typography>
+            </div>
+
+            <div className="flex flex-wrap gap-2 justify-center py-4">
+              {HOBBIES_LIST.map(hobby => (
+                <button
+                  key={hobby}
+                  onClick={() => toggleHobby(hobby)}
+                  className={cn(
+                    "px-4 py-2.5 rounded-full text-sm font-medium transition-all",
+                    data.hobbies.includes(hobby)
+                      ? "bg-purple-600 text-white shadow-md shadow-purple-200"
+                      : "bg-white text-gray-600 border border-gray-200 hover:border-purple-300"
+                  )}
+                >
+                  {hobby}
+                </button>
+              ))}
+            </div>
+
+            <Button
+              onClick={nextStep}
+              disabled={data.hobbies.length < 3}
+              className="w-full h-14 rounded-2xl bg-purple-600 text-lg font-bold disabled:bg-gray-200"
+            >
+              Harika Görünüyor!
+            </Button>
+          </div>
+        )}
+
+        {/* STEP 5: FINAL PREVIEW / PHOTO */}
+        {step === 5 && (
+          <div className="space-y-8 animate-in zoom-in-95 duration-500 text-center">
+            <div className="space-y-2">
+              <div className="mx-auto w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                <Sparkles className="w-12 h-12 text-green-600" />
+              </div>
+              <Typography variant="h2" className="text-purple-900">Profiliniz Hazır!</Typography>
+              <Typography variant="body-large" className="text-gray-600">Sizin için en iyi adayları hazırladık.</Typography>
+            </div>
+
+            <Card className="p-6 text-left border-purple-100 bg-white shadow-xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-4 opacity-5">
+                <Logo size={120} />
+              </div>
+              <div className="space-y-4 relative z-10">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 rounded-full bg-gray-100 border-2 border-purple-200 flex items-center justify-center">
+                    <Camera className="w-6 h-6 text-gray-400" />
+                  </div>
+                  <div>
+                    <Typography variant="h3" className="text-gray-900">{language === 'tr' ? 'Yeni Profil' : 'New Profile'}</Typography>
+                    <Typography variant="caption" className="text-purple-600 font-bold">{getLabel(data.intention, language)}</Typography>
+                  </div>
+                </div>
+                <div className="p-4 bg-slate-50 rounded-2xl italic text-sm text-gray-600 line-clamp-3">
+                  &quot;{data.bio}&quot;
+                </div>
+                <div className="flex flex-wrap gap-1.5 opacity-70">
+                  {data.hobbies.slice(0, 3).map(h => (
+                    <span key={h} className="text-[10px] bg-gray-200 px-2 py-0.5 rounded-full">{h}</span>
+                  ))}
+                  {data.hobbies.length > 3 && <span className="text-[10px] text-gray-400">+{data.hobbies.length - 3}</span>}
+                </div>
+              </div>
             </Card>
-          </Link>
-        </div>
+
+            <Button onClick={handleFinish} className="w-full h-16 rounded-2xl bg-purple-600 hover:bg-purple-700 text-xl font-bold shadow-xl shadow-purple-200 animate-bounce transition-all">
+              Hemen Tanışmaya Başla!
+            </Button>
+          </div>
+        )}
 
         <div className="text-center pt-8">
           <Typography variant="caption" className="text-gray-400">
-            Adım 1 / 5
+            Adım {step} / 5
           </Typography>
         </div>
       </div>

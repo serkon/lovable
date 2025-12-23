@@ -19,6 +19,10 @@ interface AppContextType {
   rejectMatch: (profileId: number) => void;
   cancelRequest: (profileId: number) => void;
   resetProfiles: () => Promise<void>;
+
+  // Settings
+  language: "tr" | "en";
+  setLanguage: (lang: "tr" | "en") => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -28,7 +32,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [likesReceived, setLikesReceived] = useState<Profile[]>(MOCK_LIKED_BY_PROFILES);
   const [matches, setMatches] = useState<Profile[]>(MOCK_MATCHES); // Mutual matches
-  const [sentRequests, setSentRequests] = useState<Profile[]>([]); // "Tanışmak İsterim" sent by me
+  const [sentRequests, setSentRequests] = useState<Profile[]>([]);
+  const [language, setLanguage] = useState<"tr" | "en">("tr");
 
   // Load Initial Data
   useEffect(() => {
@@ -99,6 +104,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         rejectMatch,
         cancelRequest,
         resetProfiles,
+        language,
+        setLanguage
       }}
     >
       {children}

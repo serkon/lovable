@@ -6,16 +6,20 @@ import { Card } from "@/components/ui/Card";
 import { Typography } from "@/components/ui/Typography";
 import { Check, X, MapPin, Briefcase, GraduationCap, Heart, SlidersHorizontal, Eye, EyeOff, Sparkles, User, BookOpen, MessageCircle, Clock } from "lucide-react";
 import { FilterModal, FilterState } from "@/components/dashboard/FilterModal";
+import { IceBreakerModal } from "@/components/dashboard/IceBreakerModal";
 import { useAppStore } from "@/context/AppStore"; // Use Store
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { Logo } from "@/components/ui/Logo";
+import { getLabel } from "@/lib/translations";
 
 export default function DashboardPage() {
-  const { profiles, sendLike, passProfile, matches, resetProfiles } = useAppStore(); // Get from context
+  const { profiles, sendLike, passProfile, matches, resetProfiles, language, setLanguage } = useAppStore(); // Get from context
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMatched, setIsMatched] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isIceBreakerOpen, setIsIceBreakerOpen] = useState(false);
+  const [lastLikedName, setLastLikedName] = useState("");
   const [isGhostMode, setIsGhostMode] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
     ageRange: [40, 80],
@@ -45,11 +49,22 @@ export default function DashboardPage() {
 
   const handleLike = () => {
     if (currentProfile) {
+      setIsIceBreakerOpen(true);
+    }
+  };
+
+  const [lastQuestion, setLastQuestion] = useState("");
+
+  const handleSendIceBreaker = (question: string) => {
+    if (currentProfile) {
+      setLastLikedName(currentProfile.name);
+      setLastQuestion(question);
       sendLike(currentProfile);
+      setIsIceBreakerOpen(false);
       setIsMatched(true);
       setTimeout(() => {
         setIsMatched(false);
-      }, 1500);
+      }, 2000);
     }
   };
 
@@ -108,6 +123,12 @@ export default function DashboardPage() {
           </div>
         </div>
         <FilterModal isOpen={isFilterOpen} onClose={() => setIsFilterOpen(false)} onApply={setFilters} />
+        <IceBreakerModal
+          isOpen={isIceBreakerOpen}
+          onClose={() => setIsIceBreakerOpen(false)}
+          onSend={handleSendIceBreaker}
+          targetName={currentProfile?.name || ""}
+        />
       </div>
     );
   }
@@ -122,8 +143,12 @@ export default function DashboardPage() {
           Harika!
         </Typography>
         <Typography variant="h3" className="text-purple-100">
-          {currentProfile.name} ile tanışma isteğiniz iletildi.
+          {lastLikedName} ile tanışma isteğiniz iletildi.
         </Typography>
+        <div className="bg-white/10 p-4 rounded-2xl border border-white/20 max-w-sm">
+          <Typography variant="caption" className="text-purple-200 uppercase font-bold tracking-wider mb-1 block">Gönderilen Soru</Typography>
+          <p className="text-white italic">&quot;{lastQuestion}&quot;</p>
+        </div>
       </div>
     );
   }
@@ -178,6 +203,24 @@ export default function DashboardPage() {
               <div className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-white"></div>
             </div>
           </Link>
+
+          <button
+            onClick={() => setLanguage(language === "tr" ? "en" : "tr")}
+            className={cn("w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold border transition-colors",
+              isGhostMode
+                ? "text-white border-gray-600 hover:bg-gray-700"
+                : "text-purple-700 border-purple-100 hover:bg-purple-50"
+            )}
+            title="Dili Değiştir / Change Language"
+          >
+            {language.toUpperCase()}
+          </button>
+
+          <Link href="/profile">
+            <Button size="icon" variant="ghost" className="rounded-full w-8 h-8" title="Profilim">
+              <User className={cn("w-4 h-4", isGhostMode ? "text-white" : "text-gray-600")} />
+            </Button>
+          </Link>
         </div>
       </header>
 
@@ -186,6 +229,13 @@ export default function DashboardPage() {
         setFilters(newFilters);
         setCurrentIndex(0); // Reset list on filter change
       }} />
+
+      <IceBreakerModal
+        isOpen={isIceBreakerOpen}
+        onClose={() => setIsIceBreakerOpen(false)}
+        onSend={handleSendIceBreaker}
+        targetName={currentProfile?.name}
+      />
 
       {/* Main Content */}
       <main className="flex-1 max-w-2xl mx-auto w-full flex flex-col items-center">
@@ -200,7 +250,7 @@ export default function DashboardPage() {
             {/* Badge: Intention - Sticky relative to card */}
             <div className="fixed top-12 left-2 z-20 bg-white/90 backdrop-blur px-2 py-0.5 rounded-full text-xs font-semibold text-purple-700 shadow-sm flex items-center gap-1 md:absolute md:top-4 md:left-4">
               <Heart className="w-3 h-3 fill-purple-700" />
-              {currentProfile.intention}
+              {getLabel(currentProfile.intention, language)}
             </div>
 
             {/* Badge: Distance - Sticky relative to card */}
@@ -235,16 +285,7 @@ export default function DashboardPage() {
             {/* Tiny drag handle indicator for aesthetics */}
             <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-1 opacity-50" />
 
-            {/* Ice Breaker Section */}
-            <div className="bg-purple-50 p-3 rounded-xl border border-purple-100">
-              <div className="flex items-center gap-1.5 text-purple-700 mb-1 font-semibold text-sm">
-                <Sparkles className="w-3 h-3" />
-                <span>Buz Kırıcı Soru</span>
-              </div>
-              <p className="text-base text-purple-900 font-medium italic">
-                {currentProfile.iceBreaker}
-              </p>
-            </div>
+
 
             {/* Quick Stats Grid */}
             <div className="grid grid-cols-2 gap-3 text-gray-700 text-sm">
@@ -254,11 +295,11 @@ export default function DashboardPage() {
               </div>
               <div className="flex items-center gap-2 bg-gray-50 p-2.5 rounded-lg">
                 <BookOpen className="w-4 h-4 text-purple-500" />
-                <span className="font-medium">{currentProfile.education}</span>
+                <span className="font-medium">{getLabel(currentProfile.education, language)}</span>
               </div>
               <div className="flex items-center gap-2 bg-gray-50 p-2.5 rounded-lg col-span-2">
                 <GraduationCap className="w-4 h-4 text-purple-500" />
-                <span className="font-medium">{currentProfile.maritalStatus}</span>
+                <span className="font-medium">{getLabel(currentProfile.maritalStatus, language)}</span>
               </div>
             </div>
 
@@ -272,7 +313,7 @@ export default function DashboardPage() {
             </div>
 
             <div className="space-y-1">
-              <Typography variant="h3" className="text-base text-black">Hakkımda</Typography>
+              <Typography variant="h3" className="text-base text-black">{getLabel('bio', language)}</Typography>
               <p className="text-lg text-gray-600 leading-relaxed font-serif">
                 {currentProfile.bio}
               </p>
