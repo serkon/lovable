@@ -1,0 +1,7 @@
+export const APP_CONFIG = {
+  MIN_HOBBIES_COUNT: 3,
+  MIN_AGE: 40,
+  MAX_AGE: 99,
+  DEFAULT_LANGUAGE: "tr",
+  PAGINATION_LIMIT: 20,
+};

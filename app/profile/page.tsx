@@ -9,9 +9,14 @@ import { cn } from "@/lib/utils";
 import { MARITAL_STATUSES, EDUCATIONS, INTENTIONS, MaritalStatusId, EducationId, IntentionId } from "@/lib/mock-data";
 import { useAppStore } from "@/context/AppStore";
 import { getLabel } from "@/lib/translations";
+import { APP_CONFIG } from "@/lib/config";
 
 export default function ProfilePage() {
     const { language } = useAppStore();
+    const [name, setName] = useState("Ayşe Yılmaz");
+    const [age, setAge] = useState("48");
+    const [city, setCity] = useState("İstanbul, Kadıköy");
+    const [job, setJob] = useState("Emekli Öğretmen");
     const [bio, setBio] = useState("Huzurlu bir hayat süren, doğa aşığı ve kitap kurdu biriyim. Yeni yerler keşfetmeyi severim.");
     const [selectedHobbies, setSelectedHobbies] = useState(["Gezi, Doğa & Kamp", "Kültür, Sanat & Kitap"]);
     const [maritalStatus, setMaritalStatus] = useState<MaritalStatusId>("ms_divorced");
@@ -65,7 +70,53 @@ export default function ProfilePage() {
                             <Camera className="w-5 h-5" />
                         </button>
                     </div>
-                    <Typography variant="h2" className="text-xl font-bold">Ayşe, 48</Typography>
+                    <Typography variant="h2" className="text-xl font-bold">{name}, {age}</Typography>
+                    <Typography variant="caption" className="text-gray-500">{city}</Typography>
+                </section>
+
+                {/* Personal Info Section */}
+                <section className="space-y-4">
+                    <Typography variant="h3" className="text-base font-semibold text-gray-700">{language === 'tr' ? 'Kişisel Bilgiler' : 'Personal Information'}</Typography>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white p-4 rounded-3xl border border-gray-100 shadow-sm">
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Adınız Soyadınız</label>
+                            <input
+                                type="text"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none text-gray-700 bg-slate-50/50"
+                            />
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Yaşınız</label>
+                            <input
+                                type="number"
+                                value={age}
+                                onChange={(e) => setAge(e.target.value)}
+                                min={APP_CONFIG.MIN_AGE}
+                                max={APP_CONFIG.MAX_AGE}
+                                className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none text-gray-700 bg-slate-50/50"
+                            />
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Şehir</label>
+                            <input
+                                type="text"
+                                value={city}
+                                onChange={(e) => setCity(e.target.value)}
+                                className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none text-gray-700 bg-slate-50/50"
+                            />
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Mesleğiniz</label>
+                            <input
+                                type="text"
+                                value={job}
+                                onChange={(e) => setJob(e.target.value)}
+                                className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none text-gray-700 bg-slate-50/50"
+                            />
+                        </div>
+                    </div>
                 </section>
 
                 {/* Bio Section */}
@@ -136,10 +187,18 @@ export default function ProfilePage() {
 
                 {/* Save Button */}
                 <div className="pt-6">
-                    <Button className="w-full h-14 rounded-2xl bg-purple-600 hover:bg-purple-700 text-lg font-bold shadow-xl shadow-purple-100 flex items-center justify-center gap-2">
+                    <Button
+                        disabled={selectedHobbies.length < APP_CONFIG.MIN_HOBBIES_COUNT}
+                        className="w-full h-14 rounded-2xl bg-purple-600 hover:bg-purple-700 text-lg font-bold shadow-xl shadow-purple-100 flex items-center justify-center gap-2 disabled:bg-gray-300 transition-all"
+                    >
                         <Save className="w-5 h-5" />
                         {getLabel('save', language)}
                     </Button>
+                    {selectedHobbies.length < APP_CONFIG.MIN_HOBBIES_COUNT && (
+                        <Typography variant="caption" className="text-red-500 text-center block mt-2">
+                            En az {APP_CONFIG.MIN_HOBBIES_COUNT} hobi seçmelisiniz.
+                        </Typography>
+                    )}
                 </div>
             </main>
         </div>

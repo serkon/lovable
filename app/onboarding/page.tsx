@@ -21,8 +21,13 @@ import { cn } from "@/lib/utils";
 import { MARITAL_STATUSES, EDUCATIONS, INTENTIONS } from "@/lib/mock-data";
 import { useAppStore } from "@/context/AppStore";
 import { getLabel } from "@/lib/translations";
+import { APP_CONFIG } from "@/lib/config";
 
 type OnboardingData = {
+  name: string;
+  age: string;
+  city: string;
+  job: string;
   gender: string;
   bio: string;
   intention: string;
@@ -55,6 +60,10 @@ export default function OnboardingPage() {
   const { language } = useAppStore();
   const [step, setStep] = useState(1);
   const [data, setData] = useState<OnboardingData>({
+    name: "",
+    age: "",
+    city: "",
+    job: "",
     gender: "",
     bio: "",
     intention: "",
@@ -101,7 +110,7 @@ export default function OnboardingPage() {
 
       {/* Progress Stepper */}
       <div className="w-full max-w-md flex items-center justify-between mb-8 px-2">
-        {[1, 2, 3, 4, 5].map((s) => (
+        {[1, 2, 3, 4, 5, 6].map((s) => (
           <div key={s} className="flex items-center flex-1 last:flex-none">
             <div
               className={cn(
@@ -111,7 +120,7 @@ export default function OnboardingPage() {
             >
               {step > s ? <Check className="w-4 h-4" /> : s}
             </div>
-            {s < 5 && (
+            {s < 6 && (
               <div
                 className={cn(
                   "h-1 flex-1 mx-2 rounded-full",
@@ -124,7 +133,7 @@ export default function OnboardingPage() {
       </div>
 
       <div className="w-full max-w-lg">
-        {step > 1 && step < 5 && (
+        {step > 1 && step < 6 && (
           <button
             onClick={prevStep}
             className="flex items-center gap-1 text-gray-500 hover:text-purple-600 mb-4 transition-colors text-sm font-medium"
@@ -161,8 +170,73 @@ export default function OnboardingPage() {
           </div>
         )}
 
-        {/* STEP 2: BIO / ABOUT ME */}
+        {/* STEP 2: BASIC INFO */}
         {step === 2 && (
+          <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
+            <div className="text-center space-y-2">
+              <Typography variant="h2" className="text-purple-900">Kendinizi Tanıtın</Typography>
+              <Typography variant="body-large" className="text-gray-600">Size nasıl hitap etmemizi istersiniz?</Typography>
+            </div>
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2 col-span-2">
+                  <label className="text-sm font-semibold text-gray-700">Adınız Soyadınız</label>
+                  <input
+                    type="text"
+                    value={data.name}
+                    onChange={(e) => setData({ ...data, name: e.target.value })}
+                    className="w-full p-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none bg-white"
+                    placeholder="Örn: Serkan Konakcı"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700">Yaşınız</label>
+                  <input
+                    type="number"
+                    value={data.age}
+                    onChange={(e) => setData({ ...data, age: e.target.value })}
+                    className="w-full p-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none bg-white font-mono"
+                    placeholder="Örn: 45"
+                    min={APP_CONFIG.MIN_AGE}
+                    max={APP_CONFIG.MAX_AGE}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700">Şehir</label>
+                  <input
+                    type="text"
+                    value={data.city}
+                    onChange={(e) => setData({ ...data, city: e.target.value })}
+                    className="w-full p-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none bg-white"
+                    placeholder="Örn: İstanbul"
+                  />
+                </div>
+                <div className="space-y-2 col-span-2">
+                  <label className="text-sm font-semibold text-gray-700">Mesleğiniz</label>
+                  <input
+                    type="text"
+                    value={data.job}
+                    onChange={(e) => setData({ ...data, job: e.target.value })}
+                    className="w-full p-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none bg-white"
+                    placeholder="Örn: Emekli Öğretmen / Mühendis"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <Button
+              onClick={nextStep}
+              disabled={!data.name || !data.age || !data.city || !data.job}
+              className="w-full h-14 rounded-2xl bg-purple-600 text-lg font-bold disabled:bg-gray-200"
+            >
+              Devam Et
+            </Button>
+          </div>
+        )}
+
+        {/* STEP 3: BIO / ABOUT ME */}
+        {step === 3 && (
           <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
             <div className="text-center space-y-2">
               <Typography variant="h2" className="text-purple-900">Kendinizden Bahsedin</Typography>
@@ -212,8 +286,8 @@ export default function OnboardingPage() {
           </div>
         )}
 
-        {/* STEP 3: DETAILS (Intention, Education, Marital) */}
-        {step === 3 && (
+        {/* STEP 4: DETAILS (Intention, Education, Marital) */}
+        {step === 4 && (
           <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
             <div className="text-center space-y-2">
               <Typography variant="h2" className="text-purple-900">Biraz Daha Detay</Typography>
@@ -274,12 +348,12 @@ export default function OnboardingPage() {
           </div>
         )}
 
-        {/* STEP 4: HOBBIES */}
-        {step === 4 && (
+        {/* STEP 5: HOBBIES */}
+        {step === 5 && (
           <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
             <div className="text-center space-y-2">
               <Typography variant="h2" className="text-purple-900">İlgi Alanlarınız</Typography>
-              <Typography variant="caption" className="text-gray-500">Ortak noktalarınızı keşfetmek için en az 3 hobi seçin</Typography>
+              <Typography variant="caption" className="text-gray-500">Ortak noktalarınızı keşfetmek için en az {APP_CONFIG.MIN_HOBBIES_COUNT} hobi seçin</Typography>
             </div>
 
             <div className="flex flex-wrap gap-2 justify-center py-4">
@@ -301,7 +375,7 @@ export default function OnboardingPage() {
 
             <Button
               onClick={nextStep}
-              disabled={data.hobbies.length < 3}
+              disabled={data.hobbies.length < APP_CONFIG.MIN_HOBBIES_COUNT}
               className="w-full h-14 rounded-2xl bg-purple-600 text-lg font-bold disabled:bg-gray-200"
             >
               Harika Görünüyor!
@@ -309,8 +383,8 @@ export default function OnboardingPage() {
           </div>
         )}
 
-        {/* STEP 5: FINAL PREVIEW / PHOTO */}
-        {step === 5 && (
+        {/* STEP 6: FINAL PREVIEW / PHOTO */}
+        {step === 6 && (
           <div className="space-y-8 animate-in zoom-in-95 duration-500 text-center">
             <div className="space-y-2">
               <div className="mx-auto w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-4">
@@ -330,12 +404,26 @@ export default function OnboardingPage() {
                     <Camera className="w-6 h-6 text-gray-400" />
                   </div>
                   <div>
-                    <Typography variant="h3" className="text-gray-900">{language === 'tr' ? 'Yeni Profil' : 'New Profile'}</Typography>
-                    <Typography variant="caption" className="text-purple-600 font-bold">{getLabel(data.intention, language)}</Typography>
+                    <Typography variant="h3" className="text-gray-900">{data.name || 'Yeni Profil'}, {data.age || '40'}</Typography>
+                    <div className="flex items-center gap-2">
+                      <Typography variant="caption" className="text-purple-600 font-bold">{getLabel(data.intention, language)}</Typography>
+                      <span className="text-gray-300">•</span>
+                      <Typography variant="caption" className="text-gray-500">{data.city}</Typography>
+                    </div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs border-b border-gray-100 pb-4 mb-4">
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <User className="w-3 h-3 text-purple-400" />
+                    {data.job}
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <GraduationCap className="w-3 h-3 text-purple-400" />
+                    {getLabel(data.education, language)}
                   </div>
                 </div>
                 <div className="p-4 bg-slate-50 rounded-2xl italic text-sm text-gray-600 line-clamp-3">
-                  &quot;{data.bio}&quot;
+                  &quot;{data.bio || 'Henüz bir biyografi yazılmadı...'}&quot;
                 </div>
                 <div className="flex flex-wrap gap-1.5 opacity-70">
                   {data.hobbies.slice(0, 3).map(h => (
@@ -354,7 +442,7 @@ export default function OnboardingPage() {
 
         <div className="text-center pt-8">
           <Typography variant="caption" className="text-gray-400">
-            Adım {step} / 5
+            Adım {step} / 6
           </Typography>
         </div>
       </div>
