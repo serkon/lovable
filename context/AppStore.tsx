@@ -3,24 +3,28 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import { MOCK_PROFILES, MOCK_LIKED_BY_PROFILES, MOCK_MATCHES, Profile } from "@/lib/mock-data";
 import { fetchProfilesFromAPI } from "@/lib/services/userService";
+import { getCurrentUser, sendLike as dbSendLike } from "@/lib/actions/userActions";
+import { User } from "@prisma/client";
 
-// Define the shape of our context
+export interface ExtendedUser extends User {
+  hobbiesArray?: string[];
+}
+
 interface AppContextType {
-  // Data Lists
   profiles: Profile[];
   likesReceived: Profile[];
   matches: Profile[];
   sentRequests: Profile[];
+  currentUser: ExtendedUser | null;
 
-  // Actions
-  sendLike: (profile: Profile) => void;
-  passProfile: (profileId: number) => void;
+  sendLike: (profile: Profile) => Promise<void>;
+  passProfile: (profileId: string | number) => void;
   approveMatch: (profile: Profile) => void;
-  rejectMatch: (profileId: number) => void;
-  cancelRequest: (profileId: number) => void;
+  rejectMatch: (profileId: string | number) => void;
+  cancelRequest: (profileId: string | number) => void;
   resetProfiles: () => Promise<void>;
+  refreshCurrentUser: () => Promise<void>;
 
-  // Settings
   language: "tr" | "en";
   setLanguage: (lang: "tr" | "en") => void;
 }
@@ -28,67 +32,99 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  // Initialize state
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [likesReceived, setLikesReceived] = useState<Profile[]>(MOCK_LIKED_BY_PROFILES);
-  const [matches, setMatches] = useState<Profile[]>(MOCK_MATCHES); // Mutual matches
+  const [matches, setMatches] = useState<Profile[]>(MOCK_MATCHES);
   const [sentRequests, setSentRequests] = useState<Profile[]>([]);
+  const [currentUser, setCurrentUser] = useState<ExtendedUser | null>(null);
   const [language, setLanguage] = useState<"tr" | "en">("tr");
 
-  // Load Initial Data
+  const refreshCurrentUser = async () => {
+    try {
+      const user: any = await getCurrentUser();
+
+      if (user) {
+        // Transform hobbies from Relation[] to string[] if needed for display helper
+        // But for ExtendedUser type it might keep them as objects. 
+        // Let's attach a flattened array helper.
+        if (Array.isArray(user.hobbies)) {
+          user.hobbiesArray = user.hobbies.map((h: any) => h.name);
+        } else {
+          user.hobbiesArray = [];
+        }
+
+        // Transform likesSent to Profile objects for sentRequests
+        const dbSentRequests = user.likesSent?.map((like: any) => {
+          const target = like.receiver;
+          if (!target) return null;
+          return {
+            id: target.id,
+            name: target.name,
+            age: target.age,
+            location: target.city,
+            distance: 0, // Not stored in DB
+            job: target.job?.name || target.job || "", // Handle relation or fallback
+            bio: target.bio,
+            imageUrl: target.imageUrl,
+            education: target.education,
+            maritalStatus: target.maritalStatus,
+            intention: target.intention,
+            // Hobbies should be array of strings for frontend Profile type
+            hobbies: Array.isArray(target.hobbies) ? target.hobbies.map((h: any) => h.name) : [],
+            gender: target.gender?.name || target.gender // Handle relation
+          };
+        }).filter(Boolean) || [];
+
+        setSentRequests(dbSentRequests);
+      }
+      setCurrentUser(user);
+    } catch (error) {
+      console.error("Failed to fetch user:", error);
+    }
+  };
+
   useEffect(() => {
     const loadData = async () => {
-      // Try fetching new data
+      await refreshCurrentUser();
       const newProfiles = await fetchProfilesFromAPI(20);
-      if (newProfiles.length > 0) {
-        setProfiles(newProfiles);
-      } else {
-        setProfiles(MOCK_PROFILES); // Fallback
-      }
+      setProfiles(newProfiles.length > 0 ? newProfiles : MOCK_PROFILES);
     };
     loadData();
   }, []);
 
-  // Action: User clicks "Tanışmak İsterim" on Dashboard
-  const sendLike = (profile: Profile) => {
-    // Add to my sent requests
-    setSentRequests((prev) => [...prev, profile]);
-    // Remove from discoverable profiles to show next
-    setProfiles((prev) => prev.filter((p) => p.id !== profile.id));
+  const sendLike = async (profile: Profile) => {
+    try {
+      await dbSendLike(profile);
+      // We don't need to manually update sentRequests here because revalidatePath and refreshCurrentUser (if called) would handle it, 
+      // but for instant UI let's keep local update:
+      setSentRequests((prev) => [...prev, profile]);
+      setProfiles((prev) => prev.filter((p) => p.id !== profile.id));
+    } catch (error) {
+      console.error("Failed to send like:", error);
+    }
   };
 
-  // Action: User clicks "Pass" on Dashboard
-  const passProfile = (profileId: number) => {
+  const passProfile = (profileId: string | number) => {
     setProfiles((prev) => prev.filter((p) => p.id !== profileId));
   };
 
-  // Action: User approves a "Like Received" -> Becomes a Match
   const approveMatch = (profile: Profile) => {
-    // Add to Matches
     setMatches((prev) => [...prev, profile]);
-    // Remove from Likes Received list
     setLikesReceived((prev) => prev.filter((p) => p.id !== profile.id));
   };
 
-  // Action: User passes a "Like Received"
-  const rejectMatch = (profileId: number) => {
+  const rejectMatch = (profileId: string | number) => {
     setLikesReceived((prev) => prev.filter((p) => p.id !== profileId));
   };
 
-  // Action: User cancels a sent request
-  const cancelRequest = (profileId: number) => {
+  const cancelRequest = (profileId: string | number) => {
     setSentRequests((prev) => prev.filter((p) => p.id !== profileId));
   };
 
-  // Action: Reset Profiles (Fetch new batch)
   const resetProfiles = async () => {
-    setProfiles([]); // Clear current
+    setProfiles([]);
     const newProfiles = await fetchProfilesFromAPI(20);
-    if (newProfiles.length > 0) {
-      setProfiles(newProfiles);
-    } else {
-      setProfiles(MOCK_PROFILES);
-    }
+    setProfiles(newProfiles.length > 0 ? newProfiles : MOCK_PROFILES);
   };
 
   return (
@@ -98,12 +134,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
         likesReceived,
         matches,
         sentRequests,
+        currentUser,
         sendLike,
         passProfile,
         approveMatch,
         rejectMatch,
         cancelRequest,
         resetProfiles,
+        refreshCurrentUser,
         language,
         setLanguage
       }}
@@ -113,7 +151,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// Hook for easy usage
 export function useAppStore() {
   const context = useContext(AppContext);
   if (!context) {

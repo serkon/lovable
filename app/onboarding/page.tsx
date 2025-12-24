@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/Card";
 import { Typography } from "@/components/ui/Typography";
 import { Button } from "@/components/ui/Button";
@@ -22,6 +22,8 @@ import { MARITAL_STATUSES, EDUCATIONS, INTENTIONS } from "@/lib/mock-data";
 import { useAppStore } from "@/context/AppStore";
 import { getLabel } from "@/lib/translations";
 import { APP_CONFIG } from "@/lib/config";
+import { updateUserProfile } from "@/lib/actions/userActions";
+import { getBioTemplates, getHobbies } from "@/lib/actions/contentActions";
 
 type OnboardingData = {
   name: string;
@@ -35,25 +37,6 @@ type OnboardingData = {
   maritalStatus: string;
   hobbies: string[];
 };
-
-const BIO_TEMPLATES = [
-  "Huzurlu bir hayat süren, doğa aşığı biriyim.",
-  "Yeni yerler keşfetmeyi ve seyahat etmeyi seviyorum.",
-  "Dürüstlük, samimiyet ve güven benim için her şeyden önce gelir.",
-  "Hayatın bu döneminde gerçek bir dost ve hayat arkadaşı arıyorum.",
-  "Mutfakta vakit geçirmeyi ve güzel sofralar kurmayı severim.",
-  "Kitap okumak, sinemaya gitmek ve derin sohbetler etmekten keyif alırım.",
-  "Aile değerlerine önem veren, sevdikleriyle vakit geçirmeyi seven biriyim.",
-  "Hayata pozitif bakmayı, gülmeyi ve anı yaşamayı seviyorum.",
-  "Sağlık, spor ve zinde kalmak benim için değerli."
-];
-
-const HOBBIES_LIST = [
-  "Gezi, Doğa & Kamp", "Kültür, Sanat & Kitap", "Sinema & Tiyatro",
-  "Müzik & Dans", "Yemek & Gurme", "Spor, Yoga & Pilates",
-  "Psikoloji & Kişisel Gelişim", "Tavla & Sosyal Oyunlar",
-  "Bahçe İşleri", "Balık Tutma", "El Sanatları"
-];
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -72,12 +55,41 @@ export default function OnboardingPage() {
     hobbies: [],
   });
 
+  const [bioTemplates, setBioTemplates] = useState<string[]>([]);
+  const [hobbiesList, setHobbiesList] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const dbBioTemplates = await getBioTemplates();
+      const dbHobbies = await getHobbies();
+      setBioTemplates(dbBioTemplates);
+      setHobbiesList(dbHobbies);
+    };
+    fetchData();
+  }, []);
+
   const nextStep = () => setStep((s) => s + 1);
   const prevStep = () => setStep((s) => s - 1);
 
-  const handleFinish = () => {
-    // In a real app, save data to backend/context here
-    router.push("/dashboard");
+  const handleFinish = async () => {
+    try {
+      await updateUserProfile({
+        name: data.name,
+        age: parseInt(data.age),
+        city: data.city,
+        job: data.job,
+        gender: data.gender,
+        bio: data.bio,
+        intention: data.intention,
+        education: data.education,
+        maritalStatus: data.maritalStatus,
+        hobbies: data.hobbies,
+      });
+      router.push("/dashboard");
+    } catch (error) {
+      console.error("Failed to save profile:", error);
+      alert("Profil kaydedilirken bir hata oluştu.");
+    }
   };
 
   const toggleHobby = (hobby: string) => {
@@ -257,7 +269,7 @@ export default function OnboardingPage() {
                 <Typography variant="caption" className="text-gray-400 mb-3 block px-1">Önerilen Cümleler (Tıklayarak Seçin)</Typography>
                 <div className="max-h-40 overflow-y-auto pr-2 custom-scrollbar">
                   <div className="flex flex-wrap gap-2">
-                    {BIO_TEMPLATES.map((t, i) => {
+                    {bioTemplates.map((t, i) => {
                       const isSelected = data.bio.includes(t);
                       return (
                         <button
@@ -357,7 +369,7 @@ export default function OnboardingPage() {
             </div>
 
             <div className="flex flex-wrap gap-2 justify-center py-4">
-              {HOBBIES_LIST.map(hobby => (
+              {hobbiesList.map(hobby => (
                 <button
                   key={hobby}
                   onClick={() => toggleHobby(hobby)}

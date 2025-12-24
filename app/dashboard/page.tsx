@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Typography } from "@/components/ui/Typography";
-import { Check, X, MapPin, Briefcase, GraduationCap, Heart, SlidersHorizontal, Eye, EyeOff, Sparkles, User, BookOpen, MessageCircle, Clock } from "lucide-react";
+import { Check, X, MapPin, Briefcase, GraduationCap, Heart, SlidersHorizontal, Eye, EyeOff, User, BookOpen, MessageCircle, Clock, ChevronLeft, ChevronRight } from "lucide-react";
 import { FilterModal, FilterState } from "@/components/dashboard/FilterModal";
 import { IceBreakerModal } from "@/components/dashboard/IceBreakerModal";
 import { useAppStore } from "@/context/AppStore"; // Use Store
@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { Logo } from "@/components/ui/Logo";
 import { getLabel } from "@/lib/translations";
+import { Profile } from "@/lib/mock-data";
 
 export default function DashboardPage() {
   const { profiles, sendLike, passProfile, matches, resetProfiles, language, setLanguage } = useAppStore(); // Get from context
@@ -27,7 +28,7 @@ export default function DashboardPage() {
   });
 
   // Filter Logic
-  const filteredProfiles = useMemo(() => {
+  const filteredProfiles: Profile[] = useMemo(() => {
     return profiles.filter(p => {
       if (p.age < filters.ageRange[0] || p.age > filters.ageRange[1]) return false;
       if (p.distance > filters.maxDistance) return false;
@@ -37,15 +38,39 @@ export default function DashboardPage() {
     });
   }, [filters, profiles]);
 
-  const currentProfile = filteredProfiles[currentIndex];
+  const currentProfile: any = filteredProfiles[currentIndex];
   const isFinished = !currentProfile;
 
-  const handleNext = () => {
-    // If we're passing (X button), remove from store (or just skip in local view if desired, but store action is better)
+  const handlePass = () => {
+    // If we're passing (X button), remove from store
     if (currentProfile) {
       passProfile(currentProfile.id);
+      // Since the current one is removed, the next one slides into currentIndex. 
+      // We might want to ensure currentIndex is still valid, but React re-render will handle bounds check via isFinished check implicitly if list empties.
+      // However, if we are at the end of list and remove one, logic might need check. But typically filteredProfiles changes.
     }
   };
+
+  const handlePrevious = useCallback(() => {
+    setCurrentIndex((prev) => Math.max(0, prev - 1));
+  }, []);
+
+  const handleNext = useCallback(() => {
+    setCurrentIndex((prev) => Math.min(filteredProfiles.length - 1, prev + 1));
+  }, [filteredProfiles.length]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") {
+        handlePrevious();
+      } else if (e.key === "ArrowRight") {
+        handleNext();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handlePrevious, handleNext]);
 
   const handleLike = () => {
     if (currentProfile) {
@@ -85,7 +110,7 @@ export default function DashboardPage() {
 
           <div className="flex items-center gap-1">
             <Link href="/sent-requests">
-              <Button size="icon" variant="ghost" className="rounded-full w-8 h-8" title="Gönderilen İstekler">
+              <Button size="icon" variant="ghost" className="rounded-full w-8 h-8" title="Gönderilen İstekler" data-testid="sent-requests-link">
                 <Clock className="w-4 h-4 text-gray-600" />
               </Button>
             </Link>
@@ -173,22 +198,23 @@ export default function DashboardPage() {
               isGhostMode ? "text-white hover:bg-gray-700" : "text-purple-700 hover:bg-purple-50"
             )}
             title="Gizli Mod"
+            data-testid="ghost-mode-toggle"
           >
             {isGhostMode ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
           </button>
 
-          <Button size="icon" variant="ghost" className="rounded-full w-8 h-8" onClick={() => setIsFilterOpen(true)} title="Filtreler">
+          <Button size="icon" variant="ghost" className="rounded-full w-8 h-8" onClick={() => setIsFilterOpen(true)} title="Filtreler" data-testid="filter-button">
             <SlidersHorizontal className={cn("w-4 h-4", isGhostMode ? "text-white" : "text-gray-600")} />
           </Button>
 
           <Link href="/sent-requests">
-            <Button size="icon" variant="ghost" className="rounded-full w-8 h-8" title="Gönderilen İstekler">
+            <Button size="icon" variant="ghost" className="rounded-full w-8 h-8" title="Gönderilen İstekler" data-testid="sent-requests-link">
               <Clock className={cn("w-4 h-4", isGhostMode ? "text-white" : "text-gray-600")} />
             </Button>
           </Link>
 
           <Link href="/matches">
-            <Button size="icon" variant="ghost" className="rounded-full w-8 h-8 relative" title="Sohbet ve Eşleşmeler">
+            <Button size="icon" variant="ghost" className="rounded-full w-8 h-8 relative" title="Sohbet ve Eşleşmeler" data-testid="matches-link">
               <MessageCircle className={cn("w-4 h-4", isGhostMode ? "text-white" : "text-gray-600")} />
               {matches.length > 0 && <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>}
             </Button>
@@ -212,12 +238,13 @@ export default function DashboardPage() {
                 : "text-purple-700 border-purple-100 hover:bg-purple-50"
             )}
             title="Dili Değiştir / Change Language"
+            data-testid="language-toggle"
           >
             {language.toUpperCase()}
           </button>
 
           <Link href="/profile">
-            <Button size="icon" variant="ghost" className="rounded-full w-8 h-8" title="Profilim">
+            <Button size="icon" variant="ghost" className="rounded-full w-8 h-8" title="Profilim" data-testid="profile-link">
               <User className={cn("w-4 h-4", isGhostMode ? "text-white" : "text-gray-600")} />
             </Button>
           </Link>
@@ -238,7 +265,21 @@ export default function DashboardPage() {
       />
 
       {/* Main Content */}
-      <main className="flex-1 max-w-2xl mx-auto w-full flex flex-col items-center">
+      <main className="flex-1 max-w-2xl mx-auto w-full flex flex-col items-center px-4 md:px-0 relative">
+
+        {/* Navigation - Left */}
+        {
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handlePrevious}
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-full md:-translate-x-12 z-20 hidden md:flex rounded-full bg-white/80 hover:bg-white shadow-sm left-6 cursor-pointer"
+            data-testid="desktop-prev-button"
+            disabled={currentIndex === 0}
+          >
+            <ChevronLeft className="w-6 h-6 text-gray-600" />
+          </Button>
+        }
 
         <Card data-testid="active-profile-card" className="border-0 flex flex-col w-full h-auto animate-in slide-in-from-right duration-300 relative rounded-[32px] my-6 mb-32" key={currentProfile.id}>
 
@@ -305,7 +346,7 @@ export default function DashboardPage() {
 
             {/* Hobbies Tags */}
             <div className="flex flex-wrap gap-1.5">
-              {currentProfile.hobbies.map((hobby) => (
+              {currentProfile.hobbies.map((hobby: string) => (
                 <span key={hobby} className="px-2.5 py-1 bg-gray-100 text-gray-600 rounded-md text-xs font-medium">
                   {hobby}
                 </span>
@@ -319,7 +360,46 @@ export default function DashboardPage() {
               </p>
             </div>
           </div>
+
         </Card>
+
+        {/* Navigation - Right (Desktop) */}
+        {currentIndex < filteredProfiles.length - 1 && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleNext}
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-full md:translate-x-12 z-20 hidden md:flex rounded-full bg-white/80 hover:bg-white shadow-sm right-6 cursor-pointer"
+            data-testid="desktop-next-button"
+          >
+            <ChevronRight className="w-6 h-6 text-gray-600" />
+          </Button>
+        )}
+
+        {/* Mobile Navigation Controls - Inline with card or below? Let's put them above FABs or integration */}
+        <div className="flex md:hidden w-full justify-between px-4 absolute top-1/2 -translate-y-1/2 pointer-events-none">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handlePrevious}
+            disabled={currentIndex === 0}
+            className={cn("pointer-events-auto rounded-full bg-white/50 backdrop-blur-sm p-2 h-10 w-10 shadow-sm", currentIndex === 0 && "opacity-0")}
+            data-testid="mobile-prev-button"
+          >
+            <ChevronLeft className="w-6 h-6 text-gray-800" />
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleNext}
+            disabled={currentIndex >= filteredProfiles.length - 1}
+            className={cn("pointer-events-auto rounded-full bg-white/50 backdrop-blur-sm p-2 h-10 w-10 shadow-sm", currentIndex >= filteredProfiles.length - 1 && "opacity-0")}
+            data-testid="mobile-next-button"
+          >
+            <ChevronRight className="w-6 h-6 text-gray-800" />
+          </Button>
+        </div>
 
       </main>
 
@@ -328,8 +408,9 @@ export default function DashboardPage() {
       <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center gap-8 animate-in slide-in-from-bottom-10 duration-500">
         {/* Pass Button */}
         <Button
-          onClick={handleNext}
+          onClick={handlePass}
           className="h-16 w-16 rounded-full bg-white border-2 border-red-100 hover:bg-red-50 text-red-500 shadow-xl shadow-red-500/10 transition-transform active:scale-90 flex items-center justify-center relative overlow-hidden"
+          data-testid="pass-button"
         >
           <X className="w-8 h-8 relative z-10" strokeWidth={3} />
           <span className="sr-only">Pas Geç</span>
@@ -339,11 +420,12 @@ export default function DashboardPage() {
         <Button
           onClick={handleLike}
           className="h-16 w-16 rounded-full bg-purple-600 hover:bg-purple-700 text-white shadow-xl shadow-purple-500/40 transition-transform active:scale-90 flex items-center justify-center relative overlow-hidden"
+          data-testid="like-button"
         >
           <Check className="w-8 h-8 relative z-10" strokeWidth={3} />
           <span className="sr-only">Tanışmak İsterim</span>
         </Button>
       </div>
-    </div>
+    </div >
   );
 }

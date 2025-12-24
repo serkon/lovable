@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/Button";
 import { Typography } from "@/components/ui/Typography";
 import { ArrowLeft, Camera, Save, Settings } from "lucide-react";
@@ -10,30 +10,86 @@ import { MARITAL_STATUSES, EDUCATIONS, INTENTIONS, MaritalStatusId, EducationId,
 import { useAppStore } from "@/context/AppStore";
 import { getLabel } from "@/lib/translations";
 import { APP_CONFIG } from "@/lib/config";
+import { updateUserProfile } from "@/lib/actions/userActions";
+import { getHobbies } from "@/lib/actions/contentActions";
 
 export default function ProfilePage() {
-    const { language } = useAppStore();
-    const [name, setName] = useState("Ayşe Yılmaz");
-    const [age, setAge] = useState("48");
-    const [city, setCity] = useState("İstanbul, Kadıköy");
-    const [job, setJob] = useState("Emekli Öğretmen");
-    const [bio, setBio] = useState("Huzurlu bir hayat süren, doğa aşığı ve kitap kurdu biriyim. Yeni yerler keşfetmeyi severim.");
-    const [selectedHobbies, setSelectedHobbies] = useState(["Gezi, Doğa & Kamp", "Kültür, Sanat & Kitap"]);
-    const [maritalStatus, setMaritalStatus] = useState<MaritalStatusId>("ms_divorced");
-    const [education, setEducation] = useState<EducationId>("edu_bachelors");
-    const [intention, setIntention] = useState<IntentionId>("int_chat");
+    const { language, currentUser, refreshCurrentUser } = useAppStore();
 
-    const hobbiesList = [
-        "Gezi, Doğa & Kamp", "Kültür, Sanat & Kitap", "Sinema & Tiyatro",
-        "Müzik & Dans", "Yemek & Gurme", "Spor, Yoga & Pilates",
-        "Psikoloji & Kişisel Gelişim", "Tavla & Sosyal Oyunlar",
-        "Bahçe İşleri", "Balık Tutma", "El Sanatları"
-    ];
+    // Local form state
+    const [name, setName] = useState("");
+    const [age, setAge] = useState("");
+    const [city, setCity] = useState("");
+    const [job, setJob] = useState("");
+    const [bio, setBio] = useState("");
+    const [selectedHobbies, setSelectedHobbies] = useState<string[]>([]);
+    const [maritalStatus, setMaritalStatus] = useState<MaritalStatusId>("ms_private");
+    const [education, setEducation] = useState<EducationId>("edu_elementary");
+    const [intention, setIntention] = useState<IntentionId>("int_chat");
+    const [isSaving, setIsSaving] = useState(false);
+
+    // Dynamic content state
+    const [hobbiesList, setHobbiesList] = useState<string[]>([]);
+
+    // Fetch dynamic content on mount
+    useEffect(() => {
+        const loadContent = async () => {
+            const dbHobbies = await getHobbies();
+            setHobbiesList(dbHobbies);
+        };
+        loadContent();
+    }, []);
+
+    // Sync with store data when component mounts or currentUser changes
+    useEffect(() => {
+        if (currentUser) {
+            setName(currentUser.name || "");
+            setAge(currentUser.age?.toString() || "");
+            setCity(currentUser.city || "");
+            setJob(currentUser.job || "");
+            setBio(currentUser.bio || "");
+            setMaritalStatus(currentUser.maritalStatus as MaritalStatusId || "ms_private");
+            setEducation(currentUser.education as EducationId || "edu_elementary");
+            setIntention(currentUser.intention as IntentionId || "int_chat");
+
+            if (currentUser.hobbies) {
+                try {
+                    setSelectedHobbies(JSON.parse(currentUser.hobbies));
+                } catch (e) {
+                    setSelectedHobbies([]);
+                }
+            }
+        }
+    }, [currentUser]);
 
     const toggleHobby = (hobby: string) => {
         setSelectedHobbies(prev =>
             prev.includes(hobby) ? prev.filter(h => h !== hobby) : [...prev, hobby]
         );
+    };
+
+    const handleSave = async () => {
+        setIsSaving(true);
+        try {
+            await updateUserProfile({
+                name,
+                age: parseInt(age),
+                city,
+                job,
+                bio,
+                maritalStatus,
+                education,
+                intention,
+                hobbies: selectedHobbies,
+            });
+            await refreshCurrentUser();
+            alert(language === 'tr' ? "Profiliniz başarıyla güncellendi!" : "Profile updated successfully!");
+        } catch (error) {
+            console.error("Save failed:", error);
+            alert(language === 'tr' ? "Bir hata oluştu." : "An error occurred.");
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     return (
@@ -59,18 +115,18 @@ export default function ProfilePage() {
                 {/* Profile Photo Section */}
                 <section className="flex flex-col items-center space-y-4">
                     <div className="relative">
-                        <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-lg bg-gray-200">
-                            <img
-                                src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=256&h=256&auto=format&fit=crop"
-                                alt="Profil Fotoğrafı"
-                                className="w-full h-full object-cover"
-                            />
+                        <div className="w-32 h-32 rounded-full border-4 border-white shadow-xl overflow-hidden bg-purple-100 flex items-center justify-center">
+                            {currentUser?.imageUrl ? (
+                                <img src={currentUser.imageUrl} alt="Profile" className="w-full h-full object-cover" />
+                            ) : (
+                                <Camera className="w-12 h-12 text-purple-300" />
+                            )}
                         </div>
                         <button className="absolute bottom-0 right-0 bg-purple-600 text-white p-2 rounded-full shadow-lg hover:bg-purple-700 transition-colors">
                             <Camera className="w-5 h-5" />
                         </button>
                     </div>
-                    <Typography variant="h2" className="text-xl font-bold">{name}, {age}</Typography>
+                    <Typography variant="h2" className="text-xl font-bold">{name || (language === 'tr' ? 'Misafir' : 'Guest')}, {age}</Typography>
                     <Typography variant="caption" className="text-gray-500">{city}</Typography>
                 </section>
 
@@ -125,7 +181,7 @@ export default function ProfilePage() {
                     <textarea
                         value={bio}
                         onChange={(e) => setBio(e.target.value)}
-                        className="w-full h-32 p-4 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none text-gray-700 bg-white"
+                        className="w-full h-32 p-4 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none text-gray-700 bg-white shadow-sm"
                         placeholder={language === 'tr' ? 'Kendinizden bahsedin...' : 'Tell us about yourself...'}
                     />
                 </section>
@@ -137,7 +193,7 @@ export default function ProfilePage() {
                         <select
                             value={intention}
                             onChange={(e) => setIntention(e.target.value as IntentionId)}
-                            className="w-full p-3 rounded-xl border border-gray-200 bg-white shadow-sm"
+                            className="w-full p-3 rounded-xl border border-gray-200 bg-white shadow-sm focus:ring-2 focus:ring-purple-500 transition-all outline-none"
                         >
                             {INTENTIONS.map(i => <option key={i} value={i}>{getLabel(i, language)}</option>)}
                         </select>
@@ -147,7 +203,7 @@ export default function ProfilePage() {
                         <select
                             value={education}
                             onChange={(e) => setEducation(e.target.value as EducationId)}
-                            className="w-full p-3 rounded-xl border border-gray-200 bg-white shadow-sm"
+                            className="w-full p-3 rounded-xl border border-gray-200 bg-white shadow-sm focus:ring-2 focus:ring-purple-500 transition-all outline-none"
                         >
                             {EDUCATIONS.map(e => <option key={e} value={e}>{getLabel(e, language)}</option>)}
                         </select>
@@ -157,7 +213,7 @@ export default function ProfilePage() {
                         <select
                             value={maritalStatus}
                             onChange={(e) => setMaritalStatus(e.target.value as MaritalStatusId)}
-                            className="w-full p-3 rounded-xl border border-gray-200 bg-white shadow-sm"
+                            className="w-full p-3 rounded-xl border border-gray-200 bg-white shadow-sm focus:ring-2 focus:ring-purple-500 transition-all outline-none"
                         >
                             {MARITAL_STATUSES.map(s => <option key={s} value={s}>{getLabel(s, language)}</option>)}
                         </select>
@@ -173,10 +229,10 @@ export default function ProfilePage() {
                                 key={hobby}
                                 onClick={() => toggleHobby(hobby)}
                                 className={cn(
-                                    "px-4 py-2 rounded-full text-sm font-medium transition-all",
+                                    "px-4 py-2 rounded-full text-sm font-medium transition-all border",
                                     selectedHobbies.includes(hobby)
-                                        ? "bg-purple-600 text-white shadow-md shadow-purple-200"
-                                        : "bg-white text-gray-600 border border-gray-200 hover:border-purple-300"
+                                        ? "bg-purple-600 text-white border-purple-600 shadow-md"
+                                        : "bg-white text-gray-600 border-gray-200 hover:border-purple-300"
                                 )}
                             >
                                 {hobby}
@@ -188,14 +244,15 @@ export default function ProfilePage() {
                 {/* Save Button */}
                 <div className="pt-6">
                     <Button
-                        disabled={selectedHobbies.length < APP_CONFIG.MIN_HOBBIES_COUNT}
+                        onClick={handleSave}
+                        disabled={isSaving || selectedHobbies.length < APP_CONFIG.MIN_HOBBIES_COUNT}
                         className="w-full h-14 rounded-2xl bg-purple-600 hover:bg-purple-700 text-lg font-bold shadow-xl shadow-purple-100 flex items-center justify-center gap-2 disabled:bg-gray-300 transition-all"
                     >
-                        <Save className="w-5 h-5" />
-                        {getLabel('save', language)}
+                        <Save className={cn("w-5 h-5", isSaving && "animate-spin")} />
+                        {isSaving ? (language === 'tr' ? 'Kaydediliyor...' : 'Saving...') : getLabel('save', language)}
                     </Button>
                     {selectedHobbies.length < APP_CONFIG.MIN_HOBBIES_COUNT && (
-                        <Typography variant="caption" className="text-red-500 text-center block mt-2">
+                        <Typography variant="caption" className="text-red-500 text-center block mt-2 font-medium">
                             En az {APP_CONFIG.MIN_HOBBIES_COUNT} hobi seçmelisiniz.
                         </Typography>
                     )}

@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+
+model User {
+  id            String   @id @default(cuid())
+  name          String?
+  age           Int?
+  city          String?
+  
+  // Relations
+  jobId         String?
+  job           Job?     @relation(fields: [jobId], references: [id])
+  
+  genderId      String?
+  gender        Gender?  @relation(fields: [genderId], references: [id])
+  
+  bio           String?   
+  education     String?   
+  maritalStatus String?   
+  intention     String?   
+  
+  // Many-to-Many relation
+  hobbies       Hobby[]
+  
+  imageUrl      String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  likesSent     Like[]   @relation("LikesSent")
+  likesReceived Like[]   @relation("LikesReceived")
+}
+
+model Like {
+  id          String   @id @default(cuid())
+  senderId    String
+  receiverId  String
+  status      String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  createdAt   DateTime @default(now())
+
+  sender      User     @relation("LikesSent", fields: [senderId], references: [id])
+  receiver    User     @relation("LikesReceived", fields: [receiverId], references: [id])
+
+  @@unique([senderId, receiverId])
+}
+
+model Hobby {
+  id    String @id @default(cuid())
+  name  String @unique
+  users User[]
+}
+
+model Job {
+  id    String @id @default(cuid())
+  name  String @unique
+  users User[]
+}
+
+model Gender {
+  id    String @id @default(cuid())
+  name  String @unique
+  users User[]
+}
+
+model BioTemplate {
+  id      String @id @default(cuid())
+  content String @unique
+}
+
+model IceBreaker {
+  id      String @id @default(cuid())
+  content String @unique
+}
