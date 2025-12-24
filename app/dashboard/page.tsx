@@ -281,21 +281,21 @@ export default function DashboardPage() {
           </Button>
         }
 
-        <Card data-testid="active-profile-card" className="border-0 flex flex-col w-full h-auto animate-in slide-in-from-right duration-300 relative rounded-[32px] my-6 mb-32" key={currentProfile.id}>
+        <Card data-testid="active-profile-card" className="border-0 flex flex-col w-full h-auto animate-in slide-in-from-right duration-300 relative rounded-[16px] my-6 mb-32" key={currentProfile.id}>
 
 
 
           {/* Photo Area - Sticky Background */}
-          <div className="sticky top-12 h-[60vh] w-full bg-gray-200 z-0 rounded-t-[32px] overflow-hidden shadow-2xl " data-testid="profile-photo-area">
+          <div className="sticky top-12 h-[60vh] w-full bg-gray-200 z-0 rounded-t-[16px] overflow-hidden shadow-2xl " data-testid="profile-photo-area">
 
             {/* Badge: Intention - Sticky relative to card */}
-            <div className="fixed top-12 left-2 z-20 bg-white/90 backdrop-blur px-2 py-0.5 rounded-full text-xs font-semibold text-purple-700 shadow-sm flex items-center gap-1 md:absolute md:top-4 md:left-4" data-testid="badge-intention">
+            <div className="z-20 bg-white/90 backdrop-blur px-2 py-0.5 rounded-full text-xs font-semibold text-purple-700 shadow-sm flex items-center gap-1 absolute top-4 left-4" data-testid="badge-intention">
               <Heart className="w-3 h-3 fill-purple-700" />
               {getLabel(currentProfile.intention, language)}
             </div>
 
             {/* Badge: Distance - Sticky relative to card */}
-            <div className="fixed top-12 right-2 z-20 bg-black/60 backdrop-blur px-2 py-0.5 rounded-full text-xs font-medium text-white shadow-sm flex items-center gap-1 md:absolute md:top-4 md:right-4" data-testid="badge-distance">
+            <div className="z-20 bg-black/60 backdrop-blur px-2 py-0.5 rounded-full text-xs font-medium text-white shadow-sm flex items-center gap-1 absolute top-12 left-4" data-testid="badge-distance">
               <MapPin className="w-3 h-3 text-white" />
               {currentProfile.distance} km
             </div>
@@ -315,7 +315,7 @@ export default function DashboardPage() {
 
 
           {/* Details Area - Scrolls OVER the image */}
-          <div className="relative z-10 bg-white rounded-t-3xl rounded-b-[32px] -mt-4 p-5 space-y-5 min-h-0 shadow-[0_-5px_20px_rgba(0,0,0,0.1)]">
+          <div className="relative z-10 bg-white rounded-t-[16px] rounded-b-[16px] -mt-4 p-5 space-y-5 min-h-0 shadow-[0_-5px_20px_rgba(0,0,0,0.1)]">
 
 
 
