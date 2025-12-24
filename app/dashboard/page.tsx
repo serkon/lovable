@@ -281,10 +281,7 @@ export default function DashboardPage() {
           </Button>
         }
 
-        <Card data-testid="active-profile-card" className="border-0 flex flex-col w-full h-auto animate-in slide-in-from-right duration-300 relative rounded-[16px] my-6 mb-32" key={currentProfile.id}>
-
-
-
+        <Card data-testid="active-profile-card" className="border-0 flex flex-col w-full h-auto animate-in slide-in-from-right duration-300 relative rounded-[16px] my-6" key={currentProfile.id}>
           {/* Photo Area - Sticky Background */}
           <div className="sticky top-12 h-[60vh] w-full bg-gray-200 z-0 rounded-t-[16px] overflow-hidden shadow-2xl " data-testid="profile-photo-area">
 
@@ -300,6 +297,26 @@ export default function DashboardPage() {
               {currentProfile.distance} km
             </div>
             <img src={currentProfile.imageUrl} alt={currentProfile.name} className="w-full h-full object-cover" data-testid="profile-image" />
+
+            {/* Action Buttons Overlay - Instagram Style */}
+            <div className="absolute bottom-48 right-4 flex flex-col gap-3 z-30" data-testid="action-buttons">
+              <Button
+                onClick={handleLike}
+                className="h-12 w-12 rounded-full bg-white/20 backdrop-blur-md border border-white/30 hover:bg-purple-500 hover:border-purple-500 text-white shadow-lg transition-all active:scale-90 flex items-center justify-center p-0 group"
+                data-testid="like-button"
+                title="Beğen"
+              >
+                <Heart className="w-6 h-6 group-hover:fill-white text-white" strokeWidth={2.5} />
+              </Button>
+              <Button
+                onClick={handlePass}
+                className="h-12 w-12 rounded-full bg-white/20 backdrop-blur-md border border-white/30 hover:bg-black/40 text-white shadow-lg transition-all active:scale-90 flex items-center justify-center p-0"
+                data-testid="dislike-button"
+                title="Pas Geç"
+              >
+                <X className="w-6 h-6 text-white" strokeWidth={2.5} />
+              </Button>
+            </div>
           </div>
 
 
@@ -316,13 +333,8 @@ export default function DashboardPage() {
 
           {/* Details Area - Scrolls OVER the image */}
           <div className="relative z-10 bg-white rounded-t-[16px] rounded-b-[16px] -mt-4 p-5 space-y-5 min-h-0 shadow-[0_-5px_20px_rgba(0,0,0,0.1)]">
-
-
-
             {/* Tiny drag handle indicator for aesthetics */}
             <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-1 opacity-50" />
-
-
 
             {/* Quick Stats Grid */}
             <div className="grid grid-cols-2 gap-3 text-gray-700 text-sm" data-testid="profile-stats-grid">
@@ -401,27 +413,7 @@ export default function DashboardPage() {
 
       {/* Sticky Action Buttons - Compact */}
       {/* Floating Action Buttons (FAB) - Centered & Equal */}
-      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center gap-8 animate-in slide-in-from-bottom-10 duration-500">
-        {/* Pass Button */}
-        <Button
-          onClick={handlePass}
-          className="h-16 w-16 rounded-full bg-white border-2 border-red-100 hover:bg-red-50 text-red-500 shadow-xl shadow-red-500/10 transition-transform active:scale-90 flex items-center justify-center relative overlow-hidden"
-          data-testid="pass-button"
-        >
-          <X className="w-8 h-8 relative z-10" strokeWidth={3} />
-          <span className="sr-only">Pas Geç</span>
-        </Button>
-
-        {/* Like Button */}
-        <Button
-          onClick={handleLike}
-          className="h-16 w-16 rounded-full bg-purple-600 hover:bg-purple-700 text-white shadow-xl shadow-purple-500/40 transition-transform active:scale-90 flex items-center justify-center relative overlow-hidden"
-          data-testid="like-button"
-        >
-          <Check className="w-8 h-8 relative z-10" strokeWidth={3} />
-          <span className="sr-only">Tanışmak İsterim</span>
-        </Button>
-      </div>
+      {/* Sticky Action Buttons Removed - Now integrated into photo area */}
     </div >
   );
 }
