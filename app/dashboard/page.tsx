@@ -135,14 +135,14 @@ export default function DashboardPage() {
             Filtreleri genişleterek veya listeyi başa sararak tekrar inceleyebilirsiniz.
           </Typography>
           <div className="flex flex-col gap-3 w-full max-w-xs">
-            <Button onClick={() => setIsFilterOpen(true)} variant="outline" className="w-full">
+            <Button onClick={() => setIsFilterOpen(true)} variant="outline" className="w-full" data-testid="empty-state-change-filters-btn">
               Filtreleri Değiştir
             </Button>
 
             <Button onClick={() => {
               resetProfiles();
               setCurrentIndex(0);
-            }} className="w-full bg-purple-600 hover:bg-purple-700">
+            }} className="w-full bg-purple-600 hover:bg-purple-700" data-testid="empty-state-reset-btn">
               Listeyi Başa Sar
             </Button>
           </div>
@@ -160,19 +160,19 @@ export default function DashboardPage() {
 
   if (isMatched) {
     return (
-      <div className="min-h-screen bg-purple-600 flex flex-col items-center justify-center p-6 text-center space-y-8 animate-in zoom-in duration-300">
+      <div className="min-h-screen bg-purple-600 flex flex-col items-center justify-center p-6 text-center space-y-8 animate-in zoom-in duration-300" data-testid="match-success-container">
         <div className="bg-white p-8 rounded-full shadow-2xl">
           <Heart className="w-16 h-16 text-purple-600 fill-purple-600 animate-pulse" />
         </div>
         <Typography variant="h1" className="text-white">
           Harika!
         </Typography>
-        <Typography variant="h3" className="text-purple-100">
+        <Typography variant="h3" className="text-purple-100" data-testid="match-success-name">
           {lastLikedName} ile tanışma isteğiniz iletildi.
         </Typography>
         <div className="bg-white/10 p-4 rounded-2xl border border-white/20 max-w-sm">
           <Typography variant="caption" className="text-purple-200 uppercase font-bold tracking-wider mb-1 block">Gönderilen Soru</Typography>
-          <p className="text-white italic">&quot;{lastQuestion}&quot;</p>
+          <p className="text-white italic" data-testid="match-success-question">&quot;{lastQuestion}&quot;</p>
         </div>
       </div>
     );
@@ -286,32 +286,28 @@ export default function DashboardPage() {
 
 
           {/* Photo Area - Sticky Background */}
-          <div className="sticky top-12 h-[60vh] w-full bg-gray-200 z-0 rounded-t-[32px] overflow-hidden shadow-2xl ">
+          <div className="sticky top-12 h-[60vh] w-full bg-gray-200 z-0 rounded-t-[32px] overflow-hidden shadow-2xl " data-testid="profile-photo-area">
 
             {/* Badge: Intention - Sticky relative to card */}
-            <div className="fixed top-12 left-2 z-20 bg-white/90 backdrop-blur px-2 py-0.5 rounded-full text-xs font-semibold text-purple-700 shadow-sm flex items-center gap-1 md:absolute md:top-4 md:left-4">
+            <div className="fixed top-12 left-2 z-20 bg-white/90 backdrop-blur px-2 py-0.5 rounded-full text-xs font-semibold text-purple-700 shadow-sm flex items-center gap-1 md:absolute md:top-4 md:left-4" data-testid="badge-intention">
               <Heart className="w-3 h-3 fill-purple-700" />
               {getLabel(currentProfile.intention, language)}
             </div>
 
             {/* Badge: Distance - Sticky relative to card */}
-            <div className="fixed top-12 right-2 z-20 bg-black/60 backdrop-blur px-2 py-0.5 rounded-full text-xs font-medium text-white shadow-sm flex items-center gap-1 md:absolute md:top-4 md:right-4">
+            <div className="fixed top-12 right-2 z-20 bg-black/60 backdrop-blur px-2 py-0.5 rounded-full text-xs font-medium text-white shadow-sm flex items-center gap-1 md:absolute md:top-4 md:right-4" data-testid="badge-distance">
               <MapPin className="w-3 h-3 text-white" />
               {currentProfile.distance} km
             </div>
-            <img
-              src={currentProfile.imageUrl}
-              alt={currentProfile.name}
-              className="w-full h-full object-cover"
-            />
+            <img src={currentProfile.imageUrl} alt={currentProfile.name} className="w-full h-full object-cover" data-testid="profile-image" />
           </div>
 
 
-          <div className="bg-gradient-to-t from-black/90 via-black/50 to-transparent p-6 pt-24 z-1 mt-[-194px]">
-            <Typography variant="h1" className="text-white drop-shadow-lg text-4xl font-extrabold tracking-tight">
+          <div className="bg-gradient-to-t from-black/90 via-black/50 to-transparent p-6 pt-24 z-1 mt-[-194px]" data-testid="profile-info-overlay">
+            <Typography variant="h1" className="text-white drop-shadow-lg text-4xl font-extrabold tracking-tight" data-testid="profile-name-age">
               {currentProfile.name}, {currentProfile.age}
             </Typography>
-            <div className="flex items-center gap-1 text-white/90 mt-0.5">
+            <div className="flex items-center gap-1 text-white/90 mt-0.5" data-testid="profile-location">
               <MapPin className="w-3 h-3" />
               <span className="text-base">{currentProfile.location}</span>
             </div>
@@ -329,33 +325,33 @@ export default function DashboardPage() {
 
 
             {/* Quick Stats Grid */}
-            <div className="grid grid-cols-2 gap-3 text-gray-700 text-sm">
-              <div className="flex items-center gap-2 bg-gray-50 p-2.5 rounded-lg">
+            <div className="grid grid-cols-2 gap-3 text-gray-700 text-sm" data-testid="profile-stats-grid">
+              <div className="flex items-center gap-2 bg-gray-50 p-2.5 rounded-lg" data-testid="profile-stat-job">
                 <Briefcase className="w-4 h-4 text-purple-500" />
                 <span className="font-medium">{currentProfile.job}</span>
               </div>
-              <div className="flex items-center gap-2 bg-gray-50 p-2.5 rounded-lg">
+              <div className="flex items-center gap-2 bg-gray-50 p-2.5 rounded-lg" data-testid="profile-stat-education">
                 <BookOpen className="w-4 h-4 text-purple-500" />
                 <span className="font-medium">{getLabel(currentProfile.education, language)}</span>
               </div>
-              <div className="flex items-center gap-2 bg-gray-50 p-2.5 rounded-lg col-span-2">
+              <div className="flex items-center gap-2 bg-gray-50 p-2.5 rounded-lg col-span-2" data-testid="profile-stat-marital-status">
                 <GraduationCap className="w-4 h-4 text-purple-500" />
                 <span className="font-medium">{getLabel(currentProfile.maritalStatus, language)}</span>
               </div>
             </div>
 
             {/* Hobbies Tags */}
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-wrap gap-1.5" data-testid="profile-hobbies-list">
               {currentProfile.hobbies.map((hobby: string) => (
-                <span key={hobby} className="px-2.5 py-1 bg-gray-100 text-gray-600 rounded-md text-xs font-medium">
+                <span key={hobby} className="px-2.5 py-1 bg-gray-100 text-gray-600 rounded-md text-xs font-medium" data-testid="profile-hobby-tag">
                   {hobby}
                 </span>
               ))}
             </div>
 
-            <div className="space-y-1">
+            <div className="space-y-1" data-testid="profile-bio-section">
               <Typography variant="h3" className="text-base text-black">{getLabel('bio', language)}</Typography>
-              <p className="text-lg text-gray-600 leading-relaxed font-serif">
+              <p className="text-lg text-gray-600 leading-relaxed font-serif" data-testid="profile-bio-text">
                 {currentProfile.bio}
               </p>
             </div>

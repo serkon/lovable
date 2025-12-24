@@ -75,6 +75,7 @@ export default function SentRequestsPage() {
                                         size="sm"
                                         onClick={() => cancelRequest(profile.id)}
                                         className="mt-4 w-full text-red-500 border-red-100 hover:bg-red-50 hover:text-red-700 h-9 text-xs"
+                                        data-testid={`cancel-request-btn-${profile.id}`}
                                     >
                                         İsteği Geri Çek
                                     </Button>

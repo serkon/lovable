@@ -141,6 +141,7 @@ export default function ProfilePage() {
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none text-gray-700 bg-slate-50/50"
+                                data-testid="profile-edit-name"
                             />
                         </div>
                         <div className="space-y-1.5">
@@ -152,6 +153,7 @@ export default function ProfilePage() {
                                 min={APP_CONFIG.MIN_AGE}
                                 max={APP_CONFIG.MAX_AGE}
                                 className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none text-gray-700 bg-slate-50/50"
+                                data-testid="profile-edit-age"
                             />
                         </div>
                         <div className="space-y-1.5">
@@ -161,6 +163,7 @@ export default function ProfilePage() {
                                 value={city}
                                 onChange={(e) => setCity(e.target.value)}
                                 className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none text-gray-700 bg-slate-50/50"
+                                data-testid="profile-edit-city"
                             />
                         </div>
                         <div className="space-y-1.5">
@@ -170,6 +173,7 @@ export default function ProfilePage() {
                                 value={job}
                                 onChange={(e) => setJob(e.target.value)}
                                 className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none text-gray-700 bg-slate-50/50"
+                                data-testid="profile-edit-job"
                             />
                         </div>
                     </div>
@@ -183,6 +187,7 @@ export default function ProfilePage() {
                         onChange={(e) => setBio(e.target.value)}
                         className="w-full h-32 p-4 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none text-gray-700 bg-white shadow-sm"
                         placeholder={language === 'tr' ? 'Kendinizden bahsedin...' : 'Tell us about yourself...'}
+                        data-testid="profile-edit-bio"
                     />
                 </section>
 
@@ -194,6 +199,7 @@ export default function ProfilePage() {
                             value={intention}
                             onChange={(e) => setIntention(e.target.value as IntentionId)}
                             className="w-full p-3 rounded-xl border border-gray-200 bg-white shadow-sm focus:ring-2 focus:ring-purple-500 transition-all outline-none"
+                            data-testid="profile-edit-intention"
                         >
                             {INTENTIONS.map(i => <option key={i} value={i}>{getLabel(i, language)}</option>)}
                         </select>
@@ -204,6 +210,7 @@ export default function ProfilePage() {
                             value={education}
                             onChange={(e) => setEducation(e.target.value as EducationId)}
                             className="w-full p-3 rounded-xl border border-gray-200 bg-white shadow-sm focus:ring-2 focus:ring-purple-500 transition-all outline-none"
+                            data-testid="profile-edit-education"
                         >
                             {EDUCATIONS.map(e => <option key={e} value={e}>{getLabel(e, language)}</option>)}
                         </select>
@@ -214,6 +221,7 @@ export default function ProfilePage() {
                             value={maritalStatus}
                             onChange={(e) => setMaritalStatus(e.target.value as MaritalStatusId)}
                             className="w-full p-3 rounded-xl border border-gray-200 bg-white shadow-sm focus:ring-2 focus:ring-purple-500 transition-all outline-none"
+                            data-testid="profile-edit-marital-status"
                         >
                             {MARITAL_STATUSES.map(s => <option key={s} value={s}>{getLabel(s, language)}</option>)}
                         </select>
@@ -234,6 +242,7 @@ export default function ProfilePage() {
                                         ? "bg-purple-600 text-white border-purple-600 shadow-md"
                                         : "bg-white text-gray-600 border-gray-200 hover:border-purple-300"
                                 )}
+                                data-testid={`profile-edit-hobby-${hobby}`}
                             >
                                 {hobby}
                             </button>
@@ -247,6 +256,7 @@ export default function ProfilePage() {
                         onClick={handleSave}
                         disabled={isSaving || selectedHobbies.length < APP_CONFIG.MIN_HOBBIES_COUNT}
                         className="w-full h-14 rounded-2xl bg-purple-600 hover:bg-purple-700 text-lg font-bold shadow-xl shadow-purple-100 flex items-center justify-center gap-2 disabled:bg-gray-300 transition-all"
+                        data-testid="profile-save-btn"
                     >
                         <Save className={cn("w-5 h-5", isSaving && "animate-spin")} />
                         {isSaving ? (language === 'tr' ? 'Kaydediliyor...' : 'Saving...') : getLabel('save', language)}

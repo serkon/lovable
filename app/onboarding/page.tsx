@@ -121,9 +121,9 @@ export default function OnboardingPage() {
       <Logo size={48} className="mb-6" />
 
       {/* Progress Stepper */}
-      <div className="w-full max-w-md flex items-center justify-between mb-8 px-2">
+      <div className="w-full max-w-md flex items-center justify-between mb-8 px-2" data-testid="onboarding-stepper">
         {[1, 2, 3, 4, 5, 6].map((s) => (
-          <div key={s} className="flex items-center flex-1 last:flex-none">
+          <div key={s} className="flex items-center flex-1 last:flex-none" data-testid={`step-indicator-${s}`}>
             <div
               className={cn(
                 "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors",
@@ -149,6 +149,7 @@ export default function OnboardingPage() {
           <button
             onClick={prevStep}
             className="flex items-center gap-1 text-gray-500 hover:text-purple-600 mb-4 transition-colors text-sm font-medium"
+            data-testid="onboarding-prev-btn"
           >
             <ChevronLeft className="w-4 h-4" /> Geri Dön
           </button>
@@ -170,6 +171,7 @@ export default function OnboardingPage() {
                     "p-6 cursor-pointer flex items-center gap-6 transition-all border-2",
                     data.gender === g ? "border-purple-600 bg-purple-50" : "border-transparent hover:border-gray-200 hover:shadow-md"
                   )}
+                  data-testid={`gender-option-${g.toLowerCase()}`}
                 >
                   <div className={cn("p-4 rounded-full", g === "Erkek" ? "bg-blue-100" : "bg-pink-100")}>
                     <User className={cn("w-8 h-8", g === "Erkek" ? "text-blue-600" : "text-pink-600")} />
@@ -200,6 +202,7 @@ export default function OnboardingPage() {
                     onChange={(e) => setData({ ...data, name: e.target.value })}
                     className="w-full p-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none bg-white"
                     placeholder="Örn: Serkan Konakcı"
+                    data-testid="input-name"
                   />
                 </div>
                 <div className="space-y-2">
@@ -212,6 +215,7 @@ export default function OnboardingPage() {
                     placeholder="Örn: 45"
                     min={APP_CONFIG.MIN_AGE}
                     max={APP_CONFIG.MAX_AGE}
+                    data-testid="input-age"
                   />
                 </div>
                 <div className="space-y-2">
@@ -222,6 +226,7 @@ export default function OnboardingPage() {
                     onChange={(e) => setData({ ...data, city: e.target.value })}
                     className="w-full p-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none bg-white"
                     placeholder="Örn: İstanbul"
+                    data-testid="input-city"
                   />
                 </div>
                 <div className="space-y-2 col-span-2">
@@ -232,6 +237,7 @@ export default function OnboardingPage() {
                     onChange={(e) => setData({ ...data, job: e.target.value })}
                     className="w-full p-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none bg-white"
                     placeholder="Örn: Emekli Öğretmen / Mühendis"
+                    data-testid="input-job"
                   />
                 </div>
               </div>
@@ -241,6 +247,7 @@ export default function OnboardingPage() {
               onClick={nextStep}
               disabled={!data.name || !data.age || !data.city || !data.job}
               className="w-full h-14 rounded-2xl bg-purple-600 text-lg font-bold disabled:bg-gray-200"
+              data-testid="step-2-next-btn"
             >
               Devam Et
             </Button>
@@ -263,6 +270,7 @@ export default function OnboardingPage() {
                 onChange={(e) => setData({ ...data, bio: e.target.value })}
                 className="w-full h-28 p-4 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none text-gray-700 bg-white shadow-inner resize-none text-sm"
                 placeholder="Buraya yazabilir veya aşağıdan seçebilirsiniz..."
+                data-testid="input-bio"
               />
 
               <div className="bg-slate-50 border border-gray-100 rounded-2xl p-3">
@@ -281,6 +289,7 @@ export default function OnboardingPage() {
                               ? "bg-purple-600 text-white border-purple-600 shadow-sm"
                               : "bg-white text-gray-600 border-gray-200 hover:border-purple-300 hover:bg-purple-50"
                           )}
+                          data-testid={`bio-template-${i}`}
                         >
                           {isSelected ? <Check className="w-3 h-3" /> : <Sparkles className="w-3 h-3 text-purple-400 opacity-60" />}
                           {t}
@@ -292,7 +301,7 @@ export default function OnboardingPage() {
               </div>
             </div>
 
-            <Button onClick={nextStep} className="w-full h-14 rounded-2xl bg-purple-600 text-lg font-bold">
+            <Button onClick={nextStep} className="w-full h-14 rounded-2xl bg-purple-600 text-lg font-bold" data-testid="step-3-next-btn">
               Devam Et
             </Button>
           </div>
@@ -315,6 +324,7 @@ export default function OnboardingPage() {
                   value={data.intention}
                   onChange={(e) => setData({ ...data, intention: e.target.value })}
                   className="w-full p-4 rounded-xl border border-gray-200 bg-white"
+                  data-testid="select-intention"
                 >
                   <option value="">{language === 'tr' ? 'Seçiniz' : 'Select'}</option>
                   {INTENTIONS.map(i => <option key={i} value={i}>{getLabel(i, language)}</option>)}
@@ -329,6 +339,7 @@ export default function OnboardingPage() {
                   value={data.education}
                   onChange={(e) => setData({ ...data, education: e.target.value })}
                   className="w-full p-4 rounded-xl border border-gray-200 bg-white"
+                  data-testid="select-education"
                 >
                   <option value="">{language === 'tr' ? 'Seçiniz' : 'Select'}</option>
                   {EDUCATIONS.map(e => <option key={e} value={e}>{getLabel(e, language)}</option>)}
@@ -343,6 +354,7 @@ export default function OnboardingPage() {
                   value={data.maritalStatus}
                   onChange={(e) => setData({ ...data, maritalStatus: e.target.value })}
                   className="w-full p-4 rounded-xl border border-gray-200 bg-white"
+                  data-testid="select-marital-status"
                 >
                   <option value="">{language === 'tr' ? 'Seçiniz' : 'Select'}</option>
                   {MARITAL_STATUSES.map(s => <option key={s} value={s}>{getLabel(s, language)}</option>)}
@@ -354,6 +366,7 @@ export default function OnboardingPage() {
               onClick={nextStep}
               disabled={!data.intention || !data.education || !data.maritalStatus}
               className="w-full h-14 rounded-2xl bg-purple-600 text-lg font-bold disabled:bg-gray-200"
+              data-testid="step-4-next-btn"
             >
               Devam Et
             </Button>
@@ -379,6 +392,7 @@ export default function OnboardingPage() {
                       ? "bg-purple-600 text-white shadow-md shadow-purple-200"
                       : "bg-white text-gray-600 border border-gray-200 hover:border-purple-300"
                   )}
+                  data-testid={`hobby-option-${hobby}`}
                 >
                   {hobby}
                 </button>
@@ -389,6 +403,7 @@ export default function OnboardingPage() {
               onClick={nextStep}
               disabled={data.hobbies.length < APP_CONFIG.MIN_HOBBIES_COUNT}
               className="w-full h-14 rounded-2xl bg-purple-600 text-lg font-bold disabled:bg-gray-200"
+              data-testid="step-5-next-btn"
             >
               Harika Görünüyor!
             </Button>
@@ -446,7 +461,7 @@ export default function OnboardingPage() {
               </div>
             </Card>
 
-            <Button onClick={handleFinish} className="w-full h-16 rounded-2xl bg-purple-600 hover:bg-purple-700 text-xl font-bold shadow-xl shadow-purple-200 animate-bounce transition-all">
+            <Button onClick={handleFinish} className="w-full h-16 rounded-2xl bg-purple-600 hover:bg-purple-700 text-xl font-bold shadow-xl shadow-purple-200 animate-bounce transition-all" data-testid="complete-onboarding-btn">
               Hemen Tanışmaya Başla!
             </Button>
           </div>

@@ -20,7 +20,7 @@ export default function Home() {
 
           <div className="pt-8 animate-pulse">
             <Link href="/onboarding">
-              <Button size="lg" className="w-full sm:w-auto text-xl px-12 py-8 shadow-xl bg-purple-600 hover:bg-purple-700">
+              <Button size="lg" className="w-full sm:w-auto text-xl px-12 py-8 shadow-xl bg-purple-600 hover:bg-purple-700" data-testid="landing-cta-button">
                 Hemen Başlayın – Ücretsiz
               </Button>
             </Link>
