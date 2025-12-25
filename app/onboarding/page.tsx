@@ -88,7 +88,7 @@ export default function OnboardingPage() {
       router.push("/dashboard");
     } catch (error) {
       console.error("Failed to save profile:", error);
-      alert("Profil kaydedilirken bir hata oluştu.");
+      alert(getLabel('error_generic', language));
     }
   };
 
@@ -151,7 +151,7 @@ export default function OnboardingPage() {
             className="flex items-center gap-1 text-gray-500 hover:text-purple-600 mb-4 transition-colors text-sm font-medium"
             data-testid="onboarding-prev-btn"
           >
-            <ChevronLeft className="w-4 h-4" /> Geri Dön
+            <ChevronLeft className="w-4 h-4" /> {getLabel('back', language)}
           </button>
         )}
 
@@ -159,11 +159,11 @@ export default function OnboardingPage() {
         {step === 1 && (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="text-center space-y-2">
-              <Typography variant="h2" className="text-purple-900">Hoş Geldiniz</Typography>
-              <Typography variant="body-large" className="text-gray-600">Cinsiyetinizi seçerek başlayalım</Typography>
+              <Typography variant="h2" className="text-purple-900">{getLabel('welcome', language)}</Typography>
+              <Typography variant="body-large" className="text-gray-600">{getLabel('start_with_gender', language)}</Typography>
             </div>
             <div className="grid gap-4">
-              {["Kadın", "Erkek"].map((g) => (
+              {[getLabel('gender_female', language), getLabel('gender_male', language)].map((g) => (
                 <Card
                   key={g}
                   onClick={() => { setData({ ...data, gender: g }); nextStep(); }}
@@ -173,8 +173,8 @@ export default function OnboardingPage() {
                   )}
                   data-testid={`gender-option-${g.toLowerCase()}`}
                 >
-                  <div className={cn("p-4 rounded-full", g === "Erkek" ? "bg-blue-100" : "bg-pink-100")}>
-                    <User className={cn("w-8 h-8", g === "Erkek" ? "text-blue-600" : "text-pink-600")} />
+                  <div className={cn("p-4 rounded-full", g === getLabel('gender_male', language) ? "bg-blue-100" : "bg-pink-100")}>
+                    <User className={cn("w-8 h-8", g === getLabel('gender_male', language) ? "text-blue-600" : "text-pink-600")} />
                   </div>
                   <Typography variant="h3" className="text-gray-700">{g}</Typography>
                   <ArrowRight className="ml-auto w-6 h-6 text-gray-300" />
@@ -188,55 +188,55 @@ export default function OnboardingPage() {
         {step === 2 && (
           <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
             <div className="text-center space-y-2">
-              <Typography variant="h2" className="text-purple-900">Kendinizi Tanıtın</Typography>
-              <Typography variant="body-large" className="text-gray-600">Size nasıl hitap etmemizi istersiniz?</Typography>
+              <Typography variant="h2" className="text-purple-900">{getLabel('introduce_yourself', language)}</Typography>
+              <Typography variant="body-large" className="text-gray-600">{getLabel('how_to_address', language)}</Typography>
             </div>
 
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2 col-span-2">
-                  <label className="text-sm font-semibold text-gray-700">Adınız Soyadınız</label>
+                  <label className="text-sm font-semibold text-gray-700">{getLabel('label_name', language)}</label>
                   <input
                     type="text"
                     value={data.name}
                     onChange={(e) => setData({ ...data, name: e.target.value })}
                     className="w-full p-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none bg-white"
-                    placeholder="Örn: Serkan Konakcı"
+                    placeholder={getLabel('placeholder_name', language)}
                     data-testid="input-name"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-gray-700">Yaşınız</label>
+                  <label className="text-sm font-semibold text-gray-700">{getLabel('label_age', language)}</label>
                   <input
                     type="number"
                     value={data.age}
                     onChange={(e) => setData({ ...data, age: e.target.value })}
                     className="w-full p-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none bg-white font-mono"
-                    placeholder="Örn: 45"
+                    placeholder={getLabel('placeholder_age', language)}
                     min={APP_CONFIG.MIN_AGE}
                     max={APP_CONFIG.MAX_AGE}
                     data-testid="input-age"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-gray-700">Şehir</label>
+                  <label className="text-sm font-semibold text-gray-700">{getLabel('label_city', language)}</label>
                   <input
                     type="text"
                     value={data.city}
                     onChange={(e) => setData({ ...data, city: e.target.value })}
                     className="w-full p-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none bg-white"
-                    placeholder="Örn: İstanbul"
+                    placeholder={getLabel('placeholder_city', language)}
                     data-testid="input-city"
                   />
                 </div>
                 <div className="space-y-2 col-span-2">
-                  <label className="text-sm font-semibold text-gray-700">Mesleğiniz</label>
+                  <label className="text-sm font-semibold text-gray-700">{getLabel('label_job', language)}</label>
                   <input
                     type="text"
                     value={data.job}
                     onChange={(e) => setData({ ...data, job: e.target.value })}
                     className="w-full p-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none bg-white"
-                    placeholder="Örn: Emekli Öğretmen / Mühendis"
+                    placeholder={getLabel('placeholder_job', language)}
                     data-testid="input-job"
                   />
                 </div>
@@ -249,7 +249,7 @@ export default function OnboardingPage() {
               className="w-full h-14 rounded-2xl bg-purple-600 text-lg font-bold disabled:bg-gray-200"
               data-testid="step-2-next-btn"
             >
-              Devam Et
+              {getLabel('btn_continue', language)}
             </Button>
           </div>
         )}
@@ -258,9 +258,9 @@ export default function OnboardingPage() {
         {step === 3 && (
           <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
             <div className="text-center space-y-2">
-              <Typography variant="h2" className="text-purple-900">Kendinizden Bahsedin</Typography>
+              <Typography variant="h2" className="text-purple-900">{getLabel('about_me', language)}</Typography>
               <Typography variant="caption" className="text-gray-500">
-                Hazır cümlelere tıklayarak hızlıca oluşturabilirsiniz
+                {getLabel('ready_sentences', language)}
               </Typography>
             </div>
 
@@ -269,12 +269,12 @@ export default function OnboardingPage() {
                 value={data.bio}
                 onChange={(e) => setData({ ...data, bio: e.target.value })}
                 className="w-full h-28 p-4 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none text-gray-700 bg-white shadow-inner resize-none text-sm"
-                placeholder="Buraya yazabilir veya aşağıdan seçebilirsiniz..."
+                placeholder={getLabel('input_placeholder_bio', language)}
                 data-testid="input-bio"
               />
 
               <div className="bg-slate-50 border border-gray-100 rounded-2xl p-3">
-                <Typography variant="caption" className="text-gray-400 mb-3 block px-1">Önerilen Cümleler (Tıklayarak Seçin)</Typography>
+                <Typography variant="caption" className="text-gray-400 mb-3 block px-1">{getLabel('suggested_sentences', language)}</Typography>
                 <div className="max-h-40 overflow-y-auto pr-2 custom-scrollbar">
                   <div className="flex flex-wrap gap-2">
                     {bioTemplates.map((t, i) => {
@@ -302,7 +302,7 @@ export default function OnboardingPage() {
             </div>
 
             <Button onClick={nextStep} className="w-full h-14 rounded-2xl bg-purple-600 text-lg font-bold" data-testid="step-3-next-btn">
-              Devam Et
+              {getLabel('btn_continue', language)}
             </Button>
           </div>
         )}
@@ -311,14 +311,14 @@ export default function OnboardingPage() {
         {step === 4 && (
           <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
             <div className="text-center space-y-2">
-              <Typography variant="h2" className="text-purple-900">Biraz Daha Detay</Typography>
-              <Typography variant="caption" className="text-gray-500">Size en uygun kişileri bulmamıza yardımcı olun</Typography>
+              <Typography variant="h2" className="text-purple-900">{getLabel('more_details', language)}</Typography>
+              <Typography variant="caption" className="text-gray-500">{getLabel('help_us_find', language)}</Typography>
             </div>
 
             <div className="space-y-6">
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                  <Heart className="w-4 h-4 text-purple-500" /> Tanışma Amacınız
+                  <Heart className="w-4 h-4 text-purple-500" /> {getLabel('label_intention', language)}
                 </label>
                 <select
                   value={data.intention}
@@ -326,7 +326,7 @@ export default function OnboardingPage() {
                   className="w-full p-4 rounded-xl border border-gray-200 bg-white"
                   data-testid="select-intention"
                 >
-                  <option value="">{language === 'tr' ? 'Seçiniz' : 'Select'}</option>
+                  <option value="">{getLabel('select_default', language)}</option>
                   {INTENTIONS.map(i => <option key={i} value={i}>{getLabel(i, language)}</option>)}
                 </select>
               </div>
@@ -341,7 +341,7 @@ export default function OnboardingPage() {
                   className="w-full p-4 rounded-xl border border-gray-200 bg-white"
                   data-testid="select-education"
                 >
-                  <option value="">{language === 'tr' ? 'Seçiniz' : 'Select'}</option>
+                  <option value="">{getLabel('select_default', language)}</option>
                   {EDUCATIONS.map(e => <option key={e} value={e}>{getLabel(e, language)}</option>)}
                 </select>
               </div>
@@ -356,7 +356,7 @@ export default function OnboardingPage() {
                   className="w-full p-4 rounded-xl border border-gray-200 bg-white"
                   data-testid="select-marital-status"
                 >
-                  <option value="">{language === 'tr' ? 'Seçiniz' : 'Select'}</option>
+                  <option value="">{getLabel('select_default', language)}</option>
                   {MARITAL_STATUSES.map(s => <option key={s} value={s}>{getLabel(s, language)}</option>)}
                 </select>
               </div>
@@ -368,7 +368,7 @@ export default function OnboardingPage() {
               className="w-full h-14 rounded-2xl bg-purple-600 text-lg font-bold disabled:bg-gray-200"
               data-testid="step-4-next-btn"
             >
-              Devam Et
+              {getLabel('btn_continue', language)}
             </Button>
           </div>
         )}
@@ -377,8 +377,8 @@ export default function OnboardingPage() {
         {step === 5 && (
           <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
             <div className="text-center space-y-2">
-              <Typography variant="h2" className="text-purple-900">İlgi Alanlarınız</Typography>
-              <Typography variant="caption" className="text-gray-500">Ortak noktalarınızı keşfetmek için en az {APP_CONFIG.MIN_HOBBIES_COUNT} hobi seçin</Typography>
+              <Typography variant="h2" className="text-purple-900">{getLabel('hobbies', language)}</Typography>
+              <Typography variant="caption" className="text-gray-500">{getLabel('min_hobbies_req', language, { min: APP_CONFIG.MIN_HOBBIES_COUNT })}</Typography>
             </div>
 
             <div className="flex flex-wrap gap-2 justify-center py-4">
@@ -405,7 +405,7 @@ export default function OnboardingPage() {
               className="w-full h-14 rounded-2xl bg-purple-600 text-lg font-bold disabled:bg-gray-200"
               data-testid="step-5-next-btn"
             >
-              Harika Görünüyor!
+              {getLabel('btn_looks_great', language)}
             </Button>
           </div>
         )}
@@ -417,8 +417,8 @@ export default function OnboardingPage() {
               <div className="mx-auto w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-4">
                 <Sparkles className="w-12 h-12 text-green-600" />
               </div>
-              <Typography variant="h2" className="text-purple-900">Profiliniz Hazır!</Typography>
-              <Typography variant="body-large" className="text-gray-600">Sizin için en iyi adayları hazırladık.</Typography>
+              <Typography variant="h2" className="text-purple-900">{getLabel('profile_ready', language)}</Typography>
+              <Typography variant="body-large" className="text-gray-600">{getLabel('best_candidates', language)}</Typography>
             </div>
 
             <Card className="p-6 text-left border-purple-100 bg-white shadow-xl relative overflow-hidden">
@@ -431,7 +431,7 @@ export default function OnboardingPage() {
                     <Camera className="w-6 h-6 text-gray-400" />
                   </div>
                   <div>
-                    <Typography variant="h3" className="text-gray-900">{data.name || 'Yeni Profil'}, {data.age || '40'}</Typography>
+                    <Typography variant="h3" className="text-gray-900">{data.name || getLabel('guest', language)}, {data.age || '40'}</Typography>
                     <div className="flex items-center gap-2">
                       <Typography variant="caption" className="text-purple-600 font-bold">{getLabel(data.intention, language)}</Typography>
                       <span className="text-gray-300">•</span>
@@ -450,7 +450,7 @@ export default function OnboardingPage() {
                   </div>
                 </div>
                 <div className="p-4 bg-slate-50 rounded-2xl italic text-sm text-gray-600 line-clamp-3">
-                  &quot;{data.bio || 'Henüz bir biyografi yazılmadı...'}&quot;
+                  &quot;{data.bio || getLabel('no_bio_yet', language)}&quot;
                 </div>
                 <div className="flex flex-wrap gap-1.5 opacity-70">
                   {data.hobbies.slice(0, 3).map(h => (
@@ -462,14 +462,14 @@ export default function OnboardingPage() {
             </Card>
 
             <Button onClick={handleFinish} className="w-full h-16 rounded-2xl bg-purple-600 hover:bg-purple-700 text-xl font-bold shadow-xl shadow-purple-200 animate-bounce transition-all" data-testid="complete-onboarding-btn">
-              Hemen Tanışmaya Başla!
+              {getLabel('start_meeting', language)}
             </Button>
           </div>
         )}
 
         <div className="text-center pt-8">
           <Typography variant="caption" className="text-gray-400">
-            Adım {step} / 6
+            {getLabel('step_count', language, { step: step })}
           </Typography>
         </div>
       </div>

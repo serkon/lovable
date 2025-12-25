@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Typography } from "@/components/ui/Typography";
-import { Check, X, MapPin, Briefcase, GraduationCap, Heart, SlidersHorizontal, Eye, EyeOff, User, BookOpen, MessageCircle, Clock, ChevronLeft, ChevronRight } from "lucide-react";
+import { Check, X, MapPin, Briefcase, GraduationCap, Heart, SlidersHorizontal, Eye, EyeOff, User, BookOpen, MessageCircle, Clock, ChevronLeft, ChevronRight, Share2 } from "lucide-react";
 import { FilterModal, FilterState } from "@/components/dashboard/FilterModal";
 import { IceBreakerModal } from "@/components/dashboard/IceBreakerModal";
 import { useAppStore } from "@/context/AppStore"; // Use Store
@@ -95,6 +95,27 @@ export default function DashboardPage() {
 
   const toggleGhostMode = () => setIsGhostMode(!isGhostMode);
 
+  const handleShare = async () => {
+    if (!currentProfile) return;
+    const shareData = {
+      title: `${currentProfile.name} - ${getLabel('app_name', language)}`,
+      text: `${currentProfile.name} (${currentProfile.age}) seni bekliyor!`,
+      url: `${window.location.origin}/profile/${currentProfile.id}`,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback
+        await navigator.clipboard.writeText(`${shareData.title}\n${shareData.text}\n${shareData.url}`);
+        alert(getLabel('share_success', language));
+      }
+    } catch (err) {
+      console.error("Share failed:", err);
+    }
+  };
+
   if (isFinished) {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col transition-colors duration-500">
@@ -104,19 +125,19 @@ export default function DashboardPage() {
           <Link href="/" className="flex items-center gap-2">
             <Logo size={40} />
             <Typography variant="h3" className="transition-colors text-base font-bold text-purple-700">
-              İkinci Bahar
+              {getLabel('app_name', language)}
             </Typography>
           </Link>
 
           <div className="flex items-center gap-1">
             <Link href="/sent-requests">
-              <Button size="icon" variant="ghost" className="rounded-full w-8 h-8" title="Gönderilen İstekler" data-testid="sent-requests-link">
+              <Button size="icon" variant="ghost" className="rounded-full w-8 h-8" title={getLabel('tooltip_sent_requests', language)} data-testid="sent-requests-link">
                 <Clock className="w-4 h-4 text-gray-600" />
               </Button>
             </Link>
 
             <Link href="/matches">
-              <Button size="icon" variant="ghost" className="rounded-full w-8 h-8 relative" title="Sohbet ve Eşleşmeler">
+              <Button size="icon" variant="ghost" className="rounded-full w-8 h-8 relative" title={getLabel('tooltip_matches', language)}>
                 <MessageCircle className="w-4 h-4 text-gray-600" />
                 {matches.length > 0 && <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>}
               </Button>
@@ -129,21 +150,21 @@ export default function DashboardPage() {
             <Heart className="w-12 h-12 text-purple-600" />
           </div>
           <Typography variant="h2" className="text-purple-900">
-            Kriterlerinize uygun aday kalmadı.
+            {getLabel('no_candidates_title', language)}
           </Typography>
           <Typography variant="body-large" className="text-gray-600 max-w-md">
-            Filtreleri genişleterek veya listeyi başa sararak tekrar inceleyebilirsiniz.
+            {getLabel('no_candidates_subtitle', language)}
           </Typography>
           <div className="flex flex-col gap-3 w-full max-w-xs">
             <Button onClick={() => setIsFilterOpen(true)} variant="outline" className="w-full" data-testid="empty-state-change-filters-btn">
-              Filtreleri Değiştir
+              {getLabel('btn_change_filters', language)}
             </Button>
 
             <Button onClick={() => {
               resetProfiles();
               setCurrentIndex(0);
             }} className="w-full bg-purple-600 hover:bg-purple-700" data-testid="empty-state-reset-btn">
-              Listeyi Başa Sar
+              {getLabel('btn_reset_list', language)}
             </Button>
           </div>
         </div>
@@ -165,13 +186,13 @@ export default function DashboardPage() {
           <Heart className="w-16 h-16 text-purple-600 fill-purple-600 animate-pulse" />
         </div>
         <Typography variant="h1" className="text-white">
-          Harika!
+          {getLabel('match_success_title', language)}
         </Typography>
         <Typography variant="h3" className="text-purple-100" data-testid="match-success-name">
-          {lastLikedName} ile tanışma isteğiniz iletildi.
+          {getLabel('match_success_subtitle', language, { name: lastLikedName })}
         </Typography>
         <div className="bg-white/10 p-4 rounded-2xl border border-white/20 max-w-sm">
-          <Typography variant="caption" className="text-purple-200 uppercase font-bold tracking-wider mb-1 block">Gönderilen Soru</Typography>
+          <Typography variant="caption" className="text-purple-200 uppercase font-bold tracking-wider mb-1 block">{getLabel('sent_question', language)}</Typography>
           <p className="text-white italic" data-testid="match-success-question">&quot;{lastQuestion}&quot;</p>
         </div>
       </div>
@@ -179,17 +200,17 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className={cn("min-h-screen bg-slate-50 flex flex-col pb-20 md:pb-0 transition-colors duration-500", isGhostMode && "bg-gray-900")}>
+    <div className={cn("min-h-screen bg-slate-50 flex flex-col md:pb-0 transition-colors duration-500", isGhostMode && "bg-gray-900")}>
 
       {/* Header - Refined & Compact */}
       <header className={cn("h-20 px-4 shadow-sm flex justify-between items-center sticky top-0 z-30 transition-colors", isGhostMode ? "bg-gray-800 border-gray-700" : "bg-white")}>
         <Link href="/" className="flex items-center gap-2">
           <Logo size={40} className={isGhostMode ? "brightness-90 invert-[.15]" : ""} />
           <Typography variant="h3" className={cn("transition-colors text-base font-bold", isGhostMode ? "text-white" : "text-purple-700")}>
-            İkinci Bahar
+            {getLabel('app_name', language)}
           </Typography>
         </Link>
-        {isGhostMode && <span className="text-[10px] bg-gray-700 text-gray-300 px-1.5 py-0.5 rounded-full">Gizli</span>}
+        {isGhostMode && <span className="text-[10px] bg-gray-700 text-gray-300 px-1.5 py-0.5 rounded-full">{getLabel('ghost_mode', language)}</span>}
 
         <div className="flex items-center gap-1">
           <button
@@ -197,31 +218,31 @@ export default function DashboardPage() {
             className={cn("p-1.5 rounded-full transition-colors",
               isGhostMode ? "text-white hover:bg-gray-700" : "text-purple-700 hover:bg-purple-50"
             )}
-            title="Gizli Mod"
+            title={getLabel('tooltip_ghost_mode', language)}
             data-testid="ghost-mode-toggle"
           >
             {isGhostMode ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
           </button>
 
-          <Button size="icon" variant="ghost" className="rounded-full w-8 h-8" onClick={() => setIsFilterOpen(true)} title="Filtreler" data-testid="filter-button">
+          <Button size="icon" variant="ghost" className="rounded-full w-8 h-8" onClick={() => setIsFilterOpen(true)} title={getLabel('tooltip_filters', language)} data-testid="filter-button">
             <SlidersHorizontal className={cn("w-4 h-4", isGhostMode ? "text-white" : "text-gray-600")} />
           </Button>
 
           <Link href="/sent-requests">
-            <Button size="icon" variant="ghost" className="rounded-full w-8 h-8" title="Gönderilen İstekler" data-testid="sent-requests-link">
+            <Button size="icon" variant="ghost" className="rounded-full w-8 h-8" title={getLabel('tooltip_sent_requests', language)} data-testid="sent-requests-link">
               <Clock className={cn("w-4 h-4", isGhostMode ? "text-white" : "text-gray-600")} />
             </Button>
           </Link>
 
           <Link href="/matches">
-            <Button size="icon" variant="ghost" className="rounded-full w-8 h-8 relative" title="Sohbet ve Eşleşmeler" data-testid="matches-link">
+            <Button size="icon" variant="ghost" className="rounded-full w-8 h-8 relative" title={getLabel('tooltip_matches', language)} data-testid="matches-link">
               <MessageCircle className={cn("w-4 h-4", isGhostMode ? "text-white" : "text-gray-600")} />
               {matches.length > 0 && <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>}
             </Button>
           </Link>
 
           <Link href="/likes">
-            <div className="w-8 h-8 flex items-center justify-center cursor-pointer relative" title="Beğeniler">
+            <div className="w-8 h-8 flex items-center justify-center cursor-pointer relative" title={getLabel('tooltip_likes', language)}>
               <div className="bg-purple-100 p-1.5 rounded-full hover:bg-purple-200 transition-colors">
                 <Heart className="text-purple-600 w-4 h-4 fill-purple-600" />
               </div>
@@ -237,14 +258,14 @@ export default function DashboardPage() {
                 ? "text-white border-gray-600 hover:bg-gray-700"
                 : "text-purple-700 border-purple-100 hover:bg-purple-50"
             )}
-            title="Dili Değiştir / Change Language"
+            title={getLabel('tooltip_language', language)}
             data-testid="language-toggle"
           >
             {language.toUpperCase()}
           </button>
 
           <Link href="/profile">
-            <Button size="icon" variant="ghost" className="rounded-full w-8 h-8" title="Profilim" data-testid="profile-link">
+            <Button size="icon" variant="ghost" className="rounded-full w-8 h-8" title={getLabel('tooltip_profile', language)} data-testid="profile-link">
               <User className={cn("w-4 h-4", isGhostMode ? "text-white" : "text-gray-600")} />
             </Button>
           </Link>
@@ -299,37 +320,46 @@ export default function DashboardPage() {
             <img src={currentProfile.imageUrl} alt={currentProfile.name} className="w-full h-full object-cover" data-testid="profile-image" />
 
             {/* Action Buttons Overlay - Instagram Style */}
-            <div className="absolute bottom-48 right-4 flex flex-col gap-3 z-30" data-testid="action-buttons">
+            <div className="absolute bottom-48 right-4 flex flex-col gap-3 z-2" data-testid="action-buttons">
               <Button
                 onClick={handleLike}
                 className="h-12 w-12 rounded-full bg-white/20 backdrop-blur-md border border-white/30 hover:bg-purple-500 hover:border-purple-500 text-white shadow-lg transition-all active:scale-90 flex items-center justify-center p-0 group"
                 data-testid="like-button"
-                title="Beğen"
+                title={getLabel('like', language)}
               >
                 <Heart className="w-6 h-6 group-hover:fill-white text-white" strokeWidth={2.5} />
               </Button>
+
+              <Button
+                onClick={handleShare}
+                className="h-12 w-12 rounded-full bg-white/20 backdrop-blur-md border border-white/30 hover:bg-blue-500 hover:border-blue-500 text-white shadow-lg transition-all active:scale-90 flex items-center justify-center p-0"
+                data-testid="share-button"
+                title={getLabel('share', language)}
+              >
+                <Share2 className="w-5 h-5 text-white" strokeWidth={2.5} />
+              </Button>
+
               <Button
                 onClick={handlePass}
                 className="h-12 w-12 rounded-full bg-white/20 backdrop-blur-md border border-white/30 hover:bg-black/40 text-white shadow-lg transition-all active:scale-90 flex items-center justify-center p-0"
                 data-testid="dislike-button"
-                title="Pas Geç"
+                title={getLabel('pass', language)}
               >
                 <X className="w-6 h-6 text-white" strokeWidth={2.5} />
               </Button>
             </div>
-          </div>
 
-
-          <div className="bg-gradient-to-t from-black/90 via-black/50 to-transparent p-6 pt-24 z-1 mt-[-194px]" data-testid="profile-info-overlay">
-            <Typography variant="h1" className="text-white drop-shadow-lg text-4xl font-extrabold tracking-tight" data-testid="profile-name-age">
-              {currentProfile.name}, {currentProfile.age}
-            </Typography>
-            <div className="flex items-center gap-1 text-white/90 mt-0.5" data-testid="profile-location">
-              <MapPin className="w-3 h-3" />
-              <span className="text-base">{currentProfile.location}</span>
+            {/* Profile Info Overlay */}
+            <div className="bg-gradient-to-t from-black/90 via-black/50 to-transparent p-6 pt-24 z-1 mt-[-194px]" data-testid="profile-info-overlay">
+              <Typography variant="h1" className="text-white drop-shadow-lg text-4xl font-extrabold tracking-tight" data-testid="profile-name-age">
+                {currentProfile.name}, {currentProfile.age}
+              </Typography>
+              <div className="flex items-center gap-1 text-white/90 mt-0.5" data-testid="profile-location">
+                <MapPin className="w-3 h-3" />
+                <span className="text-base">{currentProfile.location}</span>
+              </div>
             </div>
           </div>
-
 
           {/* Details Area - Scrolls OVER the image */}
           <div className="relative z-10 bg-white rounded-t-[16px] rounded-b-[16px] -mt-4 p-5 space-y-5 min-h-0 shadow-[0_-5px_20px_rgba(0,0,0,0.1)]">
@@ -385,6 +415,8 @@ export default function DashboardPage() {
         )}
 
         {/* Mobile Navigation Controls - Inline with card or below? Let's put them above FABs or integration */}
+        {/* Disabled */}
+        {/*
         <div className="flex md:hidden w-full justify-between px-4 absolute top-1/2 -translate-y-1/2 pointer-events-none">
           <Button
             variant="ghost"
@@ -408,6 +440,7 @@ export default function DashboardPage() {
             <ChevronRight className="w-6 h-6 text-gray-800" />
           </Button>
         </div>
+        */}
 
       </main>
 

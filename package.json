@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "npx prisma migrate deploy && next build",
+    "sql": "npx prisma studio",
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write .",

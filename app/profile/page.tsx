@@ -13,6 +13,8 @@ import { APP_CONFIG } from "@/lib/config";
 import { updateUserProfile } from "@/lib/actions/userActions";
 import { getHobbies } from "@/lib/actions/contentActions";
 
+import Image from "next/image";
+
 export default function ProfilePage() {
     const { language, currentUser, refreshCurrentUser } = useAppStore();
 
@@ -46,18 +48,16 @@ export default function ProfilePage() {
             setName(currentUser.name || "");
             setAge(currentUser.age?.toString() || "");
             setCity(currentUser.city || "");
-            setJob(currentUser.job || "");
+            setJob(currentUser.job?.name || "");
             setBio(currentUser.bio || "");
             setMaritalStatus(currentUser.maritalStatus as MaritalStatusId || "ms_private");
             setEducation(currentUser.education as EducationId || "edu_elementary");
             setIntention(currentUser.intention as IntentionId || "int_chat");
 
             if (currentUser.hobbies) {
-                try {
-                    setSelectedHobbies(JSON.parse(currentUser.hobbies));
-                } catch (e) {
-                    setSelectedHobbies([]);
-                }
+                setSelectedHobbies(currentUser.hobbies.map(h => h.name));
+            } else if (currentUser.hobbiesArray) {
+                setSelectedHobbies(currentUser.hobbiesArray);
             }
         }
     }, [currentUser]);
@@ -83,10 +83,10 @@ export default function ProfilePage() {
                 hobbies: selectedHobbies,
             });
             await refreshCurrentUser();
-            alert(language === 'tr' ? "Profiliniz başarıyla güncellendi!" : "Profile updated successfully!");
+            alert(getLabel('profile_updated', language));
         } catch (error) {
             console.error("Save failed:", error);
-            alert(language === 'tr' ? "Bir hata oluştu." : "An error occurred.");
+            alert(getLabel('error_generic', language));
         } finally {
             setIsSaving(false);
         }
@@ -102,7 +102,7 @@ export default function ProfilePage() {
                             <ArrowLeft className="w-6 h-6 text-gray-600" />
                         </Button>
                     </Link>
-                    <Typography variant="h3" className="text-gray-900 font-bold">{language === 'tr' ? 'Profilimi Düzenle' : 'Edit My Profile'}</Typography>
+                    <Typography variant="h3" className="text-gray-900 font-bold">{getLabel('edit_profile', language)}</Typography>
                 </div>
                 <Link href="/settings">
                     <Button variant="ghost" size="icon" className="rounded-full">
@@ -117,7 +117,12 @@ export default function ProfilePage() {
                     <div className="relative">
                         <div className="w-32 h-32 rounded-full border-4 border-white shadow-xl overflow-hidden bg-purple-100 flex items-center justify-center">
                             {currentUser?.imageUrl ? (
-                                <img src={currentUser.imageUrl} alt="Profile" className="w-full h-full object-cover" />
+                                <Image
+                                    src={currentUser.imageUrl}
+                                    alt="Profile"
+                                    fill
+                                    className="object-cover"
+                                />
                             ) : (
                                 <Camera className="w-12 h-12 text-purple-300" />
                             )}
@@ -126,16 +131,16 @@ export default function ProfilePage() {
                             <Camera className="w-5 h-5" />
                         </button>
                     </div>
-                    <Typography variant="h2" className="text-xl font-bold">{name || (language === 'tr' ? 'Misafir' : 'Guest')}, {age}</Typography>
+                    <Typography variant="h2" className="text-xl font-bold">{name || getLabel('guest', language)}, {age}</Typography>
                     <Typography variant="caption" className="text-gray-500">{city}</Typography>
                 </section>
 
                 {/* Personal Info Section */}
                 <section className="space-y-4">
-                    <Typography variant="h3" className="text-base font-semibold text-gray-700">{language === 'tr' ? 'Kişisel Bilgiler' : 'Personal Information'}</Typography>
+                    <Typography variant="h3" className="text-base font-semibold text-gray-700">{getLabel('personal_info', language)}</Typography>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white p-4 rounded-3xl border border-gray-100 shadow-sm">
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Adınız Soyadınız</label>
+                            <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">{getLabel('label_name', language)}</label>
                             <input
                                 type="text"
                                 value={name}
@@ -145,7 +150,7 @@ export default function ProfilePage() {
                             />
                         </div>
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Yaşınız</label>
+                            <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">{getLabel('label_age', language)}</label>
                             <input
                                 type="number"
                                 value={age}
@@ -157,7 +162,7 @@ export default function ProfilePage() {
                             />
                         </div>
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Şehir</label>
+                            <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">{getLabel('label_city', language)}</label>
                             <input
                                 type="text"
                                 value={city}
@@ -167,7 +172,7 @@ export default function ProfilePage() {
                             />
                         </div>
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Mesleğiniz</label>
+                            <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">{getLabel('label_job', language)}</label>
                             <input
                                 type="text"
                                 value={job}
@@ -186,7 +191,7 @@ export default function ProfilePage() {
                         value={bio}
                         onChange={(e) => setBio(e.target.value)}
                         className="w-full h-32 p-4 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none text-gray-700 bg-white shadow-sm"
-                        placeholder={language === 'tr' ? 'Kendinizden bahsedin...' : 'Tell us about yourself...'}
+                        placeholder={getLabel('placeholder_bio', language)}
                         data-testid="profile-edit-bio"
                     />
                 </section>
@@ -230,7 +235,7 @@ export default function ProfilePage() {
 
                 {/* Hobbies Section */}
                 <section className="space-y-3">
-                    <Typography variant="h3" className="text-base font-semibold text-gray-700">Hobiler</Typography>
+                    <Typography variant="h3" className="text-base font-semibold text-gray-700">{getLabel('hobbies', language)}</Typography>
                     <div className="flex flex-wrap gap-2">
                         {hobbiesList.map(hobby => (
                             <button
@@ -259,11 +264,11 @@ export default function ProfilePage() {
                         data-testid="profile-save-btn"
                     >
                         <Save className={cn("w-5 h-5", isSaving && "animate-spin")} />
-                        {isSaving ? (language === 'tr' ? 'Kaydediliyor...' : 'Saving...') : getLabel('save', language)}
+                        {isSaving ? getLabel('saving', language) : getLabel('save', language)}
                     </Button>
                     {selectedHobbies.length < APP_CONFIG.MIN_HOBBIES_COUNT && (
                         <Typography variant="caption" className="text-red-500 text-center block mt-2 font-medium">
-                            En az {APP_CONFIG.MIN_HOBBIES_COUNT} hobi seçmelisiniz.
+                            {getLabel('min_hobbies_error', language, { min: APP_CONFIG.MIN_HOBBIES_COUNT })}
                         </Typography>
                     )}
                 </div>

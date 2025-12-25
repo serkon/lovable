@@ -1,10 +1,16 @@
+"use client";
+
 import { Button } from "@/components/ui/Button";
 import { Typography } from "@/components/ui/Typography";
 import Link from "next/link";
 import { Heart, Shield, Users } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
+import { useAppStore } from "@/context/AppStore";
+import { getLabel } from "@/lib/translations";
 
 export default function Home() {
+  const { language } = useAppStore();
+
   return (
     <main className="min-h-screen bg-slate-50 flex flex-col">
       {/* Hero Section */}
@@ -12,19 +18,19 @@ export default function Home() {
         <div className="max-w-3xl mx-auto space-y-8">
           <Logo size={120} className="mb-4" />
           <Typography variant="h1" className="text-purple-900 leading-tight">
-            Hayatın İkinci Baharı Sizi Bekliyor
+            {getLabel('hero_title', language)}
           </Typography>
           <Typography variant="body-large" className="text-gray-600 max-w-2xl mx-auto">
-            Karmaşık menüler yok. Sahte profiller yok. Sadece sizin gibi samimiyet arayan gerçek insanlar.
+            {getLabel('hero_subtitle', language)}
           </Typography>
 
           <div className="pt-8 animate-pulse">
             <Link href="/onboarding">
               <Button size="lg" className="w-full sm:w-auto text-xl px-12 py-8 shadow-xl bg-purple-600 hover:bg-purple-700" data-testid="landing-cta-button">
-                Hemen Başlayın – Ücretsiz
+                {getLabel('cta_button', language)}
               </Button>
             </Link>
-            <p className="mt-4 text-sm text-gray-500 font-medium">Kredi kartı gerekmez</p>
+            <p className="mt-4 text-sm text-gray-500 font-medium">{getLabel('cta_no_card', language)}</p>
           </div>
         </div>
       </section>
@@ -36,9 +42,9 @@ export default function Home() {
             <div className="bg-white w-16 h-16 rounded-2xl flex items-center justify-center mx-auto shadow-sm">
               <Users className="w-8 h-8 text-purple-600" />
             </div>
-            <Typography variant="h3">Sadece Gerçek Kişiler</Typography>
+            <Typography variant="h3">{getLabel('feature_real_title', language)}</Typography>
             <Typography variant="body" className="text-gray-600">
-              Her profil tek tek kontrol edilir. Robotlara ve sahte hesaplara yer yok.
+              {getLabel('feature_real_desc', language)}
             </Typography>
           </div>
 
@@ -46,9 +52,9 @@ export default function Home() {
             <div className="bg-white w-16 h-16 rounded-2xl flex items-center justify-center mx-auto shadow-sm">
               <Shield className="w-8 h-8 text-purple-600" />
             </div>
-            <Typography variant="h3">%100 Güvenli</Typography>
+            <Typography variant="h3">{getLabel('feature_safe_title', language)}</Typography>
             <Typography variant="body" className="text-gray-600">
-              Telefon numaranız asla paylaşılmaz. Güvenle mesajlaşın.
+              {getLabel('feature_safe_desc', language)}
             </Typography>
           </div>
 
@@ -56,9 +62,9 @@ export default function Home() {
             <div className="bg-white w-16 h-16 rounded-2xl flex items-center justify-center mx-auto shadow-sm">
               <Heart className="w-8 h-8 text-purple-600" />
             </div>
-            <Typography variant="h3">Kolay Kullanım</Typography>
+            <Typography variant="h3">{getLabel('feature_easy_title', language)}</Typography>
             <Typography variant="body" className="text-gray-600">
-              Teknolojiyle aranız nasıl olursa olsun, bu uygulamayı rahatça kullanacaksınız.
+              {getLabel('feature_easy_desc', language)}
             </Typography>
           </div>
         </div>

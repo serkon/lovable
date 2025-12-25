@@ -90,7 +90,18 @@ export async function getCurrentUser() {
   return user;
 }
 
-export async function updateUserProfile(data: any) {
+export async function updateUserProfile(data: {
+  name?: string;
+  age?: number;
+  city?: string;
+  job?: string;
+  gender?: string;
+  bio?: string;
+  maritalStatus?: string;
+  education?: string;
+  intention?: string;
+  hobbies?: string[];
+}) {
   const currentUser = await getCurrentUser();
   if (!currentUser) return null;
 
@@ -141,7 +152,17 @@ export async function updateUserProfile(data: any) {
   return updated;
 }
 
-export async function sendLike(targetProfile: any) {
+export async function sendLike(targetProfile: {
+  id: string | number;
+  name: string;
+  age: number;
+  location: string;
+  imageUrl: string;
+  bio: string;
+  intention: string;
+  job?: string;
+  hobbies?: string[];
+}) {
   const currentUser = await getCurrentUser();
   if (!currentUser) return null;
 
@@ -200,4 +221,15 @@ export async function sendLike(targetProfile: any) {
   revalidatePath("/dashboard");
   revalidatePath("/sent-requests");
   return like;
+}
+
+export async function getUserById(id: string) {
+  return await prisma.user.findUnique({
+    where: { id },
+    include: {
+      job: true,
+      hobbies: true,
+      gender: true,
+    },
+  });
 }

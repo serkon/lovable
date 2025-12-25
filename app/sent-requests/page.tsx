@@ -6,9 +6,11 @@ import { Typography } from "@/components/ui/Typography";
 import { ArrowLeft, Clock, MapPin, Briefcase } from "lucide-react";
 import { useAppStore } from "@/context/AppStore";
 import Link from "next/link";
+import { getLabel } from "@/lib/translations";
+import Image from "next/image";
 
 export default function SentRequestsPage() {
-    const { sentRequests, cancelRequest } = useAppStore();
+    const { sentRequests, cancelRequest, language } = useAppStore();
 
     return (
         <div className="min-h-screen bg-slate-50 pb-20">
@@ -21,7 +23,7 @@ export default function SentRequestsPage() {
                     </Button>
                 </Link>
                 <Typography variant="h3" className="text-purple-700">
-                    Gönderilen İstekler
+                    {getLabel('sent_requests', language)}
                 </Typography>
             </header>
 
@@ -32,10 +34,10 @@ export default function SentRequestsPage() {
                         <div className="bg-purple-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
                             <Clock className="w-10 h-10 text-purple-400" />
                         </div>
-                        <Typography variant="h3" className="text-gray-700 mb-2">Henüz istek göndermediniz.</Typography>
-                        <p className="text-sm">Beğendiğiniz kişilere &quot;Tanışmak İsterim&quot; diyerek ilk adımı atın.</p>
+                        <Typography variant="h3" className="text-gray-700 mb-2">{getLabel('no_sent_requests', language)}</Typography>
+                        <p className="text-sm">{getLabel('first_step_desc', language)}</p>
                         <Link href="/dashboard" className="mt-6 inline-block">
-                            <Button>Keşfetmeye Başla</Button>
+                            <Button>{getLabel('start_exploring', language)}</Button>
                         </Link>
                     </div>
                 ) : (
@@ -43,15 +45,16 @@ export default function SentRequestsPage() {
                         {sentRequests.map((profile) => (
                             <Card data-testid={`sent-request-card-${profile.id}`} key={profile.id} className="overflow-hidden group hover:shadow-md transition-shadow">
                                 <div className="relative h-48 bg-gray-200">
-                                    <img
+                                    <Image
                                         src={profile.imageUrl}
                                         alt={profile.name}
-                                        className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
+                                        fill
+                                        className="object-cover opacity-90 group-hover:opacity-100 transition-opacity"
                                     />
                                     <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                         <span className="bg-white/90 text-purple-700 px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-2">
                                             <Clock className="w-4 h-4" />
-                                            Yanıt Bekleniyor
+                                            {getLabel('waiting_reply', language)}
                                         </span>
                                     </div>
                                 </div>
@@ -77,7 +80,7 @@ export default function SentRequestsPage() {
                                         className="mt-4 w-full text-red-500 border-red-100 hover:bg-red-50 hover:text-red-700 h-9 text-xs"
                                         data-testid={`cancel-request-btn-${profile.id}`}
                                     >
-                                        İsteği Geri Çek
+                                        {getLabel('cancel_request', language)}
                                     </Button>
                                 </div>
                             </Card>

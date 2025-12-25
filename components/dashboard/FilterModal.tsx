@@ -6,7 +6,9 @@ import { Card } from "@/components/ui/Card";
 import { Typography } from "@/components/ui/Typography";
 import { X, SlidersHorizontal, MapPin, Calendar, BookOpen, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { EducationId, MaritalStatusId } from "@/lib/mock-data";
+import { EducationId, MaritalStatusId, EDUCATIONS, MARITAL_STATUSES } from "@/lib/mock-data";
+import { useAppStore } from "@/context/AppStore";
+import { getLabel } from "@/lib/translations";
 
 interface FilterModalProps {
   isOpen: boolean;
@@ -22,6 +24,7 @@ export interface FilterState {
 }
 
 export function FilterModal({ isOpen, onClose, onApply }: FilterModalProps) {
+  const { language } = useAppStore();
   const [filters, setFilters] = useState<FilterState>({
     ageRange: [40, 65],
     maxDistance: 50,
@@ -35,7 +38,7 @@ export function FilterModal({ isOpen, onClose, onApply }: FilterModalProps) {
         <div className="p-6 sticky top-0 bg-white z-10 border-b flex justify-between items-center">
           <div className="flex items-center gap-2 text-purple-700">
             <SlidersHorizontal className="w-6 h-6" />
-            <Typography variant="h3">Filtrele</Typography>
+            <Typography variant="h3">{getLabel('filter_title', language)}</Typography>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full">
             <X className="w-6 h-6" />
@@ -47,7 +50,7 @@ export function FilterModal({ isOpen, onClose, onApply }: FilterModalProps) {
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-gray-700">
               <Calendar className="w-5 h-5 text-purple-500" />
-              <Typography variant="h3" className="text-lg">Yaş Aralığı</Typography>
+              <Typography variant="h3" className="text-lg">{getLabel('age_range', language)}</Typography>
             </div>
             <div className="px-2">
               <input
@@ -69,7 +72,7 @@ export function FilterModal({ isOpen, onClose, onApply }: FilterModalProps) {
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-gray-700">
               <MapPin className="w-5 h-5 text-purple-500" />
-              <Typography variant="h3" className="text-lg">Mesafe</Typography>
+              <Typography variant="h3" className="text-lg">{getLabel('max_distance', language)}</Typography>
             </div>
             <div className="flex gap-3 flex-wrap">
               {[10, 25, 50, 100].map((km) => (
@@ -93,17 +96,15 @@ export function FilterModal({ isOpen, onClose, onApply }: FilterModalProps) {
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-gray-700">
               <Heart className="w-5 h-5 text-purple-500" />
-              <Typography variant="h3" className="text-lg">Medeni Durum</Typography>
+              <Typography variant="h3" className="text-lg">{getLabel('maritalStatus', language)}</Typography>
             </div>
             <select
               className="w-full h-14 rounded-xl border border-gray-300 px-4 text-lg bg-white"
               onChange={(e) => setFilters({ ...filters, maritalStatus: e.target.value as MaritalStatusId })}
               value={filters.maritalStatus || ""}
             >
-              <option value="">Farketmez</option>
-              <option value="ms_single">Hiç Evlenmemiş</option>
-              <option value="ms_divorced">Boşanmış</option>
-              <option value="ms_private">Eşi Vefat Etmiş</option>
+              <option value="">{getLabel('select_all', language)}</option>
+              {MARITAL_STATUSES.map(s => <option key={s} value={s}>{getLabel(s, language)}</option>)}
             </select>
           </div>
 
@@ -111,18 +112,15 @@ export function FilterModal({ isOpen, onClose, onApply }: FilterModalProps) {
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-gray-700">
               <BookOpen className="w-5 h-5 text-purple-500" />
-              <Typography variant="h3" className="text-lg">Eğitim</Typography>
+              <Typography variant="h3" className="text-lg">{getLabel('education', language)}</Typography>
             </div>
             <select
               className="w-full h-14 rounded-xl border border-gray-300 px-4 text-lg bg-white"
               onChange={(e) => setFilters({ ...filters, education: e.target.value as EducationId })}
               value={filters.education || ""}
             >
-              <option value="">Farketmez</option>
-              <option value="edu_highschool">Lise</option>
-              <option value="edu_associates">Ön Lisans</option>
-              <option value="edu_bachelors">Lisans</option>
-              <option value="edu_masters">Yüksek Lisans</option>
+              <option value="">{getLabel('select_all', language)}</option>
+              {EDUCATIONS.map(e => <option key={e} value={e}>{getLabel(e, language)}</option>)}
             </select>
           </div>
 
@@ -130,10 +128,10 @@ export function FilterModal({ isOpen, onClose, onApply }: FilterModalProps) {
 
         <div className="p-6 border-t bg-gray-50 flex gap-4 sticky bottom-0">
           <Button variant="ghost" onClick={onClose} className="flex-1 h-14 text-lg">
-            Vazgeç
+            {getLabel('btn_cancel', language)}
           </Button>
           <Button onClick={() => { onApply(filters); onClose(); }} className="flex-[2] h-14 text-lg bg-purple-700 hover:bg-purple-800">
-            Uygula
+            {getLabel('btn_apply_filters', language)}
           </Button>
         </div>
       </Card>

@@ -1,13 +1,16 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
-import { MOCK_PROFILES, MOCK_LIKED_BY_PROFILES, MOCK_MATCHES, Profile } from "@/lib/mock-data";
+import { MOCK_PROFILES, MOCK_LIKED_BY_PROFILES, MOCK_MATCHES, Profile, EducationId, MaritalStatusId, IntentionId } from "@/lib/mock-data";
 import { fetchProfilesFromAPI } from "@/lib/services/userService";
 import { getCurrentUser, sendLike as dbSendLike } from "@/lib/actions/userActions";
 import { User } from "@prisma/client";
 
 export interface ExtendedUser extends User {
   hobbiesArray?: string[];
+  job?: { id: string; name: string } | null;
+  hobbies?: { id: string; name: string }[];
+  likesSent?: { id: string; receiver: unknown }[];
 }
 
 interface AppContextType {
@@ -41,41 +44,39 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const refreshCurrentUser = async () => {
     try {
-      const user: any = await getCurrentUser();
+      const user = await getCurrentUser() as ExtendedUser;
 
       if (user) {
         // Transform hobbies from Relation[] to string[] if needed for display helper
-        // But for ExtendedUser type it might keep them as objects. 
-        // Let's attach a flattened array helper.
         if (Array.isArray(user.hobbies)) {
-          user.hobbiesArray = user.hobbies.map((h: any) => h.name);
+          user.hobbiesArray = user.hobbies.map(h => (h as any).name);
         } else {
           user.hobbiesArray = [];
         }
 
         // Transform likesSent to Profile objects for sentRequests
-        const dbSentRequests = user.likesSent?.map((like: any) => {
-          const target = like.receiver;
+        const dbSentRequests = user.likesSent?.map((like) => {
+          const target = (like as any).receiver;
           if (!target) return null;
           return {
             id: target.id,
-            name: target.name,
-            age: target.age,
-            location: target.city,
-            distance: 0, // Not stored in DB
-            job: target.job?.name || target.job || "", // Handle relation or fallback
-            bio: target.bio,
-            imageUrl: target.imageUrl,
-            education: target.education,
-            maritalStatus: target.maritalStatus,
-            intention: target.intention,
-            // Hobbies should be array of strings for frontend Profile type
+            name: target.name || "",
+            age: target.age || 0,
+            location: target.city || "",
+            distance: 0,
+            job: target.job?.name || target.job || "",
+            bio: target.bio || "",
+            imageUrl: target.imageUrl || "",
+            education: target.education as EducationId,
+            maritalStatus: target.maritalStatus as MaritalStatusId,
+            intention: target.intention as IntentionId,
             hobbies: Array.isArray(target.hobbies) ? target.hobbies.map((h: any) => h.name) : [],
-            gender: target.gender?.name || target.gender // Handle relation
+            gender: target.gender?.name || target.gender,
+            iceBreaker: ""
           };
         }).filter(Boolean) || [];
 
-        setSentRequests(dbSentRequests);
+        setSentRequests(dbSentRequests as Profile[]);
       }
       setCurrentUser(user);
     } catch (error) {

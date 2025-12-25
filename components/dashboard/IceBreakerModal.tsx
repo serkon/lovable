@@ -6,6 +6,8 @@ import { Typography } from "@/components/ui/Typography";
 import { X, Sparkles, MessageCircle, Send } from "lucide-react";
 import { ICE_BREAKER_QUESTIONS } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
+import { useAppStore } from "@/context/AppStore";
+import { getLabel } from "@/lib/translations";
 
 interface IceBreakerModalProps {
     isOpen: boolean;
@@ -15,6 +17,7 @@ interface IceBreakerModalProps {
 }
 
 export function IceBreakerModal({ isOpen, onClose, onSend, targetName }: IceBreakerModalProps) {
+    const { language } = useAppStore();
     const [selectedQuestion, setSelectedQuestion] = useState("");
 
     if (!isOpen) return null;
@@ -36,9 +39,9 @@ export function IceBreakerModal({ isOpen, onClose, onSend, targetName }: IceBrea
                         <MessageCircle className="w-8 h-8 fill-white" />
                     </div>
 
-                    <Typography variant="h2" className="text-white">Buzları Kıralım!</Typography>
+                    <Typography variant="h2" className="text-white">{getLabel('ice_breaker_title', language)}</Typography>
                     <Typography variant="body" className="text-purple-100 opacity-90 mt-1">
-                        {targetName} ile harika bir sohbet başlatmak için bir soru seçin.
+                        {getLabel('ice_breaker_subtitle', language, { name: targetName })}
                     </Typography>
                 </div>
 
@@ -46,7 +49,7 @@ export function IceBreakerModal({ isOpen, onClose, onSend, targetName }: IceBrea
                 <div className="p-6 space-y-4">
                     <div className="flex items-center gap-2 text-purple-700 font-semibold mb-2">
                         <Sparkles className="w-4 h-4" />
-                        <span>Tanışma Soruları</span>
+                        <span>{getLabel('intro_questions', language)}</span>
                     </div>
 
                     <div className="space-y-3 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
@@ -68,7 +71,7 @@ export function IceBreakerModal({ isOpen, onClose, onSend, targetName }: IceBrea
 
                     <div className="pt-4 flex gap-3">
                         <Button variant="ghost" onClick={onClose} className="flex-1 rounded-2xl h-14 font-bold text-gray-500">
-                            Vazgeç
+                            {getLabel('btn_cancel', language)}
                         </Button>
                         <Button
                             onClick={() => onSend(selectedQuestion)}
@@ -76,7 +79,7 @@ export function IceBreakerModal({ isOpen, onClose, onSend, targetName }: IceBrea
                             className="flex-[2] bg-purple-600 hover:bg-purple-700 h-14 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-purple-200"
                         >
                             <Send className="w-5 h-5" />
-                            Soruyla Birlikte Gönder
+                            {getLabel('send_with_question', language)}
                         </Button>
                     </div>
                 </div>
