@@ -1,0 +1,10 @@
+- quick-win
+- Profesyonel Mimari (Enterprise veya ölçeklenebilir Startup - Enterprise and Scalable Startup)
+- lexicographical (ice_1, ice_10 gibi string bazlı sıralama)
+- ID alanında Slug/Key (Örn: hobby_gardening) kullanılır.
+- defining industry standards
+- static content
+- sector / industry standard practices
+- pitfalls
+- I've begun to incorporate a sortOrder column to enable controlled data presentation. This update aims to ensure that content within static tables can be presented in a controlled manner.
+- However, I'm now exploring potential pitfalls, such as sequence gaps or collisions, and am considering alternative strategies to maintain a consistent and logical order.

@@ -3,35 +3,35 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 const JOBS = [
-  "Emekli Öğretmen",
-  "Mühendis",
-  "Doktor",
-  "Hemşire",
-  "Bankacı",
-  "Muhasebeci",
-  "Avukat",
-  "Mimar",
-  "Emekli Subay",
-  "Yazar",
-  "Akademisyen",
-  "Eczacı",
-  "Terzi",
-  "Aşçı",
-  "Esnaf",
+  { id: "job_retired_teacher", name: "Emekli Öğretmen" },
+  { id: "job_engineer", name: "Mühendis" },
+  { id: "job_doctor", name: "Doktor" },
+  { id: "job_nurse", name: "Hemşire" },
+  { id: "job_banker", name: "Bankacı" },
+  { id: "job_accountant", name: "Muhasebeci" },
+  { id: "job_lawyer", name: "Avukat" },
+  { id: "job_architect", name: "Mimar" },
+  { id: "job_retired_officer", name: "Emekli Subay" },
+  { id: "job_writer", name: "Yazar" },
+  { id: "job_academic", name: "Akademisyen" },
+  { id: "job_pharmacist", name: "Eczacı" },
+  { id: "job_tailor", name: "Terzi" },
+  { id: "job_chef", name: "Aşçı" },
+  { id: "job_artisan", name: "Esnaf" },
 ];
 
 const HOBBIES = [
-  "Gezi, Doğa & Kamp",
-  "Kültür, Sanat & Kitap",
-  "Sinema & Tiyatro",
-  "Müzik & Dans",
-  "Yemek & Gurme",
-  "Spor, Yoga & Pilates",
-  "Psikoloji & Kişisel Gelişim",
-  "Tavla & Sosyal Oyunlar",
-  "Bahçe İşleri",
-  "Balık Tutma",
-  "El Sanatları",
+  { id: "hobby_nature", name: "Gezi, Doğa & Kamp" },
+  { id: "hobby_culture", name: "Kültür, Sanat & Kitap" },
+  { id: "hobby_cinema", name: "Sinema & Tiyatro" },
+  { id: "hobby_music", name: "Müzik & Dans" },
+  { id: "hobby_food", name: "Yemek & Gurme" },
+  { id: "hobby_sport", name: "Spor, Yoga & Pilates" },
+  { id: "hobby_psychology", name: "Psikoloji & Kişisel Gelişim" },
+  { id: "hobby_games", name: "Tavla & Sosyal Oyunlar" },
+  { id: "hobby_gardening", name: "Bahçe İşleri" },
+  { id: "hobby_fishing", name: "Balık Tutma" },
+  { id: "hobby_crafts", name: "El Sanatları" },
 ];
 
 const BIO_TEMPLATES = [
@@ -46,31 +46,42 @@ const BIO_TEMPLATES = [
   "Sağlık, spor ve zinde kalmak benim için değerli.",
 ];
 
-const MARITAL_STATUSES = ["ms_single", "ms_divorced", "ms_private"];
-
-const EDUCATIONS = [
-  "edu_phd",
-  "edu_masters",
-  "edu_bachelors",
-  "edu_associates",
-  "edu_highschool",
-  "edu_middleschool",
-  "edu_elementary",
+const MARITAL_STATUSES = [
+  { id: "ms_single", name: "Bekar" },
+  { id: "ms_divorced", name: "Boşanmış" },
+  { id: "ms_private", name: "Belirtmek İstemiyorum" },
 ];
 
-const INTENTIONS = ["int_chat", "int_friendship", "int_fun"];
+const EDUCATIONS = [
+  { id: "edu_phd", name: "Doktora" },
+  { id: "edu_masters", name: "Yüksek Lisans" },
+  { id: "edu_bachelors", name: "Lisans" },
+  { id: "edu_associates", name: "Önlisans" },
+  { id: "edu_highschool", name: "Lise" },
+  { id: "edu_middleschool", name: "Ortaokul" },
+  { id: "edu_elementary", name: "İlkokul" },
+];
+
+const INTENTIONS = [
+  { id: "int_chat", name: "Sohbet" },
+  { id: "int_friendship", name: "Arkadaşlık" },
+  { id: "int_fun", name: "Eğlence" },
+];
 
 const ICE_BREAKERS = [
-  "En son okuduğun kitap hangisiydi?",
-  "Hafta sonları senin için dinlenmek mi yoksa gezmek mi demek?",
-  "Çay mı kahve mi? Ben çaycıyım :)",
-  "Emeklilik hayalin nedir?",
+  "Naber? En son okuduğun kitap neydi?",
+  "Hafta sonları senin için dinlenmek mi yoksa yeni yerler keşfetmek mi demek?",
+  "Güne nasıl başlamayı seversin? Kahve mi, çay mı yoksa sabah yürüyüşü mü?",
+  "En sevdiğin film veya dizi hangisi?",
   "En sevdiğin yemek hangisi?",
   "Geçmişe dönebilseydin neyi farklı yapardın?",
   "En sevdiğin seyahat rotası neresi?",
   "Bahçende en çok ne yetiştirmeyi seversin?",
   "Hangi müzik türü seni dinlendirir?",
   "Çocukluğundan en sevdiğin anı nedir?",
+  "Seni en çok ne güldürür?",
+  "Hayatında 'iyi ki yapmışım' dediğin en büyük çılgınlık neydi?",
+  "Mutfakta aran nasıldır? Spesiyal yemeğin var mı?",
 ];
 
 const MOCK_USERS = [
@@ -78,12 +89,12 @@ const MOCK_USERS = [
     name: "Ayşe",
     age: 48,
     city: "İstanbul, Kadıköy",
-    job: "Emekli Öğretmen",
-    education: "edu_bachelors",
-    maritalStatus: "ms_divorced",
-    intention: "int_chat",
+    jobId: "job_retired_teacher",
+    educationId: "edu_bachelors",
+    maritalStatusId: "ms_divorced",
+    intentionId: "int_chat",
     bio: "Kitap okumayı, doğa yürüyüşlerini ve kedileri severim. Hayatı paylaşacak samimi birini arıyorum.",
-    hobbies: ["Kültür, Sanat & Kitap", "Gezi, Doğa & Kamp", "Bahçe İşleri"],
+    hobbies: ["hobby_culture", "hobby_nature", "hobby_gardening"],
     imageUrl:
       "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=800&h=1000",
     images: [
@@ -91,35 +102,35 @@ const MOCK_USERS = [
       "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=800&h=1000",
       "https://images.unsplash.com/photo-1554151228-14d9def656e4?auto=format&fit=crop&q=80&w=800&h=1000",
     ],
-    gender: "Kadın",
+    genderId: "gender_female",
   },
   {
     name: "Murat",
     age: 52,
     city: "İstanbul, Beşiktaş",
-    job: "Mimar",
-    education: "edu_masters",
-    maritalStatus: "ms_divorced",
-    intention: "int_fun",
+    jobId: "job_architect",
+    educationId: "edu_masters",
+    maritalStatusId: "ms_divorced",
+    intentionId: "int_fun",
     bio: "Klasik müzik dinlemeyi ve yeni yerler keşfetmeyi severim. Hayatı paylaşacak dürüst birini arıyorum.",
-    hobbies: ["Müzik & Dans", "Gezi, Doğa & Kamp", "Kültür, Sanat & Kitap"],
+    hobbies: ["hobby_music", "hobby_nature", "hobby_culture"],
     imageUrl: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=1760",
     images: [
       "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=1760",
       "https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d?q=80&w=1365",
     ],
-    gender: "Erkek",
+    genderId: "gender_male",
   },
   {
     name: "Zeynep",
     age: 45,
     city: "İzmir, Karşıyaka",
-    job: "Doktor",
-    education: "edu_phd",
-    maritalStatus: "ms_single",
-    intention: "int_friendship",
+    jobId: "job_doctor",
+    educationId: "edu_phd",
+    maritalStatusId: "ms_single",
+    intentionId: "int_friendship",
     bio: "Deniz kenarında yürüyüş yapmaya bayılırım. Dürüstlük benim için en önemli şey.",
-    hobbies: ["Spor, Yoga & Pilates", "Sinema & Tiyatro", "Psikoloji & Kişisel Gelişim"],
+    hobbies: ["hobby_sport", "hobby_cinema", "hobby_psychology"],
     imageUrl:
       "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=800&h=1000",
     images: [
@@ -127,214 +138,169 @@ const MOCK_USERS = [
       "https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?auto=format&fit=crop&q=80&w=800&h=1000",
       "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800&h=1000",
     ],
-    gender: "Kadın",
+    genderId: "gender_female",
   },
   {
     name: "Ahmet",
     age: 58,
     city: "Ankara, Çankaya",
-    job: "Emekli Bankacı",
-    education: "edu_bachelors",
-    maritalStatus: "ms_divorced",
-    intention: "int_chat",
+    jobId: "job_banker",
+    educationId: "edu_bachelors",
+    maritalStatusId: "ms_divorced",
+    intentionId: "int_chat",
     bio: "Bahçe işleriyle uğraşmak beni dinlendiriyor. Huzurlu bir ikinci bahar arıyorum.",
-    hobbies: ["Bahçe İşleri", "Balık Tutma", "Müzik & Dans"],
+    hobbies: ["hobby_gardening", "hobby_fishing", "hobby_music"],
     imageUrl:
       "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=800&h=1000",
-    gender: "Erkek",
+    genderId: "gender_male",
   },
   {
     name: "Sema",
     age: 49,
     city: "İstanbul, Kadıköy",
-    job: "Eczacı",
-    education: "edu_bachelors",
-    maritalStatus: "ms_divorced",
-    intention: "int_fun",
+    jobId: "job_pharmacist",
+    educationId: "edu_bachelors",
+    maritalStatusId: "ms_divorced",
+    intentionId: "int_fun",
     bio: "Sağlıklı yaşam ve yoga ile ilgileniyorum.",
-    hobbies: ["Yoga", "Sağlıklı Beslenme"],
+    hobbies: ["hobby_sport", "hobby_food"],
     imageUrl:
       "https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&q=80&w=800&h=1000",
-    gender: "Kadın",
+    genderId: "gender_female",
   },
   {
     name: "Kemal",
     age: 55,
     city: "İstanbul, Üsküdar",
-    job: "Emekli Subay",
-    education: "edu_bachelors",
-    maritalStatus: "ms_divorced",
-    intention: "int_friendship",
+    jobId: "job_retired_officer",
+    educationId: "edu_bachelors",
+    maritalStatusId: "ms_divorced",
+    intentionId: "int_friendship",
     bio: "Disiplinli ama neşeli biriyim. Tarih kitapları okumayı severim.",
-    hobbies: ["Kültür, Sanat & Kitap", "Gezi, Doğa & Kamp"],
+    hobbies: ["hobby_culture", "hobby_nature"],
     imageUrl:
       "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=800&h=1000",
-    gender: "Erkek",
+    genderId: "gender_male",
   },
   {
     name: "Feride",
     age: 46,
     city: "İstanbul, Bakırköy",
-    job: "Avukat",
-    education: "edu_masters",
-    maritalStatus: "ms_divorced",
-    intention: "int_fun",
+    jobId: "job_lawyer",
+    educationId: "edu_masters",
+    maritalStatusId: "ms_divorced",
+    intentionId: "int_fun",
     bio: "Adaletli ve merhametli insanları severim. Aktif bir hayatım var.",
-    hobbies: ["Spor, Yoga & Pilates", "Gezi, Doğa & Kamp"],
+    hobbies: ["hobby_sport", "hobby_nature"],
     imageUrl:
       "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=800&h=1000",
-    gender: "Kadın",
+    genderId: "gender_female",
   },
 ];
 
 async function main() {
   console.log("Cleaning database...");
   await prisma.like.deleteMany({});
-  await (prisma as any).userImage?.deleteMany({});
-  await (prisma as any).maritalStatus?.deleteMany({});
-  await (prisma as any).education?.deleteMany({});
-  await (prisma as any).intention?.deleteMany({});
+  await prisma.userImage.deleteMany({});
   await prisma.user.deleteMany({});
+  await prisma.job.deleteMany({});
+  await prisma.hobby.deleteMany({});
+  await prisma.bioTemplate.deleteMany({});
+  await prisma.iceBreaker.deleteMany({});
+  await prisma.gender.deleteMany({});
+  await prisma.maritalStatus.deleteMany({});
+  await prisma.education.deleteMany({});
+  await prisma.intention.deleteMany({});
 
-  console.log("Seeding content...");
+  console.log("Seeding genders...");
+  await prisma.gender.createMany({
+    data: [
+      { id: "gender_female", name: "Internal: Kadın", sortOrder: 10 },
+      { id: "gender_male", name: "Internal: Erkek", sortOrder: 20 },
+    ],
+  });
 
-  // Seed Jobs
-  for (const name of JOBS) {
-    await prisma.job.upsert({
-      where: { name },
-      update: {},
-      create: { name },
-    });
-  }
+  console.log("Seeding jobs...");
+  await prisma.job.createMany({
+    data: JOBS.map((job, index) => ({
+      id: job.id,
+      name: `Internal: ${job.name}`,
+      sortOrder: (index + 1) * 10,
+    })),
+  });
 
-  // Seed Hobbies
-  for (const name of HOBBIES) {
-    await prisma.hobby.upsert({
-      where: { name },
-      update: {},
-      create: { name },
-    });
-  }
+  console.log("Seeding hobbies...");
+  await prisma.hobby.createMany({
+    data: HOBBIES.map((hobby, index) => ({
+      id: hobby.id,
+      name: `Internal: ${hobby.name}`,
+      sortOrder: (index + 1) * 10,
+    })),
+  });
 
-  // Seed Bio Templates
-  for (const content of BIO_TEMPLATES) {
-    await prisma.bioTemplate.upsert({
-      where: { content },
-      update: {},
-      create: { content },
-    });
-  }
+  console.log("Seeding templates...");
+  await prisma.bioTemplate.createMany({
+    data: BIO_TEMPLATES.map((content, index) => ({
+      id: `bio_${(index + 1).toString().padStart(2, "0")}`,
+      content,
+      sortOrder: (index + 1) * 10,
+    })),
+  });
 
-  // Seed Ice Breakers
-  for (const content of ICE_BREAKERS) {
-    await prisma.iceBreaker.upsert({
-      where: { content },
-      update: {},
-      create: { content },
-    });
-  }
+  console.log("Seeding ice breakers...");
+  await prisma.iceBreaker.createMany({
+    data: ICE_BREAKERS.map((content, index) => ({
+      id: `ice_${(index + 1).toString().padStart(2, "0")}`,
+      content,
+      sortOrder: (index + 1) * 10,
+    })),
+  });
 
-  // Seed Marital Statuses
-  for (const name of MARITAL_STATUSES) {
-    await (prisma as any).maritalStatus.upsert({
-      where: { name },
-      update: {},
-      create: { name },
-    });
-  }
+  console.log("Seeding marital statuses...");
+  await prisma.maritalStatus.createMany({
+    data: MARITAL_STATUSES.map((item, index) => ({
+      id: item.id,
+      name: `Internal: ${item.name}`,
+      sortOrder: (index + 1) * 10,
+    })),
+  });
 
-  // Seed Educations
-  for (const name of EDUCATIONS) {
-    await (prisma as any).education.upsert({
-      where: { name },
-      update: {},
-      create: { name },
-    });
-  }
+  console.log("Seeding educations...");
+  await prisma.education.createMany({
+    data: EDUCATIONS.map((item, index) => ({
+      id: item.id,
+      name: `Internal: ${item.name}`,
+      sortOrder: (index + 1) * 10,
+    })),
+  });
 
-  // Seed Intentions
-  for (const name of INTENTIONS) {
-    await (prisma as any).intention.upsert({
-      where: { name },
-      update: {},
-      create: { name },
-    });
-  }
+  console.log("Seeding intentions...");
+  await prisma.intention.createMany({
+    data: INTENTIONS.map((item, index) => ({
+      id: item.id,
+      name: `Internal: ${item.name}`,
+      sortOrder: (index + 1) * 10,
+    })),
+  });
 
-  // Seed Users
   console.log("Seeding users...");
-  for (const user of MOCK_USERS) {
-    // Prepare hobbies connect array
-    const hobbyConnect = user.hobbies.map((h) => ({
-      where: { name: h },
-      create: { name: h },
-    }));
-
-    // Prepare images create array
-    const imagesCreate = (user as any).images
-      ? (user as any).images.map((url: string, index: number) => ({ url, order: index }))
-      : user.imageUrl
-        ? [{ url: user.imageUrl, order: 0 }]
-        : [];
-
+  for (const userData of MOCK_USERS) {
+    const { hobbies, images, jobId, genderId, educationId, maritalStatusId, intentionId, ...rest } =
+      userData as any;
     await prisma.user.create({
       data: {
-        name: user.name,
-        age: user.age,
-        city: user.city,
-
-        // Job Relation
-        job: {
-          connectOrCreate: {
-            where: { name: user.job },
-            create: { name: user.job },
-          },
-        },
-
-        // Gender Relation
-        gender: {
-          connectOrCreate: {
-            where: { name: user.gender },
-            create: { name: user.gender },
-          },
-        },
-
-        // Education Relation
-        education: {
-          connectOrCreate: {
-            where: { name: user.education },
-            create: { name: user.education },
-          },
-        },
-
-        // Marital Status Relation
-        maritalStatus: {
-          connectOrCreate: {
-            where: { name: user.maritalStatus },
-            create: { name: user.maritalStatus },
-          },
-        },
-
-        // Intention Relation
-        intention: {
-          connectOrCreate: {
-            where: { name: user.intention },
-            create: { name: user.intention },
-          },
-        },
-
-        bio: user.bio,
-        imageUrl: user.imageUrl,
-
-        // Hobbies Relation - Many to Many
+        ...rest,
+        job: { connect: { id: jobId } },
+        gender: { connect: { id: genderId } },
+        education: { connect: { id: educationId } },
+        maritalStatus: { connect: { id: maritalStatusId } },
+        intention: { connect: { id: intentionId } },
         hobbies: {
-          connectOrCreate: hobbyConnect,
+          connect: hobbies.map((id: string) => ({ id })),
         },
-
-        // Images Relation
         images: {
-          create: imagesCreate,
-        } as any,
+          create: images?.map((url: string, index: number) => ({ url, order: index })) || [],
+        },
       },
     });
   }

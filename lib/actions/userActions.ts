@@ -48,38 +48,41 @@ export async function getCurrentUser() {
 
         job: {
           connectOrCreate: {
-            where: { name: "Emekli Öğretmen" },
-            create: { name: "Emekli Öğretmen" },
+            where: { id: "job_retired_teacher" },
+            create: { id: "job_retired_teacher", name: "Emekli Öğretmen", sortOrder: 1 },
           },
         },
         gender: {
           connectOrCreate: {
-            where: { name: "Kadın" },
-            create: { name: "Kadın" },
+            where: { id: "gender_female" },
+            create: { id: "gender_female", name: "Kadın", sortOrder: 1 },
           },
         },
         hobbies: {
-          connectOrCreate: ["Gezi, Doğa & Kamp", "Kültür, Sanat & Kitap"].map((h) => ({
-            where: { name: h },
-            create: { name: h },
+          connectOrCreate: [
+            { id: "hobby_nature", name: "Gezi, Doğa & Kamp" },
+            { id: "hobby_culture", name: "Kültür, Sanat & Kitap" },
+          ].map((h) => ({
+            where: { id: h.id },
+            create: { id: h.id, name: h.name, sortOrder: 1 },
           })),
         },
         education: {
           connectOrCreate: {
-            where: { name: "edu_bachelors" },
-            create: { name: "edu_bachelors" },
+            where: { id: "edu_bachelors" },
+            create: { id: "edu_bachelors", name: "edu_bachelors", sortOrder: 3 },
           },
         },
         maritalStatus: {
           connectOrCreate: {
-            where: { name: "ms_divorced" },
-            create: { name: "ms_divorced" },
+            where: { id: "ms_divorced" },
+            create: { id: "ms_divorced", name: "ms_divorced", sortOrder: 2 },
           },
         },
         intention: {
           connectOrCreate: {
-            where: { name: "int_chat" },
-            create: { name: "int_chat" },
+            where: { id: "int_chat" },
+            create: { id: "int_chat", name: "int_chat", sortOrder: 1 },
           },
         },
       },
@@ -131,29 +134,20 @@ export async function updateUserProfile(data: {
       // Handle Job relation
       ...(job && {
         job: {
-          connectOrCreate: {
-            where: { name: job },
-            create: { name: job },
-          },
+          connect: { id: job },
         },
       }),
       // Handle Gender relation
       ...(gender && {
         gender: {
-          connectOrCreate: {
-            where: { name: gender },
-            create: { name: gender },
-          },
+          connect: { id: gender },
         },
       }),
       // Handle Hobbies relation (replaces existing if updated)
       ...(hobbies && {
         hobbies: {
           set: [], // Clear current hobbies
-          connectOrCreate: hobbies.map((h: string) => ({
-            where: { name: h },
-            create: { name: h },
-          })),
+          connect: hobbies.map((id: string) => ({ id })),
         },
       }),
       // Handle Images relation
@@ -169,28 +163,19 @@ export async function updateUserProfile(data: {
       // Handle Education relation
       ...(education && {
         education: {
-          connectOrCreate: {
-            where: { name: education },
-            create: { name: education },
-          },
+          connect: { id: education },
         },
       }),
       // Handle Marital Status relation
       ...(maritalStatus && {
         maritalStatus: {
-          connectOrCreate: {
-            where: { name: maritalStatus },
-            create: { name: maritalStatus },
-          },
+          connect: { id: maritalStatus },
         },
       }),
       // Handle Intention relation
       ...(intention && {
         intention: {
-          connectOrCreate: {
-            where: { name: intention },
-            create: { name: intention },
-          },
+          connect: { id: intention },
         },
       }),
     } as any,
@@ -220,10 +205,7 @@ export async function sendLike(targetProfile: {
   if (!currentUser) return null;
 
   const hobbyConnect = Array.isArray(targetProfile.hobbies)
-    ? targetProfile.hobbies.map((h: string) => ({
-        where: { name: h },
-        create: { name: h },
-      }))
+    ? targetProfile.hobbies.map((id: string) => ({ id }))
     : [];
 
   const imagesCreate = Array.isArray(targetProfile.images)
@@ -246,31 +228,19 @@ export async function sendLike(targetProfile: {
       imageUrl: targetProfile.imageUrl,
       bio: targetProfile.bio,
       job: {
-        connectOrCreate: {
-          where: { name: targetProfile.job || "Unknown" },
-          create: { name: targetProfile.job || "Unknown" },
-        },
+        connect: { id: targetProfile.job || "job_retired_teacher" },
       },
       education: {
-        connectOrCreate: {
-          where: { name: targetProfile.education || "edu_highschool" },
-          create: { name: targetProfile.education || "edu_highschool" },
-        },
+        connect: { id: targetProfile.education || "edu_highschool" },
       },
       maritalStatus: {
-        connectOrCreate: {
-          where: { name: targetProfile.maritalStatus || "ms_private" },
-          create: { name: targetProfile.maritalStatus || "ms_private" },
-        },
+        connect: { id: targetProfile.maritalStatus || "ms_private" },
       },
       intention: {
-        connectOrCreate: {
-          where: { name: targetProfile.intention || "int_friendship" },
-          create: { name: targetProfile.intention || "int_friendship" },
-        },
+        connect: { id: targetProfile.intention || "int_friendship" },
       },
       hobbies: {
-        connectOrCreate: hobbyConnect,
+        connect: hobbyConnect,
       },
       images: {
         create: imagesCreate,

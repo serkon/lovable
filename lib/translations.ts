@@ -16,6 +16,36 @@ export const translations = {
     edu_middleschool: "Ortaokul",
     edu_elementary: "İlkokul",
 
+    // Hobbies
+    hobby_nature: "Gezi, Doğa & Kamp",
+    hobby_culture: "Kültür, Sanat & Kitap",
+    hobby_cinema: "Sinema & Tiyatro",
+    hobby_music: "Müzik & Dans",
+    hobby_food: "Yemek & Gurme",
+    hobby_sport: "Spor, Yoga & Pilates",
+    hobby_psychology: "Psikoloji & Kişisel Gelişim",
+    hobby_games: "Tavla & Sosyal Oyunlar",
+    hobby_gardening: "Bahçe İşleri",
+    hobby_fishing: "Balık Tutma",
+    hobby_crafts: "El Sanatları",
+
+    // Jobs
+    job_retired_teacher: "Emekli Öğretmen",
+    job_engineer: "Mühendis",
+    job_doctor: "Doktor",
+    job_nurse: "Hemşire",
+    job_banker: "Bankacı",
+    job_accountant: "Muhasebeci",
+    job_lawyer: "Avukat",
+    job_architect: "Mimar",
+    job_retired_officer: "Emekli Subay",
+    job_writer: "Yazar",
+    job_academic: "Akademisyen",
+    job_pharmacist: "Eczacı",
+    job_tailor: "Terzi",
+    job_chef: "Aşçı",
+    job_artisan: "Esnaf",
+
     // Intentions
     int_chat: "Sohbet",
     int_friendship: "Arkadaşlık",
@@ -153,6 +183,36 @@ export const translations = {
     edu_highschool: "High School",
     edu_middleschool: "Middle School",
     edu_elementary: "Elementary School",
+
+    // Hobbies
+    hobby_nature: "Travel, Nature & Camping",
+    hobby_culture: "Culture, Art & Books",
+    hobby_cinema: "Cinema & Theater",
+    hobby_music: "Music & Dance",
+    hobby_food: "Food & Gourmet",
+    hobby_sport: "Sports, Yoga & Pilates",
+    hobby_psychology: "Psychology & Personal Development",
+    hobby_games: "Backgammon & Social Games",
+    hobby_gardening: "Gardening",
+    hobby_fishing: "Fishing",
+    hobby_crafts: "Handicrafts",
+
+    // Jobs
+    job_retired_teacher: "Retired Teacher",
+    job_engineer: "Engineer",
+    job_doctor: "Doctor",
+    job_nurse: "Nurse",
+    job_banker: "Banker",
+    job_accountant: "Accountant",
+    job_lawyer: "Lawyer",
+    job_architect: "Architect",
+    job_retired_officer: "Retired Officer",
+    job_writer: "Writer",
+    job_academic: "Academic",
+    job_pharmacist: "Pharmacist",
+    job_tailor: "Tailor",
+    job_chef: "Chef",
+    job_artisan: "Artisan",
 
     // Intentions
     int_chat: "Chat",

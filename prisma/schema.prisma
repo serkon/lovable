@@ -68,46 +68,55 @@ model Like {
 }
 
 model Hobby {
-  id    String @id @default(cuid())
-  name  String @unique
-  users User[]
+  id        String   @id
+  name      String   @unique
+  sortOrder Int      @default(0)
+  users     User[]
 }
 
 model Job {
-  id    String @id @default(cuid())
-  name  String @unique
-  users User[]
+  id        String   @id
+  name      String   @unique
+  sortOrder Int      @default(0)
+  users     User[]
 }
 
 model Gender {
-  id    String @id @default(cuid())
-  name  String @unique
-  users User[]
+  id        String   @id
+  name      String   @unique
+  sortOrder Int      @default(0)
+  users     User[]
 }
 
 model BioTemplate {
-  id      String @id @default(cuid())
-  content String @unique
+  id        String   @id
+  content   String   @unique
+  sortOrder Int      @default(0)
 }
 
 model IceBreaker {
-  id      String @id @default(cuid())
-  content String @unique
+  id        String   @id
+  content   String   @unique
+  sortOrder Int      @default(0)
 }
+
 model MaritalStatus {
-  id    String @id @default(cuid())
-  name  String @unique // ms_single, ms_divorced vb.
-  users User[]
+  id        String   @id
+  name      String   @unique // ms_single, ms_divorced vb.
+  sortOrder Int      @default(0)
+  users     User[]
 }
 
 model Education {
-  id    String @id @default(cuid())
-  name  String @unique // edu_phd, edu_masters vb.
-  users User[]
+  id        String   @id
+  name      String   @unique // edu_phd, edu_masters vb.
+  sortOrder Int      @default(0)
+  users     User[]
 }
 
 model Intention {
-  id    String @id @default(cuid())
-  name  String @unique // int_chat, int_friendship vb.
-  users User[]
+  id        String   @id
+  name      String   @unique // int_chat, int_friendship vb.
+  sortOrder Int      @default(0)
+  users     User[]
 }
