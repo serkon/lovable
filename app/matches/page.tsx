@@ -10,11 +10,13 @@ import { DateScheduler } from "@/components/video-date/DateScheduler";
 import Link from "next/link";
 import { getLabel } from "@/lib/translations";
 import Image from "next/image";
+import { cn } from "@/lib/utils";
 
 export default function MatchesPage() {
-  const { matches, language } = useAppStore(); // Get matches from context
+  const { matches, language } = useAppStore();
   const [schedulerOpen, setSchedulerOpen] = useState(false);
   const [selectedPartner, setSelectedPartner] = useState("");
+  const [loadingImages, setLoadingImages] = useState<Record<string, boolean>>({});
 
   const handleVideoClick = (name: string) => {
     setSelectedPartner(name);
@@ -52,8 +54,17 @@ export default function MatchesPage() {
                 src={profile.imageUrl}
                 alt={profile.name}
                 fill
-                className="object-cover"
+                className={cn(
+                  "object-cover transition-[opacity,filter,transform] duration-1000 ease-in-out",
+                  loadingImages[profile.id] !== false ? "blur-2xl opacity-0 scale-110" : "blur-0 opacity-100 scale-100"
+                )}
+                onLoad={() => setLoadingImages(prev => ({ ...prev, [profile.id]: false }))}
               />
+              {loadingImages[profile.id] !== false && (
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-100/30 backdrop-blur-[2px] z-10 transition-opacity duration-800 pointer-events-none">
+                  <div className="w-6 h-6 border-2 border-purple-200 border-t-purple-600 rounded-full animate-spin" />
+                </div>
+              )}
             </div>
 
             {/* Info */}
@@ -62,7 +73,7 @@ export default function MatchesPage() {
                 {profile.name}
               </Typography>
               <p className="text-sm text-gray-500 truncate">
-                {profile.job} • {profile.location.split(',')[0]}
+                {getLabel(profile.job, language)} • {profile.location.split(',')[0]}
               </p>
             </div>
 

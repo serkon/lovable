@@ -35,7 +35,6 @@ model User {
   // Many-to-Many relation
   hobbies       Hobby[]
   
-  imageUrl      String?
   images        UserImage[]
   
   createdAt     DateTime @default(now())

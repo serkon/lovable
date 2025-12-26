@@ -7,6 +7,7 @@ import { ArrowLeft, Send, Phone, Video } from "lucide-react";
 import { useAppStore } from "@/context/AppStore";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import Image from "next/image";
 
 export default function ChatPage() {
   const { id } = useParams();
@@ -56,8 +57,13 @@ export default function ChatPage() {
             </Button>
           </Link>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200">
-              <img src={profile.imageUrl} alt={profile.name} className="w-full h-full object-cover" />
+            <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-200">
+              <Image
+                src={profile.imageUrl}
+                alt={profile.name}
+                fill
+                className="object-cover"
+              />
             </div>
             <div>
               <Typography variant="h3" className="text-base text-gray-900">{profile.name}</Typography>

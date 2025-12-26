@@ -95,10 +95,8 @@ const MOCK_USERS = [
     intentionId: "int_chat",
     bio: "Kitap okumayı, doğa yürüyüşlerini ve kedileri severim. Hayatı paylaşacak samimi birini arıyorum.",
     hobbies: ["hobby_culture", "hobby_nature", "hobby_gardening"],
-    imageUrl:
-      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=800&h=1000",
     images: [
-      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=800&h=1000",
+      "https://images.unsplash.com/photo-1544005313-94ddf0286df2??auto=format&fit=crop&q=80&w=800&h=1000",
       "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=800&h=1000",
       "https://images.unsplash.com/photo-1554151228-14d9def656e4?auto=format&fit=crop&q=80&w=800&h=1000",
     ],
@@ -114,7 +112,6 @@ const MOCK_USERS = [
     intentionId: "int_fun",
     bio: "Klasik müzik dinlemeyi ve yeni yerler keşfetmeyi severim. Hayatı paylaşacak dürüst birini arıyorum.",
     hobbies: ["hobby_music", "hobby_nature", "hobby_culture"],
-    imageUrl: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=1760",
     images: [
       "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=1760",
       "https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d?q=80&w=1365",
@@ -131,8 +128,6 @@ const MOCK_USERS = [
     intentionId: "int_friendship",
     bio: "Deniz kenarında yürüyüş yapmaya bayılırım. Dürüstlük benim için en önemli şey.",
     hobbies: ["hobby_sport", "hobby_cinema", "hobby_psychology"],
-    imageUrl:
-      "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=800&h=1000",
     images: [
       "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=800&h=1000",
       "https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?auto=format&fit=crop&q=80&w=800&h=1000",
@@ -150,8 +145,10 @@ const MOCK_USERS = [
     intentionId: "int_chat",
     bio: "Bahçe işleriyle uğraşmak beni dinlendiriyor. Huzurlu bir ikinci bahar arıyorum.",
     hobbies: ["hobby_gardening", "hobby_fishing", "hobby_music"],
-    imageUrl:
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=800&h=1000",
+    images: [
+      "https://images.unsplash.com/photo-1651684215020-f7a5b6610f23?auto=format&fit=crop&q=80&w=800&h=1000",
+      "https://plus.unsplash.com/premium_photo-1758836220332-bf5872281aa2?auto=format&fit=crop&q=80&w=800&h=1000",
+    ],
     genderId: "gender_male",
   },
   {
@@ -164,8 +161,9 @@ const MOCK_USERS = [
     intentionId: "int_fun",
     bio: "Sağlıklı yaşam ve yoga ile ilgileniyorum.",
     hobbies: ["hobby_sport", "hobby_food"],
-    imageUrl:
+    images: [
       "https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&q=80&w=800&h=1000",
+    ],
     genderId: "gender_female",
   },
   {
@@ -178,8 +176,9 @@ const MOCK_USERS = [
     intentionId: "int_friendship",
     bio: "Disiplinli ama neşeli biriyim. Tarih kitapları okumayı severim.",
     hobbies: ["hobby_culture", "hobby_nature"],
-    imageUrl:
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=800&h=1000",
+    images: [
+      "https://images.unsplash.com/photo-1503249023995-51b0f3778ccf?q=80&w=1260&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    ],
     genderId: "gender_male",
   },
   {
@@ -192,8 +191,9 @@ const MOCK_USERS = [
     intentionId: "int_fun",
     bio: "Adaletli ve merhametli insanları severim. Aktif bir hayatım var.",
     hobbies: ["hobby_sport", "hobby_nature"],
-    imageUrl:
+    images: [
       "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=800&h=1000",
+    ],
     genderId: "gender_female",
   },
 ];
@@ -213,11 +213,14 @@ async function main() {
   await prisma.intention.deleteMany({});
 
   console.log("Seeding genders...");
+  const genderData: Array<{ id: string; name: string; sortOrder: number }> = [
+    { id: "gender_female", name: "Internal: Kadın", sortOrder: 10 },
+    { id: "gender_male", name: "Internal: Erkek", sortOrder: 20 },
+  ];
+
   await prisma.gender.createMany({
-    data: [
-      { id: "gender_female", name: "Internal: Kadın", sortOrder: 10 },
-      { id: "gender_male", name: "Internal: Erkek", sortOrder: 20 },
-    ],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data: genderData as any,
   });
 
   console.log("Seeding jobs...");
@@ -286,7 +289,7 @@ async function main() {
   console.log("Seeding users...");
   for (const userData of MOCK_USERS) {
     const { hobbies, images, jobId, genderId, educationId, maritalStatusId, intentionId, ...rest } =
-      userData as any;
+      userData;
     await prisma.user.create({
       data: {
         ...rest,
@@ -299,7 +302,7 @@ async function main() {
           connect: hobbies.map((id: string) => ({ id })),
         },
         images: {
-          create: images?.map((url: string, index: number) => ({ url, order: index })) || [],
+          create: images.map((url: string, index: number) => ({ url, order: index })),
         },
       },
     });

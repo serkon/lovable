@@ -8,3 +8,9 @@
 - pitfalls
 - I've begun to incorporate a sortOrder column to enable controlled data presentation. This update aims to ensure that content within static tables can be presented in a controlled manner.
 - However, I'm now exploring potential pitfalls, such as sequence gaps or collisions, and am considering alternative strategies to maintain a consistent and logical order.
+- bu yöntem (Lookup Table + SortOrder)
+- Redundancy (Gereksiz Tekrar): Aynı URL veritabanında iki farklı tabloda duruyor.
+  Data Drift (Veri Kopması): Yarın bir gün albümden bir fotoğraf silindiğinde, eğer ana tabloyu güncellemeyi unutursak sistemde hatalı/kırık linkler kalır.
+- Veritabanınız tamamen Normalizasyon (3NF) kurallarına uyar.
+- "Single Source of Truth (SSOT)" ve "Data Normalization" terimlerini de gururla ekleyebiliriz. :)
+- Bunları ESLint suppress comment'leriyle düzeltelim

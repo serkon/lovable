@@ -21,6 +21,7 @@ interface SettingsItem {
     id: string;
     label: string;
     desc?: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     icon: any;
     type: "toggle" | "link";
     value?: boolean;

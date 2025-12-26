@@ -7,10 +7,13 @@ import { ArrowLeft, Clock, MapPin, Briefcase } from "lucide-react";
 import { useAppStore } from "@/context/AppStore";
 import Link from "next/link";
 import { getLabel } from "@/lib/translations";
+import { useState } from "react";
 import Image from "next/image";
+import { cn } from "@/lib/utils";
 
 export default function SentRequestsPage() {
     const { sentRequests, cancelRequest, language } = useAppStore();
+    const [loadingImages, setLoadingImages] = useState<Record<string, boolean>>({});
 
     return (
         <div className="min-h-screen bg-slate-50 pb-20">
@@ -49,8 +52,17 @@ export default function SentRequestsPage() {
                                         src={profile.imageUrl}
                                         alt={profile.name}
                                         fill
-                                        className="object-cover opacity-90 group-hover:opacity-100 transition-opacity"
+                                        className={cn(
+                                            "object-cover transition-[opacity,filter,transform] duration-1000 ease-in-out",
+                                            loadingImages[profile.id] !== false ? "blur-2xl opacity-0 scale-110" : "blur-0 opacity-100 scale-100"
+                                        )}
+                                        onLoad={() => setLoadingImages(prev => ({ ...prev, [profile.id]: false }))}
                                     />
+                                    {loadingImages[profile.id] !== false && (
+                                        <div className="absolute inset-0 flex items-center justify-center bg-gray-100/30 backdrop-blur-[2px] z-10 transition-opacity duration-800 pointer-events-none">
+                                            <div className="w-8 h-8 border-3 border-purple-200 border-t-purple-600 rounded-full animate-spin" />
+                                        </div>
+                                    )}
                                     <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                         <span className="bg-white/90 text-purple-700 px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-2">
                                             <Clock className="w-4 h-4" />
@@ -68,8 +80,8 @@ export default function SentRequestsPage() {
                                             {profile.location.split(',')[0]}
                                         </div>
                                         <div className="text-sm text-gray-500 mt-1 flex items-center gap-1">
-                                            <Briefcase className="w-3 h-3" />
-                                            {profile.job}
+                                            <Briefcase className="w-3 h-3 text-purple-500" />
+                                            {getLabel(profile.job, language)}
                                         </div>
                                     </div>
 

@@ -156,6 +156,13 @@ export const translations = {
     waiting_reply: "Yanıt Bekleniyor",
     cancel_request: "İsteği Geri Çek",
 
+    // Likes
+    likes_title: "Sizi Beğenenler",
+    likes_subtitle: "Bu kişiler sizinle tanışmak istiyor. Onaylarsanız sohbet başlayacak.",
+    no_new_likes: "Şu an yeni beğeni yok.",
+    btn_pass: "Pas Geç",
+    btn_meet: "Tanış",
+
     // Modals
     filter: "Filtrele",
     age_range: "Yaş Aralığı",
@@ -323,6 +330,13 @@ export const translations = {
     start_exploring: "Start Exploring",
     waiting_reply: "Waiting for Reply",
     cancel_request: "Cancel Request",
+
+    // Likes
+    likes_title: "People Who Like You",
+    likes_subtitle: "These people want to meet you. If you approve, the chat will begin.",
+    no_new_likes: "No new likes at the moment.",
+    btn_pass: "Pass",
+    btn_meet: "Meet",
 
     // Modals
     filter: "Filter",

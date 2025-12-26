@@ -84,12 +84,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (user) {
         // Transform hobbies from Relation[] to string[] if needed for display helper
         if (Array.isArray(user.hobbies)) {
-          user.hobbiesArray = user.hobbies.map((h: { name: string }) => h.name);
+          user.hobbiesArray = user.hobbies.map((h: { id: string }) => h.id);
         } else {
           user.hobbiesArray = [];
         }
 
         // Transform likesSent to Profile objects for sentRequests
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const dbSentRequests = user.likesSent?.map((like: any) => {
           const target = like.receiver;
           if (!target) return null;
@@ -99,15 +100,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
             age: target.age || 0,
             location: target.city || "",
             distance: 0,
-            job: target.job?.name || target.job || "",
+            job: target.job?.id || "",
             bio: target.bio || "",
-            imageUrl: target.imageUrl || (target.images?.[0]?.url) || "",
-            images: Array.isArray(target.images) ? target.images.map((img: { url: string }) => img.url) : [target.imageUrl || ""],
-            education: target.education?.name || "edu_elementary",
-            maritalStatus: target.maritalStatus?.name || "ms_private",
-            intention: target.intention?.name || "int_chat",
-            hobbies: Array.isArray(target.hobbies) ? target.hobbies.map((h: { name: string }) => h.name) : [],
-            gender: target.gender?.name || "",
+            imageUrl: target.images?.[0]?.url || "https://via.placeholder.com/400",
+            images: Array.isArray(target.images) ? target.images.map((img: { url: string }) => img.url) : [],
+            education: target.education?.id || "edu_elementary",
+            maritalStatus: target.maritalStatus?.id || "ms_private",
+            intention: target.intention?.id || "int_chat",
+            hobbies: Array.isArray(target.hobbies) ? target.hobbies.map((h: { id: string }) => h.id) : [],
+            gender: target.gender?.id || "",
             iceBreaker: ""
           } as Profile;
         }).filter((p): p is Profile => p !== null) || [];

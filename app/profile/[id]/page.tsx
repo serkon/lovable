@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Typography } from "@/components/ui/Typography";
 import { Card } from "@/components/ui/Card";
-import { ArrowLeft, MapPin, Briefcase, GraduationCap, Heart, MessageCircle, Share2, Sparkles } from "lucide-react";
+import { ArrowLeft, MapPin, Briefcase, GraduationCap, Heart, MessageCircle, Share2 } from "lucide-react";
 import Link from "next/link";
 import { useAppStore } from "@/context/AppStore";
 import { getLabel } from "@/lib/translations";
@@ -21,14 +21,19 @@ export default function PublicProfilePage() {
     const [profile, setProfile] = useState<Profile | null>(null);
     const [loading, setLoading] = useState(true);
     const [imageIndex, setImageIndex] = useState(0);
+    const [isImageLoading, setIsImageLoading] = useState(true);
 
     useEffect(() => {
         const loadProfile = async () => {
             const id = params.id as string;
 
-            // 1. Try fetching from DB
+            // Reset image state when profile ID changes
+            setImageIndex(0);
+            setIsImageLoading(true);
+
             try {
-                const dbUser = await getUserById(id) as any; // Using any as Prisma recursive includes are hard to type manually
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const dbUser = await getUserById(id) as any;
                 if (dbUser) {
                     const mapped: Profile = {
                         id: dbUser.id,
@@ -42,7 +47,7 @@ export default function PublicProfilePage() {
                         intention: dbUser.intention?.id || "int_chat",
                         bio: dbUser.bio || "",
                         hobbies: Array.isArray(dbUser.hobbies) ? dbUser.hobbies.map((h: { id: string }) => h.id) : [],
-                        imageUrl: dbUser.imageUrl || (dbUser.images?.[0]?.url) || "",
+                        imageUrl: dbUser.images?.[0]?.url || "https://via.placeholder.com/400",
                         images: Array.isArray(dbUser.images) ? dbUser.images.map((img: { url: string }) => img.url) : [],
                         iceBreaker: ""
                     };
@@ -53,8 +58,6 @@ export default function PublicProfilePage() {
             } catch (err) {
                 console.error("DB fetch failed", err);
             }
-
-            // DB only from now on
 
             setLoading(false);
         };
@@ -149,24 +152,47 @@ export default function PublicProfilePage() {
                             <div className="absolute inset-0 z-20 flex">
                                 <div
                                     className="w-1/2 h-full cursor-pointer"
-                                    onClick={() => setImageIndex((prev) => (prev > 0 ? prev - 1 : displayImages.length - 1))}
+                                    onClick={() => setImageIndex((prev) => {
+                                        const newIdx = prev > 0 ? prev - 1 : displayImages.length - 1;
+                                        if (newIdx !== prev) setIsImageLoading(true);
+                                        return newIdx;
+                                    })}
                                 />
                                 <div
                                     className="w-1/2 h-full cursor-pointer"
-                                    onClick={() => setImageIndex((prev) => (prev < displayImages.length - 1 ? prev + 1 : 0))}
+                                    onClick={() => setImageIndex((prev) => {
+                                        const newIdx = prev < displayImages.length - 1 ? prev + 1 : 0;
+                                        if (newIdx !== prev) setIsImageLoading(true);
+                                        return newIdx;
+                                    })}
                                 />
                             </div>
                         </>
                     )}
 
-                    <div className="relative w-full h-full">
+                    <div className="relative w-full h-full bg-gray-100">
                         <Image
-                            src={displayImages[imageIndex] || "/placeholder-user.jpg"}
+                            key={`${profile.id}-${imageIndex}`}
+                            src={displayImages[imageIndex]}
                             alt={profile.name}
                             fill
-                            className="object-cover"
+                            className={cn(
+                                "object-cover transition-[opacity,filter,transform] duration-1000 ease-in-out",
+                                isImageLoading ? "blur-2xl opacity-0 scale-110" : "blur-0 opacity-100 scale-100"
+                            )}
+                            data-testid="profile-image"
+                            sizes="(max-width: 768px) 100vw, 672px"
                             priority
+                            onLoad={() => setIsImageLoading(false)}
                         />
+                        <div
+                            className={cn(
+                                "absolute inset-0 flex items-center justify-center bg-gray-100/30 backdrop-blur-[2px] z-10 transition-opacity duration-800 pointer-events-none",
+                                isImageLoading ? "opacity-100" : "opacity-0"
+                            )}
+                        >
+                            <div className="w-10 h-10 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin shadow-lg" />
+                        </div>
                     </div>
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none z-10" />
 
@@ -204,46 +230,33 @@ export default function PublicProfilePage() {
                 </div>
 
                 {/* Bio Section */}
-                <div className="bg-white p-6 rounded-[32px] border border-purple-50 shadow-sm space-y-3">
-                    <div className="flex items-center gap-2">
-                        <Sparkles className="w-5 h-5 text-purple-500" />
-                        <Typography variant="h3" className="text-lg font-bold text-gray-800">{getLabel('bio', language)}</Typography>
-                    </div>
-                    <p className="text-gray-600 leading-relaxed text-sm">
-                        {profile.bio}
-                    </p>
-                </div>
+                <section className="bg-white p-6 rounded-[32px] border border-purple-50 space-y-3">
+                    <Typography variant="h3" className="text-xs font-bold text-gray-400 uppercase tracking-widest">{getLabel('bio', language)}</Typography>
+                    <Typography variant="body" className="text-gray-600 leading-relaxed italic">
+                        &quot;{profile.bio}&quot;
+                    </Typography>
+                </section>
 
                 {/* Hobbies Section */}
-                <div className="bg-white p-6 rounded-[32px] border border-purple-50 shadow-sm space-y-4">
-                    <Typography variant="h3" className="text-lg font-bold text-gray-800">{getLabel('hobbies', language)}</Typography>
+                <section className="bg-white p-6 rounded-[32px] border border-purple-50 space-y-4">
+                    <Typography variant="h3" className="text-xs font-bold text-gray-400 uppercase tracking-widest">{getLabel('hobbies', language)}</Typography>
                     <div className="flex flex-wrap gap-2">
-                        {profile.hobbies.map((hobby) => (
-                            <span
-                                key={hobby}
-                                className="px-4 py-2 bg-purple-50 text-purple-700 text-xs font-semibold rounded-full border border-purple-100"
-                            >
+                        {profile.hobbies.map(hobby => (
+                            <span key={hobby} className="px-4 py-2 bg-purple-50 text-purple-700 rounded-2xl text-xs font-bold border border-purple-100">
                                 {getLabel(hobby, language)}
                             </span>
                         ))}
                     </div>
-                </div>
+                </section>
 
-                {/* Floating Actions */}
-                <div className="fixed bottom-6 left-0 right-0 px-6 flex justify-center gap-4 z-50">
-                    <Button
-                        onClick={handleLike}
-                        className="h-16 w-full max-w-[200px] rounded-full bg-purple-600 hover:bg-purple-700 text-white shadow-xl shadow-purple-200 flex items-center justify-center gap-2 transform active:scale-95 transition-all text-lg font-bold"
-                    >
+                {/* Action Buttons */}
+                <div className="flex gap-4 pt-4">
+                    <Button onClick={handleLike} className="flex-1 h-16 rounded-3xl bg-purple-600 hover:bg-purple-700 shadow-xl shadow-purple-100 text-lg font-bold gap-2">
                         <Heart className="w-6 h-6 fill-white" />
-                        {getLabel('like', language)}
+                        Beğen
                     </Button>
-
-                    <Button
-                        variant="outline"
-                        className="h-16 w-16 rounded-full border-purple-100 bg-white text-purple-600 shadow-xl shadow-purple-50 hover:bg-purple-50 transition-all"
-                    >
-                        <MessageCircle className="w-7 h-7" />
+                    <Button variant="outline" className="h-16 w-16 rounded-3xl border-2 border-purple-200 text-purple-600">
+                        <MessageCircle className="w-6 h-6" />
                     </Button>
                 </div>
             </main>

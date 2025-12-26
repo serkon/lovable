@@ -2,7 +2,6 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { Prisma } from "@prisma/client";
 
 const USER_INCLUDE = {
   job: true,
@@ -33,6 +32,7 @@ export async function getCurrentUser() {
           },
         },
       },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any,
   });
 
@@ -43,47 +43,52 @@ export async function getCurrentUser() {
         age: 48,
         city: "İstanbul, Kadıköy",
         bio: "Huzurlu bir hayat süren, doğa aşığı ve kitap kurdu biriyim. Yeni yerler keşfetmeyi severim.",
-        imageUrl:
-          "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=256&h=256&auto=format&fit=crop",
-
         job: {
           connectOrCreate: {
             where: { id: "job_retired_teacher" },
-            create: { id: "job_retired_teacher", name: "Emekli Öğretmen", sortOrder: 1 },
+            create: { id: "job_retired_teacher", name: "Internal: Emekli Öğretmen", sortOrder: 10 },
           },
         },
         gender: {
           connectOrCreate: {
             where: { id: "gender_female" },
-            create: { id: "gender_female", name: "Kadın", sortOrder: 1 },
+            create: { id: "gender_female", name: "Internal: Kadın", sortOrder: 10 },
           },
         },
         hobbies: {
           connectOrCreate: [
-            { id: "hobby_nature", name: "Gezi, Doğa & Kamp" },
-            { id: "hobby_culture", name: "Kültür, Sanat & Kitap" },
+            { id: "hobby_nature", name: "Internal: Gezi, Doğa & Kamp" },
+            { id: "hobby_culture", name: "Internal: Kültür, Sanat & Kitap" },
           ].map((h) => ({
             where: { id: h.id },
-            create: { id: h.id, name: h.name, sortOrder: 1 },
+            create: { id: h.id, name: h.name, sortOrder: 10 },
           })),
         },
         education: {
           connectOrCreate: {
             where: { id: "edu_bachelors" },
-            create: { id: "edu_bachelors", name: "edu_bachelors", sortOrder: 3 },
+            create: { id: "edu_bachelors", name: "Internal: Lisans", sortOrder: 30 },
           },
         },
         maritalStatus: {
           connectOrCreate: {
             where: { id: "ms_divorced" },
-            create: { id: "ms_divorced", name: "ms_divorced", sortOrder: 2 },
+            create: { id: "ms_divorced", name: "Internal: Boşanmış", sortOrder: 20 },
           },
         },
         intention: {
           connectOrCreate: {
             where: { id: "int_chat" },
-            create: { id: "int_chat", name: "int_chat", sortOrder: 1 },
+            create: { id: "int_chat", name: "Internal: Sohbet", sortOrder: 10 },
           },
+        },
+        images: {
+          create: [
+            {
+              url: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=256&h=256&auto=format&fit=crop",
+              order: 0,
+            },
+          ],
         },
       },
       include: {
@@ -102,6 +107,7 @@ export async function getCurrentUser() {
             },
           },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any,
     });
   }
@@ -128,6 +134,7 @@ export async function updateUserProfile(data: {
   const { job, gender, hobbies, images, education, maritalStatus, intention, ...rest } = data;
 
   const updated = await prisma.user.update({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     where: { id: (currentUser as any).id },
     data: {
       ...rest,
@@ -178,7 +185,9 @@ export async function updateUserProfile(data: {
           connect: { id: intention },
         },
       }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     include: USER_INCLUDE as any,
   });
 
@@ -191,8 +200,7 @@ export async function sendLike(targetProfile: {
   id: string | number;
   name: string;
   age: number;
-  location: string;
-  imageUrl: string;
+  city: string;
   bio: string;
   intention: string;
   education?: string;
@@ -208,13 +216,12 @@ export async function sendLike(targetProfile: {
     ? targetProfile.hobbies.map((id: string) => ({ id }))
     : [];
 
-  const imagesCreate = Array.isArray(targetProfile.images)
-    ? targetProfile.images.map((url: string, index: number) => ({
-        url,
-        order: index,
-      }))
-    : targetProfile.imageUrl
-      ? [{ url: targetProfile.imageUrl, order: 0 }]
+  const imagesCreate =
+    Array.isArray(targetProfile.images) && targetProfile.images.length > 0
+      ? targetProfile.images.map((url: string, index: number) => ({
+          url,
+          order: index,
+        }))
       : [];
 
   await prisma.user.upsert({
@@ -224,8 +231,7 @@ export async function sendLike(targetProfile: {
       id: targetProfile.id.toString(),
       name: targetProfile.name,
       age: targetProfile.age,
-      city: targetProfile.location,
-      imageUrl: targetProfile.imageUrl,
+      city: targetProfile.city,
       bio: targetProfile.bio,
       job: {
         connect: { id: targetProfile.job || "job_retired_teacher" },
@@ -245,23 +251,28 @@ export async function sendLike(targetProfile: {
       images: {
         create: imagesCreate,
       },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any,
   });
 
   const like = await prisma.like.upsert({
     where: {
       senderId_receiverId: {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         senderId: (currentUser as any).id,
         receiverId: targetProfile.id.toString(),
       },
     },
-    update: { status: "PENDING" },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    update: { status: "approved" } as any,
     create: {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       senderId: (currentUser as any).id,
       receiverId: targetProfile.id.toString(),
       status: "PENDING",
     },
-  });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } as any);
 
   revalidatePath("/dashboard");
   revalidatePath("/sent-requests");
@@ -271,6 +282,7 @@ export async function sendLike(targetProfile: {
 export async function getUserById(id: string) {
   return await prisma.user.findUnique({
     where: { id },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     include: USER_INCLUDE as any,
   });
 }

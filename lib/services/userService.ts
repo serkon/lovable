@@ -25,9 +25,11 @@ export const fetchProfilesFromAPI = async (count: number = 20): Promise<Profile[
         education: true,
         maritalStatus: true,
         intention: true,
-      } as any,
-    });
+      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return users.map((user: any) => {
       // Map DB User to Frontend Profile using slugs (IDs) for i18n
       return {
@@ -43,16 +45,13 @@ export const fetchProfilesFromAPI = async (count: number = 20): Promise<Profile[
         bio: user.bio || "",
         hobbies: user.hobbies.map((h: { id: string }) => h.id),
         imageUrl:
-          user.imageUrl ||
-          (user.images && user.images.length > 0
+          user.images && user.images.length > 0
             ? user.images[0].url
-            : "https://via.placeholder.com/400"),
+            : "https://via.placeholder.com/400",
         images:
           user.images && user.images.length > 0
             ? user.images.map((img: { url: string }) => img.url)
-            : user.imageUrl
-              ? [user.imageUrl]
-              : [],
+            : [],
         iceBreaker: "Merhaba, nasılsın?",
         gender: user.gender?.id,
       } as Profile;

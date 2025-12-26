@@ -23,6 +23,7 @@ export default function DashboardPage() {
   const [isIceBreakerOpen, setIsIceBreakerOpen] = useState(false);
   const [lastLikedName, setLastLikedName] = useState("");
   const [isGhostMode, setIsGhostMode] = useState(false);
+  const [isImageLoading, setIsImageLoading] = useState(true);
   const [filters, setFilters] = useState<FilterState>({
     ageRange: [40, 80],
     maxDistance: 100,
@@ -42,11 +43,12 @@ export default function DashboardPage() {
   const currentProfile = filteredProfiles[currentIndex] as Profile | undefined;
   const isFinished = !currentProfile;
   const [imageIndex, setImageIndex] = useState(0);
-  const [prevProfileId, setPrevProfileId] = useState<string | number | undefined>(currentProfile?.id);
+  const [prevId, setPrevId] = useState(currentProfile?.id);
 
-  if (currentProfile?.id !== prevProfileId) {
+  if (currentProfile?.id !== prevId) {
+    setPrevId(currentProfile?.id);
     setImageIndex(0);
-    setPrevProfileId(currentProfile?.id);
+    setIsImageLoading(true);
   }
 
   const displayImages = useMemo(() => {
@@ -56,15 +58,11 @@ export default function DashboardPage() {
       : [currentProfile.imageUrl];
   }, [currentProfile]);
 
-  const handlePass = () => {
-    // If we're passing (X button), remove from store
+  const handlePass = useCallback(() => {
     if (currentProfile) {
       passProfile(currentProfile.id);
-      // Since the current one is removed, the next one slides into currentIndex. 
-      // We might want to ensure currentIndex is still valid, but React re-render will handle bounds check via isFinished check implicitly if list empties.
-      // However, if we are at the end of list and remove one, logic might need check. But typically filteredProfiles changes.
     }
-  };
+  }, [currentProfile, passProfile]);
 
   const handlePrevious = useCallback(() => {
     setCurrentIndex((prev) => Math.max(0, prev - 1));
@@ -100,21 +98,19 @@ export default function DashboardPage() {
       setLastLikedName(currentProfile.name);
       setLastQuestion(question);
       sendLike(currentProfile);
-      setIsIceBreakerOpen(false);
       setIsMatched(true);
       setTimeout(() => {
         setIsMatched(false);
-      }, 2000);
+        handleNext();
+      }, 3000);
     }
   };
-
-  const toggleGhostMode = () => setIsGhostMode(!isGhostMode);
 
   const handleShare = async () => {
     if (!currentProfile) return;
     const shareData = {
       title: `${currentProfile.name} - ${getLabel('app_name', language)}`,
-      text: `${currentProfile.name} (${currentProfile.age}) seni bekliyor!`,
+      text: `${currentProfile.name} (${currentProfile.age}) profilini gör!`,
       url: `${window.location.origin}/profile/${currentProfile.id}`,
     };
 
@@ -122,7 +118,6 @@ export default function DashboardPage() {
       if (navigator.share) {
         await navigator.share(shareData);
       } else {
-        // Fallback
         await navigator.clipboard.writeText(`${shareData.title}\n${shareData.text}\n${shareData.url}`);
         alert(getLabel('share_success', language));
       }
@@ -131,22 +126,22 @@ export default function DashboardPage() {
     }
   };
 
+  const toggleGhostMode = () => {
+    setIsGhostMode(prev => !prev);
+  };
+
   if (isFinished) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col transition-colors duration-500">
-
-        {/* Header - Reused for consistency */}
-        <header className={cn("h-20 px-4 shadow-sm flex justify-between items-center sticky top-0 z-30 transition-colors bg-white")}>
-          <Link href="/" className="flex items-center gap-2">
-            <Logo size={40} />
-            <Typography variant="h3" className="transition-colors text-base font-bold text-purple-700">
-              {getLabel('app_name', language)}
-            </Typography>
-          </Link>
-
+      <div className="min-h-screen bg-white flex flex-col">
+        {/* Header - Compact for empty state */}
+        <header className="h-16 px-4 border-b flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <Logo size={32} />
+            <Typography variant="h3" className="text-purple-700 text-sm font-bold">{getLabel('app_name', language)}</Typography>
+          </div>
           <div className="flex items-center gap-1">
             <Link href="/sent-requests">
-              <Button size="icon" variant="ghost" className="rounded-full w-8 h-8" title={getLabel('tooltip_sent_requests', language)} data-testid="sent-requests-link">
+              <Button size="icon" variant="ghost" className="rounded-full w-8 h-8" title={getLabel('tooltip_sent_requests', language)}>
                 <Clock className="w-4 h-4 text-gray-600" />
               </Button>
             </Link>
@@ -218,7 +213,6 @@ export default function DashboardPage() {
     <div className={cn("min-h-screen bg-slate-50 flex flex-col md:pb-0 transition-colors duration-500", isGhostMode && "bg-gray-900")}>
 
       {/* Header - Refined & Compact */}
-      {/* Main Header Container: Contains logo, navigation icons, and language toggle */}
       <header data-testid="dashboard-header" className={cn("h-20 px-4 shadow-sm flex justify-between items-center sticky top-0 z-30 transition-colors", isGhostMode ? "bg-gray-800 border-gray-700" : "bg-white")}>
         <Link href="/" className="flex items-center gap-2">
           <Logo size={40} className={isGhostMode ? "brightness-90 invert-[.15]" : ""} />
@@ -262,7 +256,6 @@ export default function DashboardPage() {
               <div className="bg-purple-100 p-1.5 rounded-full hover:bg-purple-200 transition-colors">
                 <Heart className="text-purple-600 w-4 h-4 fill-purple-600" />
               </div>
-              {/* Notification dot */}
               <div className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-white"></div>
             </div>
           </Link>
@@ -288,7 +281,6 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      {/* Filter Modal */}
       <FilterModal isOpen={isFilterOpen} onClose={() => setIsFilterOpen(false)} onApply={(newFilters) => {
         setFilters(newFilters);
         setCurrentIndex(0); // Reset list on filter change
@@ -301,43 +293,35 @@ export default function DashboardPage() {
         targetName={currentProfile?.name}
       />
 
-      {/* Main Content */}
-      {/* Main Content Area: Centered container for the profile card and desktop navigation */}
       <main data-testid="dashboard-main-content" className="flex-1 max-w-2xl mx-auto w-full flex flex-col items-center px-4 md:px-0 relative">
 
         {/* Navigation - Left */}
-        {
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handlePrevious}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-full md:-translate-x-12 z-20 hidden md:flex rounded-full bg-white/80 hover:bg-white shadow-sm left-6 cursor-pointer"
-            data-testid="desktop-prev-button"
-            disabled={currentIndex === 0}
-          >
-            <ChevronLeft className="w-6 h-6 text-gray-600" />
-          </Button>
-        }
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handlePrevious}
+          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-full md:-translate-x-12 z-20 hidden md:flex rounded-full bg-white/80 hover:bg-white shadow-sm left-6 cursor-pointer"
+          data-testid="desktop-prev-button"
+          disabled={currentIndex === 0}
+        >
+          <ChevronLeft className="w-6 h-6 text-gray-600" />
+        </Button>
 
         <Card data-testid="active-profile-card" className="border-0 flex flex-col w-full h-auto animate-in slide-in-from-right duration-300 relative rounded-[16px] my-6" key={currentProfile.id}>
-          {/* Photo Area - Sticky Background */}
           <div className="sticky top-12 h-[60vh] w-full bg-gray-200 z-0 rounded-t-[16px] overflow-hidden shadow-2xl " data-testid="profile-photo-area">
 
-            {/* Badge: Intention - Sticky relative to card */}
             <div className="z-20 bg-white/90 backdrop-blur px-2 py-0.5 rounded-full text-xs font-semibold text-purple-700 shadow-sm flex items-center gap-1 absolute top-4 left-4" data-testid="badge-intention">
               <Heart className="w-3 h-3 fill-purple-700" />
               {getLabel(currentProfile.intention, language)}
             </div>
 
-            {/* Badge: Distance - Sticky relative to card */}
             <div className="z-20 bg-black/60 backdrop-blur px-2 py-0.5 rounded-full text-xs font-medium text-white shadow-sm flex items-center gap-1 absolute top-12 left-4" data-testid="badge-distance">
               <MapPin className="w-3 h-3 text-white" />
               {currentProfile.distance} km
             </div>
-            {/* Image Carousel Controls */}
+
             {displayImages.length > 1 && (
               <>
-                {/* Navigation Dots */}
                 <div className="absolute top-4 left-0 right-0 z-4 flex justify-center gap-1 px-4">
                   {displayImages.map((_, idx) => (
                     <div
@@ -350,40 +334,60 @@ export default function DashboardPage() {
                   ))}
                 </div>
 
-                {/* Tap Targets */}
                 <div className="absolute inset-0 z-1 flex">
                   <div
                     className="w-1/2 h-full cursor-pointer"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setImageIndex((prev) => (prev > 0 ? prev - 1 : displayImages.length - 1));
+                      setImageIndex((prev) => {
+                        const newIdx = prev > 0 ? prev - 1 : displayImages.length - 1;
+                        if (newIdx !== prev) setIsImageLoading(true);
+                        return newIdx;
+                      });
                     }}
                   />
                   <div
                     className="w-1/2 h-full cursor-pointer"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setImageIndex((prev) => (prev < displayImages.length - 1 ? prev + 1 : 0));
+                      setImageIndex((prev) => {
+                        const newIdx = prev < displayImages.length - 1 ? prev + 1 : 0;
+                        if (newIdx !== prev) setIsImageLoading(true);
+                        return newIdx;
+                      });
                     }}
                   />
                 </div>
               </>
             )}
 
-            {/* Image Container: Wraps the actual profile photo */}
             <div data-testid="profile-image-container" className="relative w-full h-full">
               <Image
+                key={`${currentProfile.id}-${imageIndex}`}
                 src={displayImages[imageIndex]}
                 alt={currentProfile.name}
                 fill
-                className="object-cover"
+                className={cn(
+                  "object-cover transition-[opacity,filter,transform] duration-1000 ease-in-out",
+                  isImageLoading ? "blur-2xl opacity-0 scale-110" : "blur-0 opacity-100 scale-100"
+                )}
                 data-testid="profile-image"
                 sizes="(max-width: 768px) 100vw, 672px"
                 priority
+                onLoad={() => setIsImageLoading(false)}
               />
+              <div
+                className={cn(
+                  "absolute inset-0 flex items-center justify-center bg-gray-100/30 backdrop-blur-[2px] z-10 transition-opacity duration-800 pointer-events-none",
+                  isImageLoading ? "opacity-100" : "opacity-0"
+                )}
+              >
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-10 h-10 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin shadow-lg" />
+                </div>
+              </div>
             </div>
 
-            {/* Action Buttons Overlay - Instagram Style */}
             <div className="absolute bottom-48 right-4 flex flex-col gap-3 z-2" data-testid="action-buttons">
               <Button
                 onClick={handleLike}
@@ -413,8 +417,6 @@ export default function DashboardPage() {
               </Button>
             </div>
 
-            {/* Profile Info Overlay */}
-            {/* Profile Info Overlay: Contains Name, Age and Location with a dark gradient background for readability */}
             <div data-testid="profile-info-overlay" className="bg-gradient-to-t from-black/90 via-black/50 to-transparent p-6 pt-24 z-1 mt-[-194px]">
               <Typography variant="h1" className="text-white drop-shadow-lg text-4xl font-extrabold tracking-tight" data-testid="profile-name-age">
                 {currentProfile.name}, {currentProfile.age}
@@ -426,13 +428,9 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Details Area - Scrolls OVER the image */}
-          {/* Details Area: Scrolls OVER the image and contains stats, hobbies and bio */}
           <div data-testid="profile-details-container" className="relative z-10 bg-white rounded-t-[16px] rounded-b-[16px] -mt-4 p-5 space-y-5 min-h-0 shadow-[0_-5px_20px_rgba(0,0,0,0.1)]">
-            {/* Tiny drag handle indicator for aesthetics */}
             <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-1 opacity-50" />
 
-            {/* Quick Stats Grid */}
             <div className="grid grid-cols-2 gap-3 text-gray-700 text-sm" data-testid="profile-stats-grid">
               <div className="flex items-center gap-2 bg-gray-50 p-2.5 rounded-lg" data-testid="profile-stat-job">
                 <Briefcase className="w-4 h-4 text-purple-500" />
@@ -448,71 +446,38 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Hobbies Tags */}
-            <div className="flex flex-wrap gap-1.5" data-testid="profile-hobbies-list">
-              {currentProfile.hobbies.map((hobby: string) => (
-                <span key={hobby} className="px-2.5 py-1 bg-gray-100 text-gray-600 rounded-md text-xs font-medium" data-testid="profile-hobby-tag">
-                  {getLabel(hobby, language)}
-                </span>
-              ))}
+            <div className="space-y-3" data-testid="profile-hobbies-section">
+              <Typography variant="h3" className="text-xs font-bold text-gray-400 uppercase tracking-widest">{getLabel('hobbies', language)}</Typography>
+              <div className="flex flex-wrap gap-2">
+                {currentProfile.hobbies.map(hobby => (
+                  <span key={hobby} className="px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-xs font-semibold border border-purple-100" data-testid={`profile-hobby-${hobby}`}>
+                    {getLabel(hobby, language)}
+                  </span>
+                ))}
+              </div>
             </div>
 
-            <div className="space-y-1" data-testid="profile-bio-section">
-              <Typography variant="h3" className="text-base text-black">{getLabel('bio', language)}</Typography>
-              <p className="text-lg text-gray-600 leading-relaxed font-serif" data-testid="profile-bio-text">
-                {currentProfile.bio}
-              </p>
+            <div className="space-y-2" data-testid="profile-bio-section">
+              <Typography variant="h3" className="text-xs font-bold text-gray-400 uppercase tracking-widest">{getLabel('bio', language)}</Typography>
+              <Typography variant="body" className="text-gray-600 leading-relaxed italic">
+                &quot;{currentProfile.bio}&quot;
+              </Typography>
             </div>
           </div>
-
         </Card>
 
-        {/* Navigation - Right (Desktop) */}
-        {currentIndex < filteredProfiles.length - 1 && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleNext}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-full md:translate-x-12 z-20 hidden md:flex rounded-full bg-white/80 hover:bg-white shadow-sm right-6 cursor-pointer"
-            data-testid="desktop-next-button"
-          >
-            <ChevronRight className="w-6 h-6 text-gray-600" />
-          </Button>
-        )}
-
-        {/* Mobile Navigation Controls - Inline with card or below? Let's put them above FABs or integration */}
-        {/* Disabled */}
-        {/*
-        <div className="flex md:hidden w-full justify-between px-4 absolute top-1/2 -translate-y-1/2 pointer-events-none">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handlePrevious}
-            disabled={currentIndex === 0}
-            className={cn("pointer-events-auto rounded-full bg-white/50 backdrop-blur-sm p-2 h-10 w-10 shadow-sm", currentIndex === 0 && "opacity-0")}
-            data-testid="mobile-prev-button"
-          >
-            <ChevronLeft className="w-6 h-6 text-gray-800" />
-          </Button>
-
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleNext}
-            disabled={currentIndex >= filteredProfiles.length - 1}
-            className={cn("pointer-events-auto rounded-full bg-white/50 backdrop-blur-sm p-2 h-10 w-10 shadow-sm", currentIndex >= filteredProfiles.length - 1 && "opacity-0")}
-            data-testid="mobile-next-button"
-          >
-            <ChevronRight className="w-6 h-6 text-gray-800" />
-          </Button>
-        </div>
-        */}
-
+        {/* Navigation - Right */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleNext}
+          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-full md:translate-x-12 z-20 hidden md:flex rounded-full bg-white/80 hover:bg-white shadow-sm right-6 cursor-pointer"
+          data-testid="desktop-next-button"
+          disabled={currentIndex === filteredProfiles.length - 1}
+        >
+          <ChevronRight className="w-6 h-6 text-gray-600" />
+        </Button>
       </main>
-
-      {/* Sticky Action Buttons - Compact */}
-      {/* Floating Action Buttons (FAB) - Centered & Equal */}
-      {/* Sticky Action Buttons Removed - Now integrated into photo area */}
-    </div >
+    </div>
   );
 }
