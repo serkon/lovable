@@ -11,7 +11,7 @@ import { useAppStore } from "@/context/AppStore";
 import { getLabel } from "@/lib/translations";
 import { APP_CONFIG } from "@/lib/config";
 import { updateUserProfile } from "@/lib/actions/userActions";
-import { getHobbies, getBioTemplates, getMaritalStatuses, getEducations, getIntentions } from "@/lib/actions/contentActions";
+import { getHobbies, getBioTemplates, getMaritalStatuses, getEducations, getIntentions, getJobs } from "@/lib/actions/contentActions";
 
 import Image from "next/image";
 
@@ -37,22 +37,25 @@ export default function ProfilePage() {
     const [maritalStatusesList, setMaritalStatusesList] = useState<string[]>([]);
     const [educationsList, setEducationsList] = useState<string[]>([]);
     const [intentionsList, setIntentionsList] = useState<string[]>([]);
+    const [jobsList, setJobsList] = useState<string[]>([]);
 
     // Fetch dynamic content on mount
     useEffect(() => {
         const loadContent = async () => {
-            const [dbHobbies, dbTemplates, dbMarital, dbEdu, dbIntention] = await Promise.all([
+            const [dbHobbies, dbTemplates, dbMarital, dbEdu, dbIntention, dbJobs] = await Promise.all([
                 getHobbies(),
                 getBioTemplates(),
                 getMaritalStatuses(),
                 getEducations(),
-                getIntentions()
+                getIntentions(),
+                getJobs()
             ]);
             setHobbiesList(dbHobbies);
             setBioTemplates(dbTemplates);
             setMaritalStatusesList(dbMarital);
             setEducationsList(dbEdu);
             setIntentionsList(dbIntention);
+            setJobsList(dbJobs);
         };
         loadContent();
     }, []);
@@ -63,11 +66,11 @@ export default function ProfilePage() {
             setName(currentUser.name || "");
             setAge(currentUser.age?.toString() || "");
             setCity(currentUser.city || "");
-            setJob(currentUser.job?.name || "");
+            setJob(currentUser.job?.id || "");
             setBio(currentUser.bio || "");
-            setMaritalStatus(currentUser.maritalStatus?.name || (currentUser.maritalStatus as unknown as string) || "ms_private");
-            setEducation(currentUser.education?.name || (currentUser.education as unknown as string) || "edu_elementary");
-            setIntention(currentUser.intention?.name || (currentUser.intention as unknown as string) || "int_chat");
+            setMaritalStatus(currentUser.maritalStatus?.id || (currentUser.maritalStatus as unknown as string) || "ms_private");
+            setEducation(currentUser.education?.id || (currentUser.education as unknown as string) || "edu_elementary");
+            setIntention(currentUser.intention?.id || (currentUser.intention as unknown as string) || "int_chat");
 
             if (currentUser.images && currentUser.images.length > 0) {
                 setUserImages(currentUser.images.map(img => img.url));
@@ -76,7 +79,7 @@ export default function ProfilePage() {
             }
 
             if (currentUser.hobbies) {
-                setSelectedHobbies(currentUser.hobbies.map(h => h.name));
+                setSelectedHobbies(currentUser.hobbies.map(h => h.id));
             } else if (currentUser.hobbiesArray) {
                 setSelectedHobbies(currentUser.hobbiesArray);
             }
@@ -218,13 +221,15 @@ export default function ProfilePage() {
                         </div>
                         <div className="space-y-1.5">
                             <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">{getLabel('label_job', language)}</label>
-                            <input
-                                type="text"
+                            <select
                                 value={job}
                                 onChange={(e) => setJob(e.target.value)}
                                 className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none text-gray-700 bg-slate-50/50"
                                 data-testid="profile-edit-job"
-                            />
+                            >
+                                <option value="">{getLabel('select_default', language)}</option>
+                                {jobsList.map(j => <option key={j} value={j}>{getLabel(j, language)}</option>)}
+                            </select>
                         </div>
                     </div>
                 </section>
@@ -324,7 +329,7 @@ export default function ProfilePage() {
                                 )}
                                 data-testid={`profile-edit-hobby-${hobby}`}
                             >
-                                {hobby}
+                                {getLabel(hobby, language)}
                             </button>
                         ))}
                     </div>

@@ -436,7 +436,7 @@ export default function DashboardPage() {
             <div className="grid grid-cols-2 gap-3 text-gray-700 text-sm" data-testid="profile-stats-grid">
               <div className="flex items-center gap-2 bg-gray-50 p-2.5 rounded-lg" data-testid="profile-stat-job">
                 <Briefcase className="w-4 h-4 text-purple-500" />
-                <span className="font-medium">{currentProfile.job}</span>
+                <span className="font-medium">{getLabel(currentProfile.job, language)}</span>
               </div>
               <div className="flex items-center gap-2 bg-gray-50 p-2.5 rounded-lg" data-testid="profile-stat-education">
                 <BookOpen className="w-4 h-4 text-purple-500" />
@@ -452,7 +452,7 @@ export default function DashboardPage() {
             <div className="flex flex-wrap gap-1.5" data-testid="profile-hobbies-list">
               {currentProfile.hobbies.map((hobby: string) => (
                 <span key={hobby} className="px-2.5 py-1 bg-gray-100 text-gray-600 rounded-md text-xs font-medium" data-testid="profile-hobby-tag">
-                  {hobby}
+                  {getLabel(hobby, language)}
                 </span>
               ))}
             </div>

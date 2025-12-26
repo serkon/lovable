@@ -36,12 +36,12 @@ export default function PublicProfilePage() {
                         age: dbUser.age || 0,
                         location: dbUser.city || "",
                         distance: 0,
-                        job: dbUser.job?.name || "",
-                        education: dbUser.education?.name || "edu_elementary",
-                        maritalStatus: dbUser.maritalStatus?.name || "ms_private",
-                        intention: dbUser.intention?.name || "int_chat",
+                        job: dbUser.job?.id || "",
+                        education: dbUser.education?.id || "edu_elementary",
+                        maritalStatus: dbUser.maritalStatus?.id || "ms_private",
+                        intention: dbUser.intention?.id || "int_chat",
                         bio: dbUser.bio || "",
-                        hobbies: Array.isArray(dbUser.hobbies) ? dbUser.hobbies.map((h: { name: string }) => h.name) : [],
+                        hobbies: Array.isArray(dbUser.hobbies) ? dbUser.hobbies.map((h: { id: string }) => h.id) : [],
                         imageUrl: dbUser.imageUrl || (dbUser.images?.[0]?.url) || "",
                         images: Array.isArray(dbUser.images) ? dbUser.images.map((img: { url: string }) => img.url) : [],
                         iceBreaker: ""
@@ -189,7 +189,7 @@ export default function PublicProfilePage() {
                         </div>
                         <div className="min-w-0">
                             <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{getLabel('job', language)}</p>
-                            <p className="text-sm font-semibold truncate">{profile.job}</p>
+                            <p className="text-sm font-semibold truncate">{getLabel(profile.job, language)}</p>
                         </div>
                     </div>
                     <div className="bg-white p-4 rounded-3xl border border-purple-50 flex items-center gap-3">
@@ -223,7 +223,7 @@ export default function PublicProfilePage() {
                                 key={hobby}
                                 className="px-4 py-2 bg-purple-50 text-purple-700 text-xs font-semibold rounded-full border border-purple-100"
                             >
-                                {hobby}
+                                {getLabel(hobby, language)}
                             </span>
                         ))}
                     </div>

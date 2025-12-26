@@ -22,7 +22,7 @@ import { useAppStore } from "@/context/AppStore";
 import { getLabel } from "@/lib/translations";
 import { APP_CONFIG } from "@/lib/config";
 import { updateUserProfile } from "@/lib/actions/userActions";
-import { getBioTemplates, getHobbies, getMaritalStatuses, getEducations, getIntentions } from "@/lib/actions/contentActions";
+import { getBioTemplates, getHobbies, getMaritalStatuses, getEducations, getIntentions, getJobs } from "@/lib/actions/contentActions";
 
 type OnboardingData = {
   name: string;
@@ -53,6 +53,7 @@ export default function OnboardingPage() {
     maritalStatus: "",
     hobbies: [],
   });
+  const [jobsList, setJobsList] = useState<string[]>([]);
 
   const [bioTemplates, setBioTemplates] = useState<string[]>([]);
   const [hobbiesList, setHobbiesList] = useState<string[]>([]);
@@ -62,18 +63,20 @@ export default function OnboardingPage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const [dbBioTemplates, dbHobbies, dbMarital, dbEdu, dbIntention] = await Promise.all([
+      const [dbBioTemplates, dbHobbies, dbMarital, dbEdu, dbIntention, dbJobs] = await Promise.all([
         getBioTemplates(),
         getHobbies(),
         getMaritalStatuses(),
         getEducations(),
-        getIntentions()
+        getIntentions(),
+        getJobs()
       ]);
       setBioTemplates(dbBioTemplates);
       setHobbiesList(dbHobbies);
       setMaritalStatusesList(dbMarital);
       setEducationsList(dbEdu);
       setIntentionsList(dbIntention);
+      setJobsList(dbJobs);
     };
     fetchData();
   }, []);
@@ -173,20 +176,20 @@ export default function OnboardingPage() {
               <Typography variant="body-large" className="text-gray-600">{getLabel('start_with_gender', language)}</Typography>
             </div>
             <div className="grid gap-4">
-              {[getLabel('gender_female', language), getLabel('gender_male', language)].map((g) => (
+              {['gender_female', 'gender_male'].map((gid) => (
                 <Card
-                  key={g}
-                  onClick={() => { setData({ ...data, gender: g }); nextStep(); }}
+                  key={gid}
+                  onClick={() => { setData({ ...data, gender: gid }); nextStep(); }}
                   className={cn(
                     "p-6 cursor-pointer flex items-center gap-6 transition-all border-2",
-                    data.gender === g ? "border-purple-600 bg-purple-50" : "border-transparent hover:border-gray-200 hover:shadow-md"
+                    data.gender === gid ? "border-purple-600 bg-purple-50" : "border-transparent hover:border-gray-200 hover:shadow-md"
                   )}
-                  data-testid={`gender-option-${g.toLowerCase()}`}
+                  data-testid={`gender-option-${gid}`}
                 >
-                  <div className={cn("p-4 rounded-full", g === getLabel('gender_male', language) ? "bg-blue-100" : "bg-pink-100")}>
-                    <User className={cn("w-8 h-8", g === getLabel('gender_male', language) ? "text-blue-600" : "text-pink-600")} />
+                  <div className={cn("p-4 rounded-full", gid === 'gender_male' ? "bg-blue-100" : "bg-pink-100")}>
+                    <User className={cn("w-8 h-8", gid === 'gender_male' ? "text-blue-600" : "text-pink-600")} />
                   </div>
-                  <Typography variant="h3" className="text-gray-700">{g}</Typography>
+                  <Typography variant="h3" className="text-gray-700">{getLabel(gid, language)}</Typography>
                   <ArrowRight className="ml-auto w-6 h-6 text-gray-300" />
                 </Card>
               ))}
@@ -241,14 +244,15 @@ export default function OnboardingPage() {
                 </div>
                 <div className="space-y-2 col-span-2">
                   <label className="text-sm font-semibold text-gray-700">{getLabel('label_job', language)}</label>
-                  <input
-                    type="text"
+                  <select
                     value={data.job}
                     onChange={(e) => setData({ ...data, job: e.target.value })}
                     className="w-full p-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none bg-white"
-                    placeholder={getLabel('placeholder_job', language)}
-                    data-testid="input-job"
-                  />
+                    data-testid="select-job"
+                  >
+                    <option value="">{getLabel('select_default', language)}</option>
+                    {jobsList.map(j => <option key={j} value={j}>{getLabel(j, language)}</option>)}
+                  </select>
                 </div>
               </div>
             </div>
@@ -404,7 +408,7 @@ export default function OnboardingPage() {
                   )}
                   data-testid={`hobby-option-${hobby}`}
                 >
-                  {hobby}
+                  {getLabel(hobby, language)}
                 </button>
               ))}
             </div>
@@ -452,7 +456,7 @@ export default function OnboardingPage() {
                 <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs border-b border-gray-100 pb-4 mb-4">
                   <div className="flex items-center gap-2 text-gray-600">
                     <User className="w-3 h-3 text-purple-400" />
-                    {data.job}
+                    {getLabel(data.job, language)}
                   </div>
                   <div className="flex items-center gap-2 text-gray-600">
                     <GraduationCap className="w-3 h-3 text-purple-400" />
@@ -464,7 +468,7 @@ export default function OnboardingPage() {
                 </div>
                 <div className="flex flex-wrap gap-1.5 opacity-70">
                   {data.hobbies.slice(0, 3).map(h => (
-                    <span key={h} className="text-[10px] bg-gray-200 px-2 py-0.5 rounded-full">{h}</span>
+                    <span key={h} className="text-[10px] bg-gray-200 px-2 py-0.5 rounded-full">{getLabel(h, language)}</span>
                   ))}
                   {data.hobbies.length > 3 && <span className="text-[10px] text-gray-400">+{data.hobbies.length - 3}</span>}
                 </div>
