@@ -287,12 +287,17 @@ async function main() {
   });
 
   console.log("Seeding users...");
+  let userIndex = 0;
   for (const userData of MOCK_USERS) {
+    userIndex++;
     const { hobbies, images, jobId, genderId, educationId, maritalStatusId, intentionId, ...rest } =
       userData;
     await prisma.user.create({
       data: {
         ...rest,
+        email: `${userData.name.toLowerCase().replace(/[^a-z0-9]/g, "")}${userIndex}@example.com`,
+        password: "password123",
+        country: "Türkiye",
         job: { connect: { id: jobId } },
         gender: { connect: { id: genderId } },
         education: { connect: { id: educationId } },

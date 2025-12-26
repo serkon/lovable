@@ -74,6 +74,8 @@ export const translations = {
     personal_info: "Kişisel Bilgiler",
     placeholder_bio: "Kendinizden bahsedin...",
     select_all: "Hepsi",
+    btn_login: "Giriş Yap",
+    already_member: "Zaten üye misiniz?",
 
     // Landing Page
     hero_title: "Hayatın İkinci Baharı Sizi Bekliyor",
@@ -118,7 +120,17 @@ export const translations = {
     best_candidates: "Sizin için en iyi adayları hazırladık.",
     no_bio_yet: "Henüz bir biyografi yazılmadı...",
     start_meeting: "Hemen Tanışmaya Başla!",
-    step_count: "Adım {step} / 6",
+    step_count: "Adım {step} / 7",
+    auth_title: "Hesabınızı Güvenceye Alın",
+    auth_desc:
+      "Profilleri kaybetmemek ve istediğiniz zaman giriş yapmak için bir şifre belirleyin.",
+    label_country: "Ülke",
+    label_email: "E-posta Adresi",
+    label_password: "Şifre",
+    btn_complete_auth: "Kaydı Tamamla ve Başla",
+    btn_skip_auth: "Şimdilik Atla (Misafir Olarak Devam Et)",
+    placeholder_email: "ornek@email.com",
+    placeholder_password: "••••••••",
 
     // Dashboard
     app_name: "İkinci Bahar",
@@ -234,6 +246,8 @@ export const translations = {
     education: "Education",
     maritalStatus: "Marital Status",
     intention: "Intention",
+    btn_login: "Log In",
+    already_member: "Already a member?",
     bio: "Bio",
     hobbies: "Hobbies",
     save: "Save",
@@ -294,7 +308,16 @@ export const translations = {
     best_candidates: "We have prepared the best candidates for you.",
     no_bio_yet: "No bio written yet...",
     start_meeting: "Start Meeting Now!",
-    step_count: "Step {step} / 6",
+    step_count: "Step {step} / 7",
+    auth_title: "Secure Your Account",
+    auth_desc: "Set a password to avoid losing profiles and to log in anytime.",
+    label_country: "Country",
+    label_email: "Email Address",
+    label_password: "Password",
+    btn_complete_auth: "Complete Registration & Start",
+    btn_skip_auth: "Skip for Now (Continue as Guest)",
+    placeholder_email: "example@email.com",
+    placeholder_password: "••••••••",
 
     // Dashboard
     app_name: "İkinci Bahar",

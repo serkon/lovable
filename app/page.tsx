@@ -7,16 +7,45 @@ import { Heart, Shield, Users } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { useAppStore } from "@/context/AppStore";
 import { getLabel } from "@/lib/translations";
+import { createGuestUser } from "@/lib/actions/userActions";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function Home() {
   const { language } = useAppStore();
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
+  const handleStart = async () => {
+    setLoading(true);
+    try {
+      await createGuestUser();
+      router.push("/onboarding");
+    } finally {
+      // Don't set loading false to prevent flicker during redirect
+    }
+  };
 
   return (
     <main className="min-h-screen bg-slate-50 flex flex-col">
+      {/* Header */}
+      <header className="bg-white px-6 py-4 flex justify-between items-center shadow-sm sticky top-0 z-50">
+        <Logo size={40} />
+        <div className="flex items-center gap-4">
+          <Typography variant="body" className="hidden sm:block text-gray-500">
+            {getLabel("already_member", language)}
+          </Typography>
+          <Link href="/login">
+            <Button variant="outline" className="border-purple-200 text-purple-700 hover:bg-purple-50">
+              {getLabel("btn_login", language)}
+            </Button>
+          </Link>
+        </div>
+      </header>
+
       {/* Hero Section */}
       <section className="bg-white py-20 px-6 text-center border-b border-gray-100 flex-1 flex flex-col justify-center items-center">
         <div className="max-w-3xl mx-auto space-y-8">
-          <Logo size={120} className="mb-4" />
           <Typography variant="h1" className="text-purple-900 leading-tight">
             {getLabel('hero_title', language)}
           </Typography>
@@ -25,11 +54,15 @@ export default function Home() {
           </Typography>
 
           <div className="pt-8 animate-pulse">
-            <Link href="/onboarding">
-              <Button size="lg" className="w-full sm:w-auto text-xl px-12 py-8 shadow-xl bg-purple-600 hover:bg-purple-700" data-testid="landing-cta-button">
-                {getLabel('cta_button', language)}
-              </Button>
-            </Link>
+            <Button
+              onClick={handleStart}
+              disabled={loading}
+              size="lg"
+              className="w-full sm:w-auto text-xl px-12 py-8 shadow-xl bg-purple-600 hover:bg-purple-700"
+              data-testid="landing-cta-button"
+            >
+              {loading ? "..." : getLabel('cta_button', language)}
+            </Button>
             <p className="mt-4 text-sm text-gray-500 font-medium">{getLabel('cta_no_card', language)}</p>
           </div>
         </div>

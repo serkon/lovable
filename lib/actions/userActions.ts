@@ -13,9 +13,19 @@ const USER_INCLUDE = {
   intention: true,
 } as const;
 
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+
 export async function getCurrentUser() {
-  // For MVP, we'll just take the first user in the DB
-  let user = await prisma.user.findFirst({
+  const cookieStore = await cookies();
+  const userId = cookieStore.get("userId")?.value;
+
+  if (!userId) {
+    return null;
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
     include: {
       ...USER_INCLUDE,
       likesSent: {
@@ -36,83 +46,75 @@ export async function getCurrentUser() {
     } as any,
   });
 
-  if (!user) {
-    user = await prisma.user.create({
-      data: {
-        name: "Ayşe Yılmaz",
-        age: 48,
-        city: "İstanbul, Kadıköy",
-        bio: "Huzurlu bir hayat süren, doğa aşığı ve kitap kurdu biriyim. Yeni yerler keşfetmeyi severim.",
-        job: {
-          connectOrCreate: {
-            where: { id: "job_retired_teacher" },
-            create: { id: "job_retired_teacher", name: "Internal: Emekli Öğretmen", sortOrder: 10 },
-          },
-        },
-        gender: {
-          connectOrCreate: {
-            where: { id: "gender_female" },
-            create: { id: "gender_female", name: "Internal: Kadın", sortOrder: 10 },
-          },
-        },
-        hobbies: {
-          connectOrCreate: [
-            { id: "hobby_nature", name: "Internal: Gezi, Doğa & Kamp" },
-            { id: "hobby_culture", name: "Internal: Kültür, Sanat & Kitap" },
-          ].map((h) => ({
-            where: { id: h.id },
-            create: { id: h.id, name: h.name, sortOrder: 10 },
-          })),
-        },
-        education: {
-          connectOrCreate: {
-            where: { id: "edu_bachelors" },
-            create: { id: "edu_bachelors", name: "Internal: Lisans", sortOrder: 30 },
-          },
-        },
-        maritalStatus: {
-          connectOrCreate: {
-            where: { id: "ms_divorced" },
-            create: { id: "ms_divorced", name: "Internal: Boşanmış", sortOrder: 20 },
-          },
-        },
-        intention: {
-          connectOrCreate: {
-            where: { id: "int_chat" },
-            create: { id: "int_chat", name: "Internal: Sohbet", sortOrder: 10 },
-          },
-        },
-        images: {
-          create: [
-            {
-              url: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=256&h=256&auto=format&fit=crop",
-              order: 0,
-            },
-          ],
-        },
-      },
-      include: {
-        ...USER_INCLUDE,
-        likesSent: {
-          include: {
-            receiver: {
-              include: USER_INCLUDE,
-            },
-          },
-        },
-        likesReceived: {
-          include: {
-            sender: {
-              include: USER_INCLUDE,
-            },
-          },
-        },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any,
-    });
-  }
+  return user;
+}
+
+export async function createGuestUser() {
+  const user = await prisma.user.create({
+    data: {
+      name: "",
+      age: 0,
+      bio: "",
+    },
+  });
+
+  (await cookies()).set("userId", user.id, {
+    path: "/",
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  });
 
   return user;
+}
+
+export async function loginUser(formData: FormData) {
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
+
+  const user = await prisma.user.findFirst({
+    where: { email },
+  });
+
+  if (user && user.password === password) {
+    (await cookies()).set("userId", user.id, {
+      path: "/",
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 30 * 24 * 60 * 60, // 30 days
+    });
+    return { success: true };
+  }
+
+  return { success: false, error: "Geçersiz e-posta veya şifre" };
+}
+
+export async function logoutUser() {
+  (await cookies()).delete("userId");
+  redirect("/");
+}
+
+export async function registerUser(data: { email: string; password: string; country: string }) {
+  const currentUser = await getCurrentUser();
+  if (!currentUser)
+    return { success: false, error: "User session not found. Please refresh and try again." };
+
+  try {
+    await prisma.user.update({
+      where: { id: (currentUser as any).id }, // eslint-disable-line @typescript-eslint/no-explicit-any
+      data: {
+        email: data.email,
+        password: data.password,
+        country: data.country,
+      },
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Registration error:", error);
+    return { success: false, error: "Bu e-posta adresi zaten kullanımda olabilir." };
+  }
 }
 
 export async function updateUserProfile(data: {

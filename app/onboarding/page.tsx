@@ -13,7 +13,8 @@ import {
   BookOpen,
   Check,
   ChevronLeft,
-  Camera
+  Camera,
+  Shield
 } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { useRouter } from "next/navigation";
@@ -21,13 +22,16 @@ import { cn } from "@/lib/utils";
 import { useAppStore } from "@/context/AppStore";
 import { getLabel } from "@/lib/translations";
 import { APP_CONFIG } from "@/lib/config";
-import { updateUserProfile } from "@/lib/actions/userActions";
+import { updateUserProfile, registerUser } from "@/lib/actions/userActions";
 import { getBioTemplates, getHobbies, getMaritalStatuses, getEducations, getIntentions, getJobs } from "@/lib/actions/contentActions";
+
+const COUNTRIES = ["Türkiye", "Germany", "United Kingdom", "United States", "Netherlands", "France", "Other"];
 
 type OnboardingData = {
   name: string;
   age: string;
   city: string;
+  country: string;
   job: string;
   gender: string;
   bio: string;
@@ -35,6 +39,8 @@ type OnboardingData = {
   education: string;
   maritalStatus: string;
   hobbies: string[];
+  email?: string;
+  password?: string;
 };
 
 export default function OnboardingPage() {
@@ -45,6 +51,7 @@ export default function OnboardingPage() {
     name: "",
     age: "",
     city: "",
+    country: "Türkiye",
     job: "",
     gender: "",
     bio: "",
@@ -52,6 +59,8 @@ export default function OnboardingPage() {
     education: "",
     maritalStatus: "",
     hobbies: [],
+    email: "",
+    password: "",
   });
   const [jobsList, setJobsList] = useState<string[]>([]);
 
@@ -60,6 +69,7 @@ export default function OnboardingPage() {
   const [maritalStatusesList, setMaritalStatusesList] = useState<string[]>([]);
   const [educationsList, setEducationsList] = useState<string[]>([]);
   const [intentionsList, setIntentionsList] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -84,8 +94,10 @@ export default function OnboardingPage() {
   const nextStep = () => setStep((s) => s + 1);
   const prevStep = () => setStep((s) => s - 1);
 
-  const handleFinish = async () => {
+  const handleFinish = async (skipAuth = false) => {
+    setLoading(true);
     try {
+      // 1. Update basic profile
       await updateUserProfile({
         name: data.name,
         age: parseInt(data.age),
@@ -98,10 +110,27 @@ export default function OnboardingPage() {
         maritalStatus: data.maritalStatus,
         hobbies: data.hobbies,
       });
+
+      // 2. Register if email provided
+      if (!skipAuth && data.email && data.password) {
+        const res = await registerUser({
+          email: data.email,
+          password: data.password,
+          country: data.country,
+        });
+
+        if (!res.success) {
+          alert(res.error);
+          setLoading(false);
+          return;
+        }
+      }
+
       router.push("/dashboard");
     } catch (error) {
       console.error("Failed to save profile:", error);
       alert(getLabel('error_generic', language));
+      setLoading(false);
     }
   };
 
@@ -135,8 +164,8 @@ export default function OnboardingPage() {
 
       {/* Progress Stepper */}
       <div className="w-full max-w-md flex items-center justify-between mb-8 px-2" data-testid="onboarding-stepper">
-        {[1, 2, 3, 4, 5, 6].map((s) => (
-          <div key={s} className="flex items-center flex-1 last:flex-none" data-testid={`step-indicator-${s}`}>
+        {[1, 2, 3, 4, 5, 6, 7].map((s) => (
+          <div key={s} className="flex items-center flex-1 last:flex-none">
             <div
               className={cn(
                 "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors",
@@ -145,7 +174,7 @@ export default function OnboardingPage() {
             >
               {step > s ? <Check className="w-4 h-4" /> : s}
             </div>
-            {s < 6 && (
+            {s < 7 && (
               <div
                 className={cn(
                   "h-1 flex-1 mx-2 rounded-full",
@@ -158,11 +187,10 @@ export default function OnboardingPage() {
       </div>
 
       <div className="w-full max-w-lg">
-        {step > 1 && step < 6 && (
+        {step > 1 && (
           <button
             onClick={prevStep}
             className="flex items-center gap-1 text-gray-500 hover:text-purple-600 mb-4 transition-colors text-sm font-medium"
-            data-testid="onboarding-prev-btn"
           >
             <ChevronLeft className="w-4 h-4" /> {getLabel('back', language)}
           </button>
@@ -184,7 +212,6 @@ export default function OnboardingPage() {
                     "p-6 cursor-pointer flex items-center gap-6 transition-all border-2",
                     data.gender === gid ? "border-purple-600 bg-purple-50" : "border-transparent hover:border-gray-200 hover:shadow-md"
                   )}
-                  data-testid={`gender-option-${gid}`}
                 >
                   <div className={cn("p-4 rounded-full", gid === 'gender_male' ? "bg-blue-100" : "bg-pink-100")}>
                     <User className={cn("w-8 h-8", gid === 'gender_male' ? "text-blue-600" : "text-pink-600")} />
@@ -215,7 +242,6 @@ export default function OnboardingPage() {
                     onChange={(e) => setData({ ...data, name: e.target.value })}
                     className="w-full p-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none bg-white"
                     placeholder={getLabel('placeholder_name', language)}
-                    data-testid="input-name"
                   />
                 </div>
                 <div className="space-y-2">
@@ -228,10 +254,21 @@ export default function OnboardingPage() {
                     placeholder={getLabel('placeholder_age', language)}
                     min={APP_CONFIG.MIN_AGE}
                     max={APP_CONFIG.MAX_AGE}
-                    data-testid="input-age"
                   />
                 </div>
+                {/* Country Select */}
                 <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700">{getLabel('label_country', language)}</label>
+                  <select
+                    value={data.country}
+                    onChange={(e) => setData({ ...data, country: e.target.value })}
+                    className="w-full p-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none bg-white"
+                  >
+                    {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+                {/* City Input */}
+                <div className="space-y-2 col-span-2">
                   <label className="text-sm font-semibold text-gray-700">{getLabel('label_city', language)}</label>
                   <input
                     type="text"
@@ -239,7 +276,6 @@ export default function OnboardingPage() {
                     onChange={(e) => setData({ ...data, city: e.target.value })}
                     className="w-full p-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none bg-white"
                     placeholder={getLabel('placeholder_city', language)}
-                    data-testid="input-city"
                   />
                 </div>
                 <div className="space-y-2 col-span-2">
@@ -248,7 +284,6 @@ export default function OnboardingPage() {
                     value={data.job}
                     onChange={(e) => setData({ ...data, job: e.target.value })}
                     className="w-full p-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none bg-white"
-                    data-testid="select-job"
                   >
                     <option value="">{getLabel('select_default', language)}</option>
                     {jobsList.map(j => <option key={j} value={j}>{getLabel(j, language)}</option>)}
@@ -259,9 +294,8 @@ export default function OnboardingPage() {
 
             <Button
               onClick={nextStep}
-              disabled={!data.name || !data.age || !data.city || !data.job}
+              disabled={!data.name || !data.age || !data.city || !data.job || !data.country}
               className="w-full h-14 rounded-2xl bg-purple-600 text-lg font-bold disabled:bg-gray-200"
-              data-testid="step-2-next-btn"
             >
               {getLabel('btn_continue', language)}
             </Button>
@@ -284,7 +318,6 @@ export default function OnboardingPage() {
                 onChange={(e) => setData({ ...data, bio: e.target.value })}
                 className="w-full h-28 p-4 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none text-gray-700 bg-white shadow-inner resize-none text-sm"
                 placeholder={getLabel('input_placeholder_bio', language)}
-                data-testid="input-bio"
               />
 
               <div className="bg-slate-50 border border-gray-100 rounded-2xl p-3">
@@ -303,7 +336,6 @@ export default function OnboardingPage() {
                               ? "bg-purple-600 text-white border-purple-600 shadow-sm"
                               : "bg-white text-gray-600 border-gray-200 hover:border-purple-300 hover:bg-purple-50"
                           )}
-                          data-testid={`bio-template-${i}`}
                         >
                           {isSelected ? <Check className="w-3 h-3" /> : <Sparkles className="w-3 h-3 text-purple-400 opacity-60" />}
                           {t}
@@ -315,7 +347,7 @@ export default function OnboardingPage() {
               </div>
             </div>
 
-            <Button onClick={nextStep} className="w-full h-14 rounded-2xl bg-purple-600 text-lg font-bold" data-testid="step-3-next-btn">
+            <Button onClick={nextStep} className="w-full h-14 rounded-2xl bg-purple-600 text-lg font-bold">
               {getLabel('btn_continue', language)}
             </Button>
           </div>
@@ -338,7 +370,6 @@ export default function OnboardingPage() {
                   value={data.intention}
                   onChange={(e) => setData({ ...data, intention: e.target.value })}
                   className="w-full p-4 rounded-xl border border-gray-200 bg-white"
-                  data-testid="select-intention"
                 >
                   <option value="">{getLabel('select_default', language)}</option>
                   {intentionsList.map(i => <option key={i} value={i}>{getLabel(i, language)}</option>)}
@@ -353,7 +384,6 @@ export default function OnboardingPage() {
                   value={data.education}
                   onChange={(e) => setData({ ...data, education: e.target.value })}
                   className="w-full p-4 rounded-xl border border-gray-200 bg-white"
-                  data-testid="select-education"
                 >
                   <option value="">{getLabel('select_default', language)}</option>
                   {educationsList.map(e => <option key={e} value={e}>{getLabel(e, language)}</option>)}
@@ -368,7 +398,6 @@ export default function OnboardingPage() {
                   value={data.maritalStatus}
                   onChange={(e) => setData({ ...data, maritalStatus: e.target.value })}
                   className="w-full p-4 rounded-xl border border-gray-200 bg-white"
-                  data-testid="select-marital-status"
                 >
                   <option value="">{getLabel('select_default', language)}</option>
                   {maritalStatusesList.map(s => <option key={s} value={s}>{getLabel(s, language)}</option>)}
@@ -380,7 +409,6 @@ export default function OnboardingPage() {
               onClick={nextStep}
               disabled={!data.intention || !data.education || !data.maritalStatus}
               className="w-full h-14 rounded-2xl bg-purple-600 text-lg font-bold disabled:bg-gray-200"
-              data-testid="step-4-next-btn"
             >
               {getLabel('btn_continue', language)}
             </Button>
@@ -406,7 +434,6 @@ export default function OnboardingPage() {
                       ? "bg-purple-600 text-white shadow-md shadow-purple-200"
                       : "bg-white text-gray-600 border border-gray-200 hover:border-purple-300"
                   )}
-                  data-testid={`hobby-option-${hobby}`}
                 >
                   {getLabel(hobby, language)}
                 </button>
@@ -417,14 +444,13 @@ export default function OnboardingPage() {
               onClick={nextStep}
               disabled={data.hobbies.length < APP_CONFIG.MIN_HOBBIES_COUNT}
               className="w-full h-14 rounded-2xl bg-purple-600 text-lg font-bold disabled:bg-gray-200"
-              data-testid="step-5-next-btn"
             >
               {getLabel('btn_looks_great', language)}
             </Button>
           </div>
         )}
 
-        {/* STEP 6: FINAL PREVIEW / PHOTO */}
+        {/* STEP 6: PREVIEW */}
         {step === 6 && (
           <div className="space-y-8 animate-in zoom-in-95 duration-500 text-center">
             <div className="space-y-2">
@@ -475,9 +501,63 @@ export default function OnboardingPage() {
               </div>
             </Card>
 
-            <Button onClick={handleFinish} className="w-full h-16 rounded-2xl bg-purple-600 hover:bg-purple-700 text-xl font-bold shadow-xl shadow-purple-200 animate-bounce transition-all" data-testid="complete-onboarding-btn">
-              {getLabel('start_meeting', language)}
+            <Button onClick={nextStep} className="w-full h-16 rounded-2xl bg-purple-600 hover:bg-purple-700 text-xl font-bold shadow-xl shadow-purple-200 animate-bounce transition-all">
+              {getLabel('btn_continue', language)}
             </Button>
+          </div>
+        )}
+
+        {/* STEP 7: SECURE ACCOUNT */}
+        {step === 7 && (
+          <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
+            <div className="text-center space-y-2">
+              <div className="mx-auto w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                <Shield className="w-10 h-10 text-blue-600" />
+              </div>
+              <Typography variant="h2" className="text-purple-900">{getLabel('auth_title', language)}</Typography>
+              <Typography variant="body" className="text-gray-600">{getLabel('auth_desc', language)}</Typography>
+            </div>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700">{getLabel('label_email', language)}</label>
+                <input
+                  type="email"
+                  value={data.email}
+                  onChange={(e) => setData({ ...data, email: e.target.value })}
+                  className="w-full p-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none bg-white"
+                  placeholder={getLabel('placeholder_email', language)}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700">{getLabel('label_password', language)}</label>
+                <input
+                  type="password"
+                  value={data.password}
+                  onChange={(e) => setData({ ...data, password: e.target.value })}
+                  className="w-full p-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none bg-white"
+                  placeholder={getLabel('placeholder_password', language)}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-3 pt-4">
+              <Button
+                onClick={() => handleFinish(false)}
+                disabled={loading || !data.email || !data.password}
+                className="w-full h-14 rounded-2xl bg-purple-600 text-lg font-bold disabled:bg-gray-200"
+              >
+                {loading ? getLabel('saving', language) : getLabel('btn_complete_auth', language)}
+              </Button>
+
+              <button
+                onClick={() => handleFinish(true)}
+                disabled={loading}
+                className="w-full py-3 text-gray-400 text-sm font-medium hover:text-gray-600"
+              >
+                {getLabel('btn_skip_auth', language)}
+              </button>
+            </div>
           </div>
         )}
 
