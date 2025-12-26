@@ -29,3 +29,24 @@ export async function getIceBreakers() {
   });
   return iceBreakers.map((i) => i.content);
 }
+
+export async function getMaritalStatuses() {
+  const statuses = await (prisma as any).maritalStatus.findMany({
+    orderBy: { name: "asc" },
+  });
+  return statuses.map((s: { name: string }) => s.name);
+}
+
+export async function getEducations() {
+  const educations = await (prisma as any).education.findMany({
+    orderBy: { name: "asc" },
+  });
+  return educations.map((e: { name: string }) => e.name);
+}
+
+export async function getIntentions() {
+  const intentions = await (prisma as any).intention.findMany({
+    orderBy: { name: "asc" },
+  });
+  return intentions.map((i: { name: string }) => i.name);
+}

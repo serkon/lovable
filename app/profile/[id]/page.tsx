@@ -10,8 +10,9 @@ import Link from "next/link";
 import { useAppStore } from "@/context/AppStore";
 import { getLabel } from "@/lib/translations";
 import { getUserById } from "@/lib/actions/userActions";
-import { MOCK_PROFILES, Profile, EducationId, MaritalStatusId, IntentionId } from "@/lib/mock-data";
+import { Profile } from "@/lib/constants";
 import Image from "next/image";
+import { cn } from "@/lib/utils";
 
 export default function PublicProfilePage() {
     const params = useParams();
@@ -19,6 +20,7 @@ export default function PublicProfilePage() {
     const { language, sendLike } = useAppStore();
     const [profile, setProfile] = useState<Profile | null>(null);
     const [loading, setLoading] = useState(true);
+    const [imageIndex, setImageIndex] = useState(0);
 
     useEffect(() => {
         const loadProfile = async () => {
@@ -26,7 +28,7 @@ export default function PublicProfilePage() {
 
             // 1. Try fetching from DB
             try {
-                const dbUser = await getUserById(id);
+                const dbUser = await getUserById(id) as any; // Using any as Prisma recursive includes are hard to type manually
                 if (dbUser) {
                     const mapped: Profile = {
                         id: dbUser.id,
@@ -35,12 +37,13 @@ export default function PublicProfilePage() {
                         location: dbUser.city || "",
                         distance: 0,
                         job: dbUser.job?.name || "",
-                        education: dbUser.education as EducationId,
-                        maritalStatus: dbUser.maritalStatus as MaritalStatusId,
-                        intention: dbUser.intention as IntentionId,
+                        education: dbUser.education?.name || "edu_elementary",
+                        maritalStatus: dbUser.maritalStatus?.name || "ms_private",
+                        intention: dbUser.intention?.name || "int_chat",
                         bio: dbUser.bio || "",
-                        hobbies: dbUser.hobbies.map(h => h.name),
-                        imageUrl: dbUser.imageUrl || "",
+                        hobbies: Array.isArray(dbUser.hobbies) ? dbUser.hobbies.map((h: { name: string }) => h.name) : [],
+                        imageUrl: dbUser.imageUrl || (dbUser.images?.[0]?.url) || "",
+                        images: Array.isArray(dbUser.images) ? dbUser.images.map((img: { url: string }) => img.url) : [],
                         iceBreaker: ""
                     };
                     setProfile(mapped);
@@ -51,22 +54,17 @@ export default function PublicProfilePage() {
                 console.error("DB fetch failed", err);
             }
 
-            // 2. Fallback to mock profiles if id is a number string
-            const mockId = parseInt(id);
-            if (!isNaN(mockId)) {
-                const mock = MOCK_PROFILES.find(p => p.id === mockId);
-                if (mock) {
-                    setProfile(mock);
-                    setLoading(false);
-                    return;
-                }
-            }
+            // DB only from now on
 
             setLoading(false);
         };
 
         loadProfile();
     }, [params.id]);
+
+    const displayImages = profile?.images && profile.images.length > 0
+        ? profile.images
+        : profile?.imageUrl ? [profile.imageUrl] : [];
 
     const handleLike = () => {
         if (profile) {
@@ -131,16 +129,48 @@ export default function PublicProfilePage() {
             <main className="max-w-md mx-auto p-4 space-y-6">
                 {/* Photo Card */}
                 <Card className="overflow-hidden rounded-[40px] border-none shadow-2xl relative aspect-[3/4]">
-                    <Image
-                        src={profile.imageUrl}
-                        alt={profile.name}
-                        fill
-                        className="object-cover"
-                        priority
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
+                    {/* Carousel Navigation */}
+                    {displayImages.length > 1 && (
+                        <>
+                            {/* Navigation Dots */}
+                            <div className="absolute top-4 left-0 right-0 z-30 flex justify-center gap-1.5 px-4">
+                                {displayImages.map((_, idx) => (
+                                    <div
+                                        key={idx}
+                                        className={cn(
+                                            "h-1 rounded-full transition-all duration-300",
+                                            idx === imageIndex ? "bg-white w-8 shadow-sm" : "bg-white/40 w-2"
+                                        )}
+                                    />
+                                ))}
+                            </div>
 
-                    <div className="absolute bottom-6 left-6 right-6 text-white p-2">
+                            {/* Tap Targets */}
+                            <div className="absolute inset-0 z-20 flex">
+                                <div
+                                    className="w-1/2 h-full cursor-pointer"
+                                    onClick={() => setImageIndex((prev) => (prev > 0 ? prev - 1 : displayImages.length - 1))}
+                                />
+                                <div
+                                    className="w-1/2 h-full cursor-pointer"
+                                    onClick={() => setImageIndex((prev) => (prev < displayImages.length - 1 ? prev + 1 : 0))}
+                                />
+                            </div>
+                        </>
+                    )}
+
+                    <div className="relative w-full h-full">
+                        <Image
+                            src={displayImages[imageIndex] || "/placeholder-user.jpg"}
+                            alt={profile.name}
+                            fill
+                            className="object-cover"
+                            priority
+                        />
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none z-10" />
+
+                    <div className="absolute bottom-6 left-6 right-6 text-white p-2 z-20">
                         <Typography variant="h1" className="text-3xl font-bold flex items-center gap-2">
                             {profile.name}, {profile.age}
                         </Typography>

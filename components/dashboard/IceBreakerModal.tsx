@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/Button";
 import { Typography } from "@/components/ui/Typography";
 import { X, Sparkles, MessageCircle, Send } from "lucide-react";
-import { ICE_BREAKER_QUESTIONS } from "@/lib/mock-data";
+import { getIceBreakers } from "@/lib/actions/contentActions";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/context/AppStore";
 import { getLabel } from "@/lib/translations";
@@ -19,6 +19,17 @@ interface IceBreakerModalProps {
 export function IceBreakerModal({ isOpen, onClose, onSend, targetName }: IceBreakerModalProps) {
     const { language } = useAppStore();
     const [selectedQuestion, setSelectedQuestion] = useState("");
+    const [questions, setQuestions] = useState<string[]>([]);
+
+    useEffect(() => {
+        const loadQuestions = async () => {
+            const dbQuestions = await getIceBreakers();
+            setQuestions(dbQuestions);
+        };
+        if (isOpen) {
+            loadQuestions();
+        }
+    }, [isOpen]);
 
     if (!isOpen) return null;
 
@@ -53,7 +64,7 @@ export function IceBreakerModal({ isOpen, onClose, onSend, targetName }: IceBrea
                     </div>
 
                     <div className="space-y-3 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
-                        {ICE_BREAKER_QUESTIONS.map((q, idx) => (
+                        {questions.map((q, idx) => (
                             <button
                                 key={idx}
                                 onClick={() => setSelectedQuestion(q)}

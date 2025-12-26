@@ -1,17 +1,52 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
-import { MOCK_PROFILES, MOCK_LIKED_BY_PROFILES, MOCK_MATCHES, Profile, EducationId, MaritalStatusId, IntentionId } from "@/lib/mock-data";
+import { Profile } from "@/lib/constants";
 import { fetchProfilesFromAPI } from "@/lib/services/userService";
 import { getCurrentUser, sendLike as dbSendLike } from "@/lib/actions/userActions";
-import { User } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 
-export interface ExtendedUser extends User {
+export type ExtendedUser = Prisma.UserGetPayload<{
+  include: {
+    job: true;
+    gender: true;
+    hobbies: true;
+    images: true;
+    education: true;
+    maritalStatus: true;
+    intention: true;
+    likesSent: {
+      include: {
+        receiver: {
+          include: {
+            job: true;
+            hobbies: true;
+            images: true;
+            education: true;
+            maritalStatus: true;
+            intention: true;
+          };
+        };
+      };
+    };
+    likesReceived: {
+      include: {
+        sender: {
+          include: {
+            job: true;
+            hobbies: true;
+            images: true;
+            education: true;
+            maritalStatus: true;
+            intention: true;
+          };
+        };
+      };
+    };
+  };
+}> & {
   hobbiesArray?: string[];
-  job?: { id: string; name: string } | null;
-  hobbies?: { id: string; name: string }[];
-  likesSent?: { id: string; receiver: unknown }[];
-}
+};
 
 interface AppContextType {
   profiles: Profile[];
@@ -36,27 +71,27 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [profiles, setProfiles] = useState<Profile[]>([]);
-  const [likesReceived, setLikesReceived] = useState<Profile[]>(MOCK_LIKED_BY_PROFILES);
-  const [matches, setMatches] = useState<Profile[]>(MOCK_MATCHES);
+  const [likesReceived, setLikesReceived] = useState<Profile[]>([]);
+  const [matches, setMatches] = useState<Profile[]>([]);
   const [sentRequests, setSentRequests] = useState<Profile[]>([]);
   const [currentUser, setCurrentUser] = useState<ExtendedUser | null>(null);
   const [language, setLanguage] = useState<"tr" | "en">("tr");
 
   const refreshCurrentUser = async () => {
     try {
-      const user = await getCurrentUser() as ExtendedUser;
+      const user = await getCurrentUser() as unknown as ExtendedUser;
 
       if (user) {
         // Transform hobbies from Relation[] to string[] if needed for display helper
         if (Array.isArray(user.hobbies)) {
-          user.hobbiesArray = user.hobbies.map(h => (h as any).name);
+          user.hobbiesArray = user.hobbies.map((h: { name: string }) => h.name);
         } else {
           user.hobbiesArray = [];
         }
 
         // Transform likesSent to Profile objects for sentRequests
-        const dbSentRequests = user.likesSent?.map((like) => {
-          const target = (like as any).receiver;
+        const dbSentRequests = user.likesSent?.map((like: any) => {
+          const target = like.receiver;
           if (!target) return null;
           return {
             id: target.id,
@@ -66,17 +101,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
             distance: 0,
             job: target.job?.name || target.job || "",
             bio: target.bio || "",
-            imageUrl: target.imageUrl || "",
-            education: target.education as EducationId,
-            maritalStatus: target.maritalStatus as MaritalStatusId,
-            intention: target.intention as IntentionId,
-            hobbies: Array.isArray(target.hobbies) ? target.hobbies.map((h: any) => h.name) : [],
-            gender: target.gender?.name || target.gender,
+            imageUrl: target.imageUrl || (target.images?.[0]?.url) || "",
+            images: Array.isArray(target.images) ? target.images.map((img: { url: string }) => img.url) : [target.imageUrl || ""],
+            education: target.education?.name || "edu_elementary",
+            maritalStatus: target.maritalStatus?.name || "ms_private",
+            intention: target.intention?.name || "int_chat",
+            hobbies: Array.isArray(target.hobbies) ? target.hobbies.map((h: { name: string }) => h.name) : [],
+            gender: target.gender?.name || "",
             iceBreaker: ""
-          };
-        }).filter(Boolean) || [];
+          } as Profile;
+        }).filter((p): p is Profile => p !== null) || [];
 
-        setSentRequests(dbSentRequests as Profile[]);
+        setSentRequests(dbSentRequests);
       }
       setCurrentUser(user);
     } catch (error) {
@@ -88,7 +124,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const loadData = async () => {
       await refreshCurrentUser();
       const newProfiles = await fetchProfilesFromAPI(20);
-      setProfiles(newProfiles.length > 0 ? newProfiles : MOCK_PROFILES);
+      setProfiles(newProfiles);
     };
     loadData();
   }, []);
@@ -125,7 +161,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const resetProfiles = async () => {
     setProfiles([]);
     const newProfiles = await fetchProfilesFromAPI(20);
-    setProfiles(newProfiles.length > 0 ? newProfiles : MOCK_PROFILES);
+    setProfiles(newProfiles);
   };
 
   return (

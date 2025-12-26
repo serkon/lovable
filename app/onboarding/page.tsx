@@ -18,12 +18,11 @@ import {
 import { Logo } from "@/components/ui/Logo";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { MARITAL_STATUSES, EDUCATIONS, INTENTIONS } from "@/lib/mock-data";
 import { useAppStore } from "@/context/AppStore";
 import { getLabel } from "@/lib/translations";
 import { APP_CONFIG } from "@/lib/config";
 import { updateUserProfile } from "@/lib/actions/userActions";
-import { getBioTemplates, getHobbies } from "@/lib/actions/contentActions";
+import { getBioTemplates, getHobbies, getMaritalStatuses, getEducations, getIntentions } from "@/lib/actions/contentActions";
 
 type OnboardingData = {
   name: string;
@@ -57,13 +56,24 @@ export default function OnboardingPage() {
 
   const [bioTemplates, setBioTemplates] = useState<string[]>([]);
   const [hobbiesList, setHobbiesList] = useState<string[]>([]);
+  const [maritalStatusesList, setMaritalStatusesList] = useState<string[]>([]);
+  const [educationsList, setEducationsList] = useState<string[]>([]);
+  const [intentionsList, setIntentionsList] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
-      const dbBioTemplates = await getBioTemplates();
-      const dbHobbies = await getHobbies();
+      const [dbBioTemplates, dbHobbies, dbMarital, dbEdu, dbIntention] = await Promise.all([
+        getBioTemplates(),
+        getHobbies(),
+        getMaritalStatuses(),
+        getEducations(),
+        getIntentions()
+      ]);
       setBioTemplates(dbBioTemplates);
       setHobbiesList(dbHobbies);
+      setMaritalStatusesList(dbMarital);
+      setEducationsList(dbEdu);
+      setIntentionsList(dbIntention);
     };
     fetchData();
   }, []);
@@ -327,7 +337,7 @@ export default function OnboardingPage() {
                   data-testid="select-intention"
                 >
                   <option value="">{getLabel('select_default', language)}</option>
-                  {INTENTIONS.map(i => <option key={i} value={i}>{getLabel(i, language)}</option>)}
+                  {intentionsList.map(i => <option key={i} value={i}>{getLabel(i, language)}</option>)}
                 </select>
               </div>
 
@@ -342,7 +352,7 @@ export default function OnboardingPage() {
                   data-testid="select-education"
                 >
                   <option value="">{getLabel('select_default', language)}</option>
-                  {EDUCATIONS.map(e => <option key={e} value={e}>{getLabel(e, language)}</option>)}
+                  {educationsList.map(e => <option key={e} value={e}>{getLabel(e, language)}</option>)}
                 </select>
               </div>
 
@@ -357,7 +367,7 @@ export default function OnboardingPage() {
                   data-testid="select-marital-status"
                 >
                   <option value="">{getLabel('select_default', language)}</option>
-                  {MARITAL_STATUSES.map(s => <option key={s} value={s}>{getLabel(s, language)}</option>)}
+                  {maritalStatusesList.map(s => <option key={s} value={s}>{getLabel(s, language)}</option>)}
                 </select>
               </div>
             </div>

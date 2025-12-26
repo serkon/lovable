@@ -43,8 +43,22 @@ const BIO_TEMPLATES = [
   "Kitap okumak, sinemaya gitmek ve derin sohbetler etmekten keyif alırım.",
   "Aile değerlerine önem veren, sevdikleriyle vakit geçirmeyi seven biriyim.",
   "Hayata pozitif bakmayı, gülmeyi ve anı yaşamayı seviyorum.",
-  "Sağlık, spor and zinde kalmak benim için değerli.",
+  "Sağlık, spor ve zinde kalmak benim için değerli.",
 ];
+
+const MARITAL_STATUSES = ["ms_single", "ms_divorced", "ms_private"];
+
+const EDUCATIONS = [
+  "edu_phd",
+  "edu_masters",
+  "edu_bachelors",
+  "edu_associates",
+  "edu_highschool",
+  "edu_middleschool",
+  "edu_elementary",
+];
+
+const INTENTIONS = ["int_chat", "int_friendship", "int_fun"];
 
 const ICE_BREAKERS = [
   "En son okuduğun kitap hangisiydi?",
@@ -72,6 +86,11 @@ const MOCK_USERS = [
     hobbies: ["Kültür, Sanat & Kitap", "Gezi, Doğa & Kamp", "Bahçe İşleri"],
     imageUrl:
       "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=800&h=1000",
+    images: [
+      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=800&h=1000",
+      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=800&h=1000",
+      "https://images.unsplash.com/photo-1554151228-14d9def656e4?auto=format&fit=crop&q=80&w=800&h=1000",
+    ],
     gender: "Kadın",
   },
   {
@@ -84,8 +103,11 @@ const MOCK_USERS = [
     intention: "int_fun",
     bio: "Klasik müzik dinlemeyi ve yeni yerler keşfetmeyi severim. Hayatı paylaşacak dürüst birini arıyorum.",
     hobbies: ["Müzik & Dans", "Gezi, Doğa & Kamp", "Kültür, Sanat & Kitap"],
-    imageUrl:
-      "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=800&h=1000",
+    imageUrl: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=1760",
+    images: [
+      "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=1760",
+      "https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d?q=80&w=1365",
+    ],
     gender: "Erkek",
   },
   {
@@ -100,6 +122,11 @@ const MOCK_USERS = [
     hobbies: ["Spor, Yoga & Pilates", "Sinema & Tiyatro", "Psikoloji & Kişisel Gelişim"],
     imageUrl:
       "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=800&h=1000",
+    images: [
+      "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=800&h=1000",
+      "https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?auto=format&fit=crop&q=80&w=800&h=1000",
+      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800&h=1000",
+    ],
     gender: "Kadın",
   },
   {
@@ -161,6 +188,14 @@ const MOCK_USERS = [
 ];
 
 async function main() {
+  console.log("Cleaning database...");
+  await prisma.like.deleteMany({});
+  await (prisma as any).userImage?.deleteMany({});
+  await (prisma as any).maritalStatus?.deleteMany({});
+  await (prisma as any).education?.deleteMany({});
+  await (prisma as any).intention?.deleteMany({});
+  await prisma.user.deleteMany({});
+
   console.log("Seeding content...");
 
   // Seed Jobs
@@ -199,55 +234,109 @@ async function main() {
     });
   }
 
+  // Seed Marital Statuses
+  for (const name of MARITAL_STATUSES) {
+    await (prisma as any).maritalStatus.upsert({
+      where: { name },
+      update: {},
+      create: { name },
+    });
+  }
+
+  // Seed Educations
+  for (const name of EDUCATIONS) {
+    await (prisma as any).education.upsert({
+      where: { name },
+      update: {},
+      create: { name },
+    });
+  }
+
+  // Seed Intentions
+  for (const name of INTENTIONS) {
+    await (prisma as any).intention.upsert({
+      where: { name },
+      update: {},
+      create: { name },
+    });
+  }
+
   // Seed Users
   console.log("Seeding users...");
   for (const user of MOCK_USERS) {
-    const existing = await prisma.user.findFirst({
-      where: { name: user.name },
-    });
+    // Prepare hobbies connect array
+    const hobbyConnect = user.hobbies.map((h) => ({
+      where: { name: h },
+      create: { name: h },
+    }));
 
-    if (!existing) {
-      // Prepare hobbies connect array
-      const hobbyConnect = user.hobbies.map((h) => ({
-        where: { name: h },
-        create: { name: h },
-      }));
+    // Prepare images create array
+    const imagesCreate = (user as any).images
+      ? (user as any).images.map((url: string, index: number) => ({ url, order: index }))
+      : user.imageUrl
+        ? [{ url: user.imageUrl, order: 0 }]
+        : [];
 
-      await prisma.user.create({
-        data: {
-          name: user.name,
-          age: user.age,
-          city: user.city,
+    await prisma.user.create({
+      data: {
+        name: user.name,
+        age: user.age,
+        city: user.city,
 
-          // Job Relation
-          job: {
-            connectOrCreate: {
-              where: { name: user.job },
-              create: { name: user.job },
-            },
-          },
-
-          // Gender Relation
-          gender: {
-            connectOrCreate: {
-              where: { name: user.gender },
-              create: { name: user.gender },
-            },
-          },
-
-          education: user.education,
-          maritalStatus: user.maritalStatus,
-          intention: user.intention,
-          bio: user.bio,
-          imageUrl: user.imageUrl,
-
-          // Hobbies Relation - Many to Many
-          hobbies: {
-            connectOrCreate: hobbyConnect,
+        // Job Relation
+        job: {
+          connectOrCreate: {
+            where: { name: user.job },
+            create: { name: user.job },
           },
         },
-      });
-    }
+
+        // Gender Relation
+        gender: {
+          connectOrCreate: {
+            where: { name: user.gender },
+            create: { name: user.gender },
+          },
+        },
+
+        // Education Relation
+        education: {
+          connectOrCreate: {
+            where: { name: user.education },
+            create: { name: user.education },
+          },
+        },
+
+        // Marital Status Relation
+        maritalStatus: {
+          connectOrCreate: {
+            where: { name: user.maritalStatus },
+            create: { name: user.maritalStatus },
+          },
+        },
+
+        // Intention Relation
+        intention: {
+          connectOrCreate: {
+            where: { name: user.intention },
+            create: { name: user.intention },
+          },
+        },
+
+        bio: user.bio,
+        imageUrl: user.imageUrl,
+
+        // Hobbies Relation - Many to Many
+        hobbies: {
+          connectOrCreate: hobbyConnect,
+        },
+
+        // Images Relation
+        images: {
+          create: imagesCreate,
+        } as any,
+      },
+    });
   }
 
   console.log("Seeding finished.");

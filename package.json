@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "npx prisma migrate deploy && next build",
+    "sql-reset": "npx prisma migrate reset --force",
     "sql": "npx prisma studio",
     "start": "next start",
     "lint": "eslint",

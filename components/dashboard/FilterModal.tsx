@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/Card";
 import { Typography } from "@/components/ui/Typography";
 import { X, SlidersHorizontal, MapPin, Calendar, BookOpen, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { EducationId, MaritalStatusId, EDUCATIONS, MARITAL_STATUSES } from "@/lib/mock-data";
+import { EducationId, MaritalStatusId } from "@/lib/constants";
 import { useAppStore } from "@/context/AppStore";
 import { getLabel } from "@/lib/translations";
 
@@ -23,12 +23,32 @@ export interface FilterState {
   maritalStatus?: MaritalStatusId;
 }
 
+import { getMaritalStatuses, getEducations } from "@/lib/actions/contentActions";
+import { useEffect } from "react";
+
 export function FilterModal({ isOpen, onClose, onApply }: FilterModalProps) {
   const { language } = useAppStore();
   const [filters, setFilters] = useState<FilterState>({
     ageRange: [40, 65],
     maxDistance: 50,
   });
+
+  const [maritalStatusesList, setMaritalStatusesList] = useState<string[]>([]);
+  const [educationsList, setEducationsList] = useState<string[]>([]);
+
+  useEffect(() => {
+    const loadContent = async () => {
+      const [dbMarital, dbEdu] = await Promise.all([
+        getMaritalStatuses(),
+        getEducations()
+      ]);
+      setMaritalStatusesList(dbMarital);
+      setEducationsList(dbEdu);
+    };
+    if (isOpen) {
+      loadContent();
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -104,7 +124,7 @@ export function FilterModal({ isOpen, onClose, onApply }: FilterModalProps) {
               value={filters.maritalStatus || ""}
             >
               <option value="">{getLabel('select_all', language)}</option>
-              {MARITAL_STATUSES.map(s => <option key={s} value={s}>{getLabel(s, language)}</option>)}
+              {maritalStatusesList.map(s => <option key={s} value={s}>{getLabel(s, language)}</option>)}
             </select>
           </div>
 
@@ -120,7 +140,7 @@ export function FilterModal({ isOpen, onClose, onApply }: FilterModalProps) {
               value={filters.education || ""}
             >
               <option value="">{getLabel('select_all', language)}</option>
-              {EDUCATIONS.map(e => <option key={e} value={e}>{getLabel(e, language)}</option>)}
+              {educationsList.map(e => <option key={e} value={e}>{getLabel(e, language)}</option>)}
             </select>
           </div>
 

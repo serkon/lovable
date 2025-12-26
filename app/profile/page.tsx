@@ -3,15 +3,15 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/Button";
 import { Typography } from "@/components/ui/Typography";
-import { ArrowLeft, Camera, Save, Settings } from "lucide-react";
+import { ArrowLeft, Camera, Save, Settings, X } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { MARITAL_STATUSES, EDUCATIONS, INTENTIONS, MaritalStatusId, EducationId, IntentionId } from "@/lib/mock-data";
+import { MaritalStatusId, EducationId, IntentionId } from "@/lib/constants";
 import { useAppStore } from "@/context/AppStore";
 import { getLabel } from "@/lib/translations";
 import { APP_CONFIG } from "@/lib/config";
 import { updateUserProfile } from "@/lib/actions/userActions";
-import { getHobbies } from "@/lib/actions/contentActions";
+import { getHobbies, getBioTemplates, getMaritalStatuses, getEducations, getIntentions } from "@/lib/actions/contentActions";
 
 import Image from "next/image";
 
@@ -28,16 +28,31 @@ export default function ProfilePage() {
     const [maritalStatus, setMaritalStatus] = useState<MaritalStatusId>("ms_private");
     const [education, setEducation] = useState<EducationId>("edu_elementary");
     const [intention, setIntention] = useState<IntentionId>("int_chat");
+    const [userImages, setUserImages] = useState<string[]>([]);
     const [isSaving, setIsSaving] = useState(false);
 
     // Dynamic content state
     const [hobbiesList, setHobbiesList] = useState<string[]>([]);
+    const [bioTemplates, setBioTemplates] = useState<string[]>([]);
+    const [maritalStatusesList, setMaritalStatusesList] = useState<string[]>([]);
+    const [educationsList, setEducationsList] = useState<string[]>([]);
+    const [intentionsList, setIntentionsList] = useState<string[]>([]);
 
     // Fetch dynamic content on mount
     useEffect(() => {
         const loadContent = async () => {
-            const dbHobbies = await getHobbies();
+            const [dbHobbies, dbTemplates, dbMarital, dbEdu, dbIntention] = await Promise.all([
+                getHobbies(),
+                getBioTemplates(),
+                getMaritalStatuses(),
+                getEducations(),
+                getIntentions()
+            ]);
             setHobbiesList(dbHobbies);
+            setBioTemplates(dbTemplates);
+            setMaritalStatusesList(dbMarital);
+            setEducationsList(dbEdu);
+            setIntentionsList(dbIntention);
         };
         loadContent();
     }, []);
@@ -50,9 +65,15 @@ export default function ProfilePage() {
             setCity(currentUser.city || "");
             setJob(currentUser.job?.name || "");
             setBio(currentUser.bio || "");
-            setMaritalStatus(currentUser.maritalStatus as MaritalStatusId || "ms_private");
-            setEducation(currentUser.education as EducationId || "edu_elementary");
-            setIntention(currentUser.intention as IntentionId || "int_chat");
+            setMaritalStatus(currentUser.maritalStatus?.name || (currentUser.maritalStatus as unknown as string) || "ms_private");
+            setEducation(currentUser.education?.name || (currentUser.education as unknown as string) || "edu_elementary");
+            setIntention(currentUser.intention?.name || (currentUser.intention as unknown as string) || "int_chat");
+
+            if (currentUser.images && currentUser.images.length > 0) {
+                setUserImages(currentUser.images.map(img => img.url));
+            } else if (currentUser.imageUrl) {
+                setUserImages([currentUser.imageUrl]);
+            }
 
             if (currentUser.hobbies) {
                 setSelectedHobbies(currentUser.hobbies.map(h => h.name));
@@ -68,12 +89,24 @@ export default function ProfilePage() {
         );
     };
 
+    const addImage = () => {
+        const url = prompt(getLabel('prompt_image_url', language) || "Lütfen bir resim URL'si girin:");
+        if (url && url.startsWith('http')) {
+            setUserImages(prev => [...prev, url].slice(0, 6));
+        }
+    };
+
+    const removeImage = (index: number) => {
+        setUserImages(prev => prev.filter((_, i) => i !== index));
+    };
+
     const handleSave = async () => {
         setIsSaving(true);
         try {
+            const parsedAge = parseInt(age);
             await updateUserProfile({
                 name,
-                age: parseInt(age),
+                age: isNaN(parsedAge) ? undefined : parsedAge,
                 city,
                 job,
                 bio,
@@ -81,6 +114,7 @@ export default function ProfilePage() {
                 education,
                 intention,
                 hobbies: selectedHobbies,
+                images: userImages,
             });
             await refreshCurrentUser();
             alert(getLabel('profile_updated', language));
@@ -112,27 +146,38 @@ export default function ProfilePage() {
             </header>
 
             <main className="max-w-2xl mx-auto w-full p-6 space-y-8">
-                {/* Profile Photo Section */}
-                <section className="flex flex-col items-center space-y-4">
-                    <div className="relative">
-                        <div className="w-32 h-32 rounded-full border-4 border-white shadow-xl overflow-hidden bg-purple-100 flex items-center justify-center">
-                            {currentUser?.imageUrl ? (
+                {/* Profile Photo Section - Enhanced for multiple images */}
+                <section className="space-y-4">
+                    <Typography variant="h3" className="text-base font-semibold text-gray-700">{getLabel('profile_photos', language)}</Typography>
+                    <div className="grid grid-cols-3 gap-3">
+                        {userImages.map((url, index) => (
+                            <div key={index} className="relative aspect-square rounded-2xl overflow-hidden bg-slate-100 group">
                                 <Image
-                                    src={currentUser.imageUrl}
-                                    alt="Profile"
+                                    src={url}
+                                    alt={`Profile ${index + 1}`}
                                     fill
                                     className="object-cover"
                                 />
-                            ) : (
-                                <Camera className="w-12 h-12 text-purple-300" />
-                            )}
-                        </div>
-                        <button className="absolute bottom-0 right-0 bg-purple-600 text-white p-2 rounded-full shadow-lg hover:bg-purple-700 transition-colors">
-                            <Camera className="w-5 h-5" />
-                        </button>
+                                <button
+                                    onClick={() => removeImage(index)}
+                                    className="absolute top-1 right-1 bg-black/60 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                    data-testid={`profile-image-remove-${index}`}
+                                >
+                                    <X className="w-3 h-3" />
+                                </button>
+                            </div>
+                        ))}
+                        {userImages.length < 6 && (
+                            <button
+                                onClick={addImage}
+                                className="aspect-square rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-2 text-gray-400 hover:text-purple-600 hover:border-purple-200 transition-all bg-white"
+                                data-testid="profile-image-add"
+                            >
+                                <Camera className="w-6 h-6" />
+                                <span className="text-[10px] font-bold uppercase">{getLabel('add_photo', language)}</span>
+                            </button>
+                        )}
                     </div>
-                    <Typography variant="h2" className="text-xl font-bold">{name || getLabel('guest', language)}, {age}</Typography>
-                    <Typography variant="caption" className="text-gray-500">{city}</Typography>
                 </section>
 
                 {/* Personal Info Section */}
@@ -186,14 +231,41 @@ export default function ProfilePage() {
 
                 {/* Bio Section */}
                 <section className="space-y-3">
-                    <Typography variant="h3" className="text-base font-semibold text-gray-700">{getLabel('bio', language)}</Typography>
+                    <div className="flex justify-between items-end">
+                        <Typography variant="h3" className="text-base font-semibold text-gray-700">{getLabel('bio', language)}</Typography>
+                        <Typography variant="caption" className="text-purple-600 font-medium">{bio.length} / 500</Typography>
+                    </div>
                     <textarea
                         value={bio}
                         onChange={(e) => setBio(e.target.value)}
-                        className="w-full h-32 p-4 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none text-gray-700 bg-white shadow-sm"
+                        className="w-full h-32 p-4 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none text-gray-700 bg-white shadow-sm transition-all"
                         placeholder={getLabel('placeholder_bio', language)}
+                        maxLength={500}
                         data-testid="profile-edit-bio"
                     />
+
+                    {bioTemplates.length > 0 && (
+                        <div className="space-y-2">
+                            <Typography variant="caption" className="text-gray-500 font-medium block">
+                                {getLabel('suggested_sentences', language)}
+                            </Typography>
+                            <div className="flex flex-wrap gap-2">
+                                {bioTemplates.map((template, idx) => (
+                                    <button
+                                        key={idx}
+                                        onClick={() => {
+                                            const newBio = bio ? `${bio}\n${template}` : template;
+                                            if (newBio.length <= 500) setBio(newBio);
+                                        }}
+                                        className="text-[11px] px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 border border-purple-100 transition-colors text-left sm:text-center"
+                                        data-testid={`bio-template-${idx}`}
+                                    >
+                                        + {template}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </section>
 
                 {/* Status & Intention Grid */}
@@ -206,7 +278,8 @@ export default function ProfilePage() {
                             className="w-full p-3 rounded-xl border border-gray-200 bg-white shadow-sm focus:ring-2 focus:ring-purple-500 transition-all outline-none"
                             data-testid="profile-edit-intention"
                         >
-                            {INTENTIONS.map(i => <option key={i} value={i}>{getLabel(i, language)}</option>)}
+                            <option value="">{getLabel('select_default', language)}</option>
+                            {intentionsList.map(i => <option key={i} value={i}>{getLabel(i, language)}</option>)}
                         </select>
                     </div>
                     <div className="space-y-2">
@@ -217,7 +290,8 @@ export default function ProfilePage() {
                             className="w-full p-3 rounded-xl border border-gray-200 bg-white shadow-sm focus:ring-2 focus:ring-purple-500 transition-all outline-none"
                             data-testid="profile-edit-education"
                         >
-                            {EDUCATIONS.map(e => <option key={e} value={e}>{getLabel(e, language)}</option>)}
+                            <option value="">{getLabel('select_default', language)}</option>
+                            {educationsList.map(e => <option key={e} value={e}>{getLabel(e, language)}</option>)}
                         </select>
                     </div>
                     <div className="space-y-2">
@@ -228,7 +302,8 @@ export default function ProfilePage() {
                             className="w-full p-3 rounded-xl border border-gray-200 bg-white shadow-sm focus:ring-2 focus:ring-purple-500 transition-all outline-none"
                             data-testid="profile-edit-marital-status"
                         >
-                            {MARITAL_STATUSES.map(s => <option key={s} value={s}>{getLabel(s, language)}</option>)}
+                            <option value="">{getLabel('select_default', language)}</option>
+                            {maritalStatusesList.map(s => <option key={s} value={s}>{getLabel(s, language)}</option>)}
                         </select>
                     </div>
                 </section>

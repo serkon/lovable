@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Typography } from "@/components/ui/Typography";
-import { Check, X, MapPin, Briefcase, GraduationCap, Heart, SlidersHorizontal, Eye, EyeOff, User, BookOpen, MessageCircle, Clock, ChevronLeft, ChevronRight, Share2 } from "lucide-react";
+import { X, MapPin, Briefcase, GraduationCap, Heart, SlidersHorizontal, Eye, EyeOff, User, BookOpen, MessageCircle, Clock, ChevronLeft, ChevronRight, Share2 } from "lucide-react";
 import { FilterModal, FilterState } from "@/components/dashboard/FilterModal";
 import { IceBreakerModal } from "@/components/dashboard/IceBreakerModal";
 import { useAppStore } from "@/context/AppStore"; // Use Store
@@ -12,7 +12,8 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { Logo } from "@/components/ui/Logo";
 import { getLabel } from "@/lib/translations";
-import { Profile } from "@/lib/mock-data";
+import { Profile } from "@/lib/constants";
+import Image from "next/image";
 
 export default function DashboardPage() {
   const { profiles, sendLike, passProfile, matches, resetProfiles, language, setLanguage } = useAppStore(); // Get from context
@@ -38,8 +39,22 @@ export default function DashboardPage() {
     });
   }, [filters, profiles]);
 
-  const currentProfile: any = filteredProfiles[currentIndex];
+  const currentProfile = filteredProfiles[currentIndex] as Profile | undefined;
   const isFinished = !currentProfile;
+  const [imageIndex, setImageIndex] = useState(0);
+  const [prevProfileId, setPrevProfileId] = useState<string | number | undefined>(currentProfile?.id);
+
+  if (currentProfile?.id !== prevProfileId) {
+    setImageIndex(0);
+    setPrevProfileId(currentProfile?.id);
+  }
+
+  const displayImages = useMemo(() => {
+    if (!currentProfile) return [];
+    return currentProfile.images && currentProfile.images.length > 0
+      ? currentProfile.images
+      : [currentProfile.imageUrl];
+  }, [currentProfile]);
 
   const handlePass = () => {
     // If we're passing (X button), remove from store
@@ -173,7 +188,7 @@ export default function DashboardPage() {
           isOpen={isIceBreakerOpen}
           onClose={() => setIsIceBreakerOpen(false)}
           onSend={handleSendIceBreaker}
-          targetName={currentProfile?.name || ""}
+          targetName={""}
         />
       </div>
     );
@@ -203,7 +218,8 @@ export default function DashboardPage() {
     <div className={cn("min-h-screen bg-slate-50 flex flex-col md:pb-0 transition-colors duration-500", isGhostMode && "bg-gray-900")}>
 
       {/* Header - Refined & Compact */}
-      <header className={cn("h-20 px-4 shadow-sm flex justify-between items-center sticky top-0 z-30 transition-colors", isGhostMode ? "bg-gray-800 border-gray-700" : "bg-white")}>
+      {/* Main Header Container: Contains logo, navigation icons, and language toggle */}
+      <header data-testid="dashboard-header" className={cn("h-20 px-4 shadow-sm flex justify-between items-center sticky top-0 z-30 transition-colors", isGhostMode ? "bg-gray-800 border-gray-700" : "bg-white")}>
         <Link href="/" className="flex items-center gap-2">
           <Logo size={40} className={isGhostMode ? "brightness-90 invert-[.15]" : ""} />
           <Typography variant="h3" className={cn("transition-colors text-base font-bold", isGhostMode ? "text-white" : "text-purple-700")}>
@@ -286,7 +302,8 @@ export default function DashboardPage() {
       />
 
       {/* Main Content */}
-      <main className="flex-1 max-w-2xl mx-auto w-full flex flex-col items-center px-4 md:px-0 relative">
+      {/* Main Content Area: Centered container for the profile card and desktop navigation */}
+      <main data-testid="dashboard-main-content" className="flex-1 max-w-2xl mx-auto w-full flex flex-col items-center px-4 md:px-0 relative">
 
         {/* Navigation - Left */}
         {
@@ -317,7 +334,54 @@ export default function DashboardPage() {
               <MapPin className="w-3 h-3 text-white" />
               {currentProfile.distance} km
             </div>
-            <img src={currentProfile.imageUrl} alt={currentProfile.name} className="w-full h-full object-cover" data-testid="profile-image" />
+            {/* Image Carousel Controls */}
+            {displayImages.length > 1 && (
+              <>
+                {/* Navigation Dots */}
+                <div className="absolute top-4 left-0 right-0 z-4 flex justify-center gap-1 px-4">
+                  {displayImages.map((_, idx) => (
+                    <div
+                      key={idx}
+                      className={cn(
+                        "h-1 rounded-full transition-all duration-300",
+                        idx === imageIndex ? "bg-white w-6" : "bg-white/40 w-2"
+                      )}
+                    />
+                  ))}
+                </div>
+
+                {/* Tap Targets */}
+                <div className="absolute inset-0 z-1 flex">
+                  <div
+                    className="w-1/2 h-full cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setImageIndex((prev) => (prev > 0 ? prev - 1 : displayImages.length - 1));
+                    }}
+                  />
+                  <div
+                    className="w-1/2 h-full cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setImageIndex((prev) => (prev < displayImages.length - 1 ? prev + 1 : 0));
+                    }}
+                  />
+                </div>
+              </>
+            )}
+
+            {/* Image Container: Wraps the actual profile photo */}
+            <div data-testid="profile-image-container" className="relative w-full h-full">
+              <Image
+                src={displayImages[imageIndex]}
+                alt={currentProfile.name}
+                fill
+                className="object-cover"
+                data-testid="profile-image"
+                sizes="(max-width: 768px) 100vw, 672px"
+                priority
+              />
+            </div>
 
             {/* Action Buttons Overlay - Instagram Style */}
             <div className="absolute bottom-48 right-4 flex flex-col gap-3 z-2" data-testid="action-buttons">
@@ -350,7 +414,8 @@ export default function DashboardPage() {
             </div>
 
             {/* Profile Info Overlay */}
-            <div className="bg-gradient-to-t from-black/90 via-black/50 to-transparent p-6 pt-24 z-1 mt-[-194px]" data-testid="profile-info-overlay">
+            {/* Profile Info Overlay: Contains Name, Age and Location with a dark gradient background for readability */}
+            <div data-testid="profile-info-overlay" className="bg-gradient-to-t from-black/90 via-black/50 to-transparent p-6 pt-24 z-1 mt-[-194px]">
               <Typography variant="h1" className="text-white drop-shadow-lg text-4xl font-extrabold tracking-tight" data-testid="profile-name-age">
                 {currentProfile.name}, {currentProfile.age}
               </Typography>
@@ -362,7 +427,8 @@ export default function DashboardPage() {
           </div>
 
           {/* Details Area - Scrolls OVER the image */}
-          <div className="relative z-10 bg-white rounded-t-[16px] rounded-b-[16px] -mt-4 p-5 space-y-5 min-h-0 shadow-[0_-5px_20px_rgba(0,0,0,0.1)]">
+          {/* Details Area: Scrolls OVER the image and contains stats, hobbies and bio */}
+          <div data-testid="profile-details-container" className="relative z-10 bg-white rounded-t-[16px] rounded-b-[16px] -mt-4 p-5 space-y-5 min-h-0 shadow-[0_-5px_20px_rgba(0,0,0,0.1)]">
             {/* Tiny drag handle indicator for aesthetics */}
             <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-1 opacity-50" />
 

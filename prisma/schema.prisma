@@ -21,20 +21,37 @@ model User {
   genderId      String?
   gender        Gender?  @relation(fields: [genderId], references: [id])
   
-  bio           String?   
-  education     String?   
-  maritalStatus String?   
-  intention     String?   
+  bio             String?   
+  
+  educationId     String?
+  education       Education?     @relation(fields: [educationId], references: [id])
+  
+  maritalStatusId String?
+  maritalStatus   MaritalStatus? @relation(fields: [maritalStatusId], references: [id])
+  
+  intentionId     String?
+  intention       Intention?     @relation(fields: [intentionId], references: [id])
   
   // Many-to-Many relation
   hobbies       Hobby[]
   
   imageUrl      String?
+  images        UserImage[]
+  
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
   likesSent     Like[]   @relation("LikesSent")
   likesReceived Like[]   @relation("LikesReceived")
+}
+
+model UserImage {
+  id        String   @id @default(cuid())
+  url       String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
 }
 
 model Like {
@@ -76,4 +93,21 @@ model BioTemplate {
 model IceBreaker {
   id      String @id @default(cuid())
   content String @unique
+}
+model MaritalStatus {
+  id    String @id @default(cuid())
+  name  String @unique // ms_single, ms_divorced vb.
+  users User[]
+}
+
+model Education {
+  id    String @id @default(cuid())
+  name  String @unique // edu_phd, edu_masters vb.
+  users User[]
+}
+
+model Intention {
+  id    String @id @default(cuid())
+  name  String @unique // int_chat, int_friendship vb.
+  users User[]
 }

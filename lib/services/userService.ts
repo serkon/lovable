@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { Profile, EducationId, MaritalStatusId, IntentionId } from "@/lib/mock-data";
+import { Profile, EducationId, MaritalStatusId, IntentionId } from "@/lib/constants";
 
 // Helper to pick random item (not used if fetching from DB, but kept for potential fallbacks if needed, though we will remove mock logic)
 
@@ -26,10 +26,14 @@ export const fetchProfilesFromAPI = async (count: number = 20): Promise<Profile[
         job: true,
         hobbies: true,
         gender: true,
-      },
+        images: true,
+        education: true,
+        maritalStatus: true,
+        intention: true,
+      } as any,
     });
 
-    return users.map((user) => {
+    return users.map((user: any) => {
       // Map DB User to Frontend Profile
       return {
         id: user.id,
@@ -38,12 +42,22 @@ export const fetchProfilesFromAPI = async (count: number = 20): Promise<Profile[
         location: user.city || "Bilinmiyor",
         distance: Math.floor(Math.random() * 20) + 1, // Fake distance for now as we don't have geo
         job: user.job?.name || user.job?.toString() || "", // Handle relation or fallback
-        education: (user.education as EducationId) || "edu_highschool",
-        maritalStatus: (user.maritalStatus as MaritalStatusId) || "ms_single",
-        intention: (user.intention as IntentionId) || "int_friendship",
+        education: (user.education?.name as EducationId) || "edu_highschool",
+        maritalStatus: (user.maritalStatus?.name as MaritalStatusId) || "ms_single",
+        intention: (user.intention?.name as IntentionId) || "int_friendship",
         bio: user.bio || "",
-        hobbies: user.hobbies.map((h) => h.name),
-        imageUrl: user.imageUrl || "https://via.placeholder.com/400",
+        hobbies: user.hobbies.map((h: { name: string }) => h.name),
+        imageUrl:
+          user.imageUrl ||
+          (user.images && user.images.length > 0
+            ? user.images[0].url
+            : "https://via.placeholder.com/400"),
+        images:
+          user.images && user.images.length > 0
+            ? user.images.map((img: { url: string }) => img.url)
+            : user.imageUrl
+              ? [user.imageUrl]
+              : [],
         iceBreaker: "Merhaba, nasılsın?", // Default or fetch from IceBreaker table if relation existed (it doesn't on User yet, logic was random)
         gender: user.gender?.name,
       } as Profile; // Casting to Profile ensuring it matches shape roughly
