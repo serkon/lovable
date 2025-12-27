@@ -1,14 +1,23 @@
 "use client";
 
-import { useState } from "react";
-import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
-import { Typography } from "@/components/ui/Typography";
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { X, SlidersHorizontal, MapPin, Calendar, BookOpen, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { EducationId, MaritalStatusId } from "@/lib/constants";
 import { useAppStore } from "@/context/AppStore";
 import { getLabel } from "@/lib/translations";
+import { getMaritalStatuses, getEducations } from "@/lib/actions/contentActions";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 
 interface FilterModalProps {
   isOpen: boolean;
@@ -22,9 +31,6 @@ export interface FilterState {
   education?: EducationId;
   maritalStatus?: MaritalStatusId;
 }
-
-import { getMaritalStatuses, getEducations } from "@/lib/actions/contentActions";
-import { useEffect } from "react";
 
 export function FilterModal({ isOpen, onClose, onApply }: FilterModalProps) {
   const { language } = useAppStore();
@@ -42,8 +48,8 @@ export function FilterModal({ isOpen, onClose, onApply }: FilterModalProps) {
         getMaritalStatuses(),
         getEducations()
       ]);
-      setMaritalStatusesList(dbMarital);
-      setEducationsList(dbEdu);
+      setMaritalStatusesList(dbMarital || []);
+      setEducationsList(dbEdu || []);
     };
     if (isOpen) {
       loadContent();
@@ -53,25 +59,25 @@ export function FilterModal({ isOpen, onClose, onApply }: FilterModalProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <Card className="w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl animate-in zoom-in-95 duration-200 border-purple-100">
-        <div className="p-6 sticky top-0 bg-white z-10 border-b flex justify-between items-center">
-          <div className="flex items-center gap-2 text-purple-700">
-            <SlidersHorizontal className="w-6 h-6" />
-            <Typography variant="h3">{getLabel('filter_title', language)}</Typography>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <Card className="w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="p-6 border-b flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <SlidersHorizontal className="w-5 h-5" />
+            <h3 className="text-xl font-semibold">Filtreleme</h3>
           </div>
-          <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full">
-            <X className="w-6 h-6" />
+          <Button variant="ghost" size="icon" onClick={onClose}>
+            <X className="w-5 h-5" />
           </Button>
         </div>
 
-        <div className="p-6 space-y-8">
+        <div className="p-6 space-y-8 overflow-y-auto">
           {/* Age Range */}
           <div className="space-y-4">
-            <div className="flex items-center gap-2 text-gray-700">
-              <Calendar className="w-5 h-5 text-purple-500" />
-              <Typography variant="h3" className="text-lg">{getLabel('age_range', language)}</Typography>
-            </div>
+            <Label className="flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-muted-foreground" />
+              {getLabel('age_range', language)}
+            </Label>
             <div className="px-2">
               <input
                 type="range"
@@ -79,79 +85,86 @@ export function FilterModal({ isOpen, onClose, onApply }: FilterModalProps) {
                 max="80"
                 value={filters.ageRange[1]}
                 onChange={(e) => setFilters({ ...filters, ageRange: [filters.ageRange[0], parseInt(e.target.value)] })}
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
+                className="w-full"
               />
-              <div className="flex justify-between mt-2 text-lg font-medium text-gray-600">
+              <div className="flex justify-between mt-2 text-xs text-muted-foreground">
                 <span>{filters.ageRange[0]}</span>
                 <span>{filters.ageRange[1]}</span>
               </div>
             </div>
           </div>
 
+          <Separator />
+
           {/* Distance */}
           <div className="space-y-4">
-            <div className="flex items-center gap-2 text-gray-700">
-              <MapPin className="w-5 h-5 text-purple-500" />
-              <Typography variant="h3" className="text-lg">{getLabel('max_distance', language)}</Typography>
-            </div>
-            <div className="flex gap-3 flex-wrap">
+            <Label className="flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-muted-foreground" />
+              {getLabel('max_distance', language)}
+            </Label>
+            <div className="flex gap-2 flex-wrap">
               {[10, 25, 50, 100].map((km) => (
-                <button
+                <Button
                   key={km}
+                  variant={filters.maxDistance === km ? "default" : "outline"}
+                  size="sm"
                   onClick={() => setFilters({ ...filters, maxDistance: km })}
-                  className={cn(
-                    "px-4 py-2 rounded-xl border-2 text-lg font-medium transition-all",
-                    filters.maxDistance === km
-                      ? "border-purple-600 bg-purple-50 text-purple-700"
-                      : "border-gray-200 text-gray-600 hover:border-purple-200"
-                  )}
                 >
                   {km} km
-                </button>
+                </Button>
               ))}
             </div>
           </div>
 
+          <Separator />
+
           {/* Marital Status */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 text-gray-700">
-              <Heart className="w-5 h-5 text-purple-500" />
-              <Typography variant="h3" className="text-lg">{getLabel('maritalStatus', language)}</Typography>
-            </div>
-            <select
-              className="w-full h-14 rounded-xl border border-gray-300 px-4 text-lg bg-white"
-              onChange={(e) => setFilters({ ...filters, maritalStatus: e.target.value as MaritalStatusId })}
-              value={filters.maritalStatus || ""}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2">
+              <Heart className="w-4 h-4 text-muted-foreground" />
+              {getLabel('maritalStatus', language)}
+            </Label>
+            <Select
+              value={filters.maritalStatus || "all"}
+              onValueChange={(val) => setFilters({ ...filters, maritalStatus: val === "all" ? undefined : (val as MaritalStatusId) })}
             >
-              <option value="">{getLabel('select_all', language)}</option>
-              {maritalStatusesList.map(s => <option key={s} value={s}>{getLabel(s, language)}</option>)}
-            </select>
+              <SelectTrigger>
+                <SelectValue placeholder={getLabel('select_all', language)} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{getLabel('select_all', language)}</SelectItem>
+                {maritalStatusesList.map(s => <SelectItem key={s} value={s}>{getLabel(s, language)}</SelectItem>)}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Education */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 text-gray-700">
-              <BookOpen className="w-5 h-5 text-purple-500" />
-              <Typography variant="h3" className="text-lg">{getLabel('education', language)}</Typography>
-            </div>
-            <select
-              className="w-full h-14 rounded-xl border border-gray-300 px-4 text-lg bg-white"
-              onChange={(e) => setFilters({ ...filters, education: e.target.value as EducationId })}
-              value={filters.education || ""}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2">
+              <BookOpen className="w-4 h-4 text-muted-foreground" />
+              {getLabel('education', language)}
+            </Label>
+            <Select
+              value={filters.education || "all"}
+              onValueChange={(val) => setFilters({ ...filters, education: val === "all" ? undefined : (val as EducationId) })}
             >
-              <option value="">{getLabel('select_all', language)}</option>
-              {educationsList.map(e => <option key={e} value={e}>{getLabel(e, language)}</option>)}
-            </select>
+              <SelectTrigger>
+                <SelectValue placeholder={getLabel('select_all', language)} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{getLabel('select_all', language)}</SelectItem>
+                {educationsList.map(e => <SelectItem key={e} value={e}>{getLabel(e, language)}</SelectItem>)}
+              </SelectContent>
+            </Select>
           </div>
-
         </div>
 
-        <div className="p-6 border-t bg-gray-50 flex gap-4 sticky bottom-0">
-          <Button variant="ghost" onClick={onClose} className="flex-1 h-14 text-lg">
-            {getLabel('btn_cancel', language)}
+        <div className="p-6 border-t flex gap-3">
+          <Button variant="outline" onClick={onClose} className="flex-1">
+            İptal
           </Button>
-          <Button onClick={() => { onApply(filters); onClose(); }} className="flex-[2] h-14 text-lg bg-purple-700 hover:bg-purple-800">
-            {getLabel('btn_apply_filters', language)}
+          <Button onClick={() => { onApply(filters); onClose(); }} className="flex-[2]">
+            Filtreleri Uygula
           </Button>
         </div>
       </Card>

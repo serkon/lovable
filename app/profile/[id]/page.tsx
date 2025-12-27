@@ -2,9 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Button } from "@/components/ui/Button";
-import { Typography } from "@/components/ui/Typography";
-import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, MapPin, Briefcase, GraduationCap, Heart, MessageCircle, Share2 } from "lucide-react";
 import Link from "next/link";
 import { useAppStore } from "@/context/AppStore";
@@ -13,6 +12,8 @@ import { getUserById } from "@/lib/actions/userActions";
 import { Profile } from "@/lib/constants";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function PublicProfilePage() {
     const params = useParams();
@@ -26,8 +27,6 @@ export default function PublicProfilePage() {
     useEffect(() => {
         const loadProfile = async () => {
             const id = params.id as string;
-
-            // Reset image state when profile ID changes
             setImageIndex(0);
             setIsImageLoading(true);
 
@@ -98,57 +97,58 @@ export default function PublicProfilePage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+            <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 space-y-4">
+                <Skeleton className="h-[60vh] w-full max-w-md rounded-xl" />
+                <div className="w-full max-w-md space-y-2">
+                    <Skeleton className="h-8 w-3/4" />
+                    <Skeleton className="h-4 w-1/2" />
+                </div>
             </div>
         );
     }
 
     if (!profile) {
         return (
-            <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center">
-                <Typography variant="h2" className="text-gray-800 mb-2">Profil Bulunamadı</Typography>
-                <Typography variant="body" className="text-gray-500 mb-6">Aradığınız kişi artık aramızda olmayabilir.</Typography>
+            <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center space-y-4">
+                <h2 className="text-2xl font-bold">Profil Bulunamadı</h2>
+                <p className="text-muted-foreground">Aradığınız kişi artık aramızda olmayabilir.</p>
                 <Link href="/dashboard">
-                    <Button className="bg-purple-600">Keşfetmeye Geri Dön</Button>
+                    <Button>Keşfetmeye Geri Dön</Button>
                 </Link>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-slate-50 pb-20">
-            {/* Dynamic Header */}
-            <header className="bg-white/80 backdrop-blur-md h-16 px-4 flex justify-between items-center sticky top-0 z-40 border-b border-purple-50">
-                <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full">
-                    <ArrowLeft className="w-6 h-6 text-purple-600" />
+        <div className="min-h-screen bg-background pb-20">
+            {/* Header */}
+            <header className="bg-background/80 backdrop-blur-md h-16 px-4 flex justify-between items-center sticky top-0 z-40 border-b">
+                <Button variant="ghost" size="icon" onClick={() => router.back()}>
+                    <ArrowLeft className="w-6 h-6" />
                 </Button>
-                <Typography variant="h3" className="text-purple-700 font-bold">{profile.name}</Typography>
-                <Button variant="ghost" size="icon" onClick={handleShare} className="rounded-full">
-                    <Share2 className="w-5 h-5 text-gray-400" />
+                <h3 className="font-bold text-sm tracking-tight">{profile.name}</h3>
+                <Button variant="ghost" size="icon" onClick={handleShare}>
+                    <Share2 className="w-5 h-5 text-muted-foreground" />
                 </Button>
             </header>
 
             <main className="max-w-md mx-auto p-4 space-y-6">
                 {/* Photo Card */}
-                <Card className="overflow-hidden rounded-[40px] border-none shadow-2xl relative aspect-[3/4]">
-                    {/* Carousel Navigation */}
+                <Card className="overflow-hidden relative aspect-[3/4] p-0 border">
                     {displayImages.length > 1 && (
                         <>
-                            {/* Navigation Dots */}
-                            <div className="absolute top-4 left-0 right-0 z-30 flex justify-center gap-1.5 px-4">
+                            <div className="absolute top-4 left-0 right-0 z-30 flex justify-center gap-1 px-4">
                                 {displayImages.map((_, idx) => (
                                     <div
                                         key={idx}
                                         className={cn(
-                                            "h-1 rounded-full transition-all duration-300",
+                                            "h-1 rounded-full",
                                             idx === imageIndex ? "bg-white w-8 shadow-sm" : "bg-white/40 w-2"
                                         )}
                                     />
                                 ))}
                             </div>
 
-                            {/* Tap Targets */}
                             <div className="absolute inset-0 z-20 flex">
                                 <div
                                     className="w-1/2 h-full cursor-pointer"
@@ -170,94 +170,90 @@ export default function PublicProfilePage() {
                         </>
                     )}
 
-                    <div className="relative w-full h-full bg-gray-100">
+                    <div className="relative w-full h-full bg-muted">
                         <Image
                             key={`${profile.id}-${imageIndex}`}
                             src={displayImages[imageIndex]}
                             alt={profile.name}
                             fill
                             className={cn(
-                                "object-cover transition-[opacity,filter,transform] duration-1000 ease-in-out",
-                                isImageLoading ? "blur-2xl opacity-0 scale-110" : "blur-0 opacity-100 scale-100"
+                                "object-cover transition-all duration-700",
+                                isImageLoading ? "blur-xl" : "blur-0"
                             )}
-                            data-testid="profile-image"
-                            sizes="(max-width: 768px) 100vw, 672px"
                             priority
                             onLoad={() => setIsImageLoading(false)}
                         />
-                        <div
-                            className={cn(
-                                "absolute inset-0 flex items-center justify-center bg-gray-100/30 backdrop-blur-[2px] z-10 transition-opacity duration-800 pointer-events-none",
-                                isImageLoading ? "opacity-100" : "opacity-0"
-                            )}
-                        >
-                            <div className="w-10 h-10 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin shadow-lg" />
-                        </div>
                     </div>
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none z-10" />
 
-                    <div className="absolute bottom-6 left-6 right-6 text-white p-2 z-20">
-                        <Typography variant="h1" className="text-3xl font-bold flex items-center gap-2">
+                    <div className="absolute bottom-6 left-6 right-6 text-white z-20">
+                        <h2 className="text-2xl font-bold">
                             {profile.name}, {profile.age}
-                        </Typography>
-                        <div className="flex items-center gap-1.5 opacity-90 mt-1">
-                            <MapPin className="w-4 h-4 text-purple-300" />
-                            <p className="text-sm font-medium">{profile.location}</p>
+                        </h2>
+                        <div className="flex items-center gap-1.5 opacity-90 mt-1 text-sm">
+                            <MapPin className="w-4 h-4" />
+                            <span>{profile.location}</span>
                         </div>
                     </div>
                 </Card>
 
-                {/* Quick Info Grid */}
+                {/* Info Grid */}
                 <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-white p-4 rounded-3xl border border-purple-50 flex items-center gap-3">
-                        <div className="bg-purple-100 p-2 rounded-xl">
-                            <Briefcase className="w-5 h-5 text-purple-600" />
+                    <Card className="p-4 border shadow-none rounded-xl">
+                        <div className="flex items-center gap-3">
+                            <Briefcase className="w-5 h-5 text-muted-foreground" />
+                            <div className="min-w-0">
+                                <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">{getLabel('job', language)}</p>
+                                <p className="text-xs font-semibold truncate">{getLabel(profile.job, language)}</p>
+                            </div>
                         </div>
-                        <div className="min-w-0">
-                            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{getLabel('job', language)}</p>
-                            <p className="text-sm font-semibold truncate">{getLabel(profile.job, language)}</p>
+                    </Card>
+                    <Card className="p-4 border shadow-none rounded-xl">
+                        <div className="flex items-center gap-3">
+                            <GraduationCap className="w-5 h-5 text-muted-foreground" />
+                            <div className="min-w-0">
+                                <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">{getLabel('education', language)}</p>
+                                <p className="text-xs font-semibold truncate">{getLabel(profile.education, language)}</p>
+                            </div>
                         </div>
-                    </div>
-                    <div className="bg-white p-4 rounded-3xl border border-purple-50 flex items-center gap-3">
-                        <div className="bg-purple-100 p-2 rounded-xl">
-                            <GraduationCap className="w-5 h-5 text-purple-600" />
-                        </div>
-                        <div className="min-w-0">
-                            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{getLabel('education', language)}</p>
-                            <p className="text-sm font-semibold truncate">{getLabel(profile.education, language)}</p>
-                        </div>
-                    </div>
+                    </Card>
                 </div>
 
                 {/* Bio Section */}
-                <section className="bg-white p-6 rounded-[32px] border border-purple-50 space-y-3">
-                    <Typography variant="h3" className="text-xs font-bold text-gray-400 uppercase tracking-widest">{getLabel('bio', language)}</Typography>
-                    <Typography variant="body" className="text-gray-600 leading-relaxed italic">
-                        &quot;{profile.bio}&quot;
-                    </Typography>
-                </section>
+                <Card className="border shadow-none rounded-xl">
+                    <CardContent className="p-6 space-y-3">
+                        <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{getLabel('bio', language)}</h3>
+                        <p className="text-foreground leading-relaxed italic text-sm">
+                            &quot;{profile.bio}&quot;
+                        </p>
+                    </CardContent>
+                </Card>
 
                 {/* Hobbies Section */}
-                <section className="bg-white p-6 rounded-[32px] border border-purple-50 space-y-4">
-                    <Typography variant="h3" className="text-xs font-bold text-gray-400 uppercase tracking-widest">{getLabel('hobbies', language)}</Typography>
-                    <div className="flex flex-wrap gap-2">
-                        {profile.hobbies.map(hobby => (
-                            <span key={hobby} className="px-4 py-2 bg-purple-50 text-purple-700 rounded-2xl text-xs font-bold border border-purple-100">
-                                {getLabel(hobby, language)}
-                            </span>
-                        ))}
-                    </div>
-                </section>
+                <Card className="border shadow-none rounded-xl">
+                    <CardContent className="p-6 space-y-4">
+                        <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{getLabel('hobbies', language)}</h3>
+                        <div className="flex flex-wrap gap-2">
+                            {profile.hobbies.map(hobby => (
+                                <Badge key={hobby} variant="secondary" className="px-2.5 py-0.5 text-[10px] font-bold uppercase">
+                                    {getLabel(hobby, language)}
+                                </Badge>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
 
                 {/* Action Buttons */}
                 <div className="flex gap-4 pt-4">
-                    <Button onClick={handleLike} className="flex-1 h-16 rounded-3xl bg-purple-600 hover:bg-purple-700 shadow-xl shadow-purple-100 text-lg font-bold gap-2">
-                        <Heart className="w-6 h-6 fill-white" />
+                    <Button onClick={handleLike} className="flex-1 gap-2">
+                        <Heart className="w-5 h-5 fill-current" />
                         Beğen
                     </Button>
-                    <Button variant="outline" className="h-16 w-16 rounded-3xl border-2 border-purple-200 text-purple-600">
-                        <MessageCircle className="w-6 h-6" />
-                    </Button>
+                    <Link href={`/chat/${profile.id}`} className="flex-none">
+                        <Button variant="outline" size="icon">
+                            <MessageCircle className="w-6 h-6" />
+                        </Button>
+                    </Link>
                 </div>
             </main>
         </div>

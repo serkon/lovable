@@ -1,17 +1,27 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/Button";
-import { Typography } from "@/components/ui/Typography";
-import { ArrowLeft, Camera, Save, Settings, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, Camera, Settings, X } from "lucide-react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
-import { MaritalStatusId, EducationId, IntentionId } from "@/lib/constants";
 import { useAppStore } from "@/context/AppStore";
 import { getLabel } from "@/lib/translations";
-import { APP_CONFIG } from "@/lib/config";
 import { updateUserProfile } from "@/lib/actions/userActions";
 import { getHobbies, getBioTemplates, getMaritalStatuses, getEducations, getIntentions, getJobs } from "@/lib/actions/contentActions";
+import { MaritalStatusId, EducationId, IntentionId } from "@/lib/constants";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 import Image from "next/image";
 
@@ -50,12 +60,12 @@ export default function ProfilePage() {
                 getIntentions(),
                 getJobs()
             ]);
-            setHobbiesList(dbHobbies);
-            setBioTemplates(dbTemplates);
-            setMaritalStatusesList(dbMarital);
-            setEducationsList(dbEdu);
-            setIntentionsList(dbIntention);
-            setJobsList(dbJobs);
+            setHobbiesList(dbHobbies || []);
+            setBioTemplates(dbTemplates || []);
+            setMaritalStatusesList(dbMarital || []);
+            setEducationsList(dbEdu || []);
+            setIntentionsList(dbIntention || []);
+            setJobsList(dbJobs || []);
         };
         loadContent();
     }, []);
@@ -68,14 +78,12 @@ export default function ProfilePage() {
             setCity(currentUser.city || "");
             setJob(currentUser.job?.id || "");
             setBio(currentUser.bio || "");
-            setMaritalStatus(currentUser.maritalStatus?.id || (currentUser.maritalStatus as unknown as string) || "ms_private");
-            setEducation(currentUser.education?.id || (currentUser.education as unknown as string) || "edu_elementary");
-            setIntention(currentUser.intention?.id || (currentUser.intention as unknown as string) || "int_chat");
+            setMaritalStatus(currentUser.maritalStatus?.id as MaritalStatusId || "ms_private");
+            setEducation(currentUser.education?.id as EducationId || "edu_elementary");
+            setIntention(currentUser.intention?.id as IntentionId || "int_chat");
 
             if (currentUser.images && currentUser.images.length > 0) {
                 setUserImages(currentUser.images.map(img => img.url));
-            } else if (currentUser.imageUrl) {
-                setUserImages([currentUser.imageUrl]);
             }
 
             if (currentUser.hobbies) {
@@ -106,21 +114,20 @@ export default function ProfilePage() {
     const handleSave = async () => {
         setIsSaving(true);
         try {
-            const parsedAge = parseInt(age);
             await updateUserProfile({
                 name,
-                age: isNaN(parsedAge) ? undefined : parsedAge,
+                age: parseInt(age),
                 city,
                 job,
                 bio,
-                maritalStatus,
-                education,
-                intention,
                 hobbies: selectedHobbies,
                 images: userImages,
+                maritalStatus,
+                education,
+                intention
             });
             await refreshCurrentUser();
-            alert(getLabel('profile_updated', language));
+            alert(getLabel('profile_updated_success', language));
         } catch (error) {
             console.error("Save failed:", error);
             alert(getLabel('error_generic', language));
@@ -130,227 +137,203 @@ export default function ProfilePage() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 flex flex-col pb-20">
+        <div className="min-h-screen bg-background pb-20">
             {/* Header */}
-            <header className="h-20 px-4 bg-white shadow-sm flex justify-between items-center sticky top-0 z-30">
-                <div className="flex items-center gap-3">
+            <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background px-4">
+                <div className="flex items-center gap-2">
                     <Link href="/dashboard">
-                        <Button variant="ghost" size="icon" className="rounded-full">
-                            <ArrowLeft className="w-6 h-6 text-gray-600" />
+                        <Button variant="ghost" size="icon">
+                            <ArrowLeft className="h-5 w-5" />
                         </Button>
                     </Link>
-                    <Typography variant="h3" className="text-gray-900 font-bold">{getLabel('edit_profile', language)}</Typography>
+                    <h1 className="font-bold">Profilimi Düzenle</h1>
                 </div>
-                <Link href="/settings">
-                    <Button variant="ghost" size="icon" className="rounded-full">
-                        <Settings className="w-6 h-6 text-gray-600" />
+                <div className="flex gap-2">
+                    <Link href="/settings">
+                        <Button variant="ghost" size="icon">
+                            <Settings className="h-5 w-5" />
+                        </Button>
+                    </Link>
+                    <Button onClick={handleSave} disabled={isSaving}>
+                        Kaydet
                     </Button>
-                </Link>
+                </div>
             </header>
 
-            <main className="max-w-2xl mx-auto w-full p-6 space-y-8">
-                {/* Profile Photo Section - Enhanced for multiple images */}
+            <main className="mx-auto max-w-xl px-4 py-8 space-y-10">
+                {/* Photo Section */}
                 <section className="space-y-4">
-                    <Typography variant="h3" className="text-base font-semibold text-gray-700">{getLabel('profile_photos', language)}</Typography>
-                    <div className="grid grid-cols-3 gap-3">
-                        {userImages.map((url, index) => (
-                            <div key={index} className="relative aspect-square rounded-2xl overflow-hidden bg-slate-100 group">
-                                <Image
-                                    src={url}
-                                    alt={`Profile ${index + 1}`}
-                                    fill
-                                    className="object-cover"
-                                />
-                                <button
-                                    onClick={() => removeImage(index)}
-                                    className="absolute top-1 right-1 bg-black/60 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                                    data-testid={`profile-image-remove-${index}`}
+                    <div className="flex items-center justify-between px-1">
+                        <Label className="text-xs font-bold text-muted-foreground">Fotoğraflar</Label>
+                        <span className="text-xs text-muted-foreground">{userImages.length}/6</span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2">
+                        {userImages.map((url, idx) => (
+                            <div key={idx} className="relative aspect-square bg-muted border overflow-hidden">
+                                <Image src={url} alt="Profile" fill className="object-cover" />
+                                <Button
+                                    variant="destructive"
+                                    size="icon"
+                                    onClick={() => removeImage(idx)}
+                                    className="absolute right-1 top-1 h-6 w-6"
                                 >
-                                    <X className="w-3 h-3" />
-                                </button>
+                                    <X className="h-3 w-3" />
+                                </Button>
                             </div>
                         ))}
                         {userImages.length < 6 && (
-                            <button
+                            <Button
+                                variant="outline"
                                 onClick={addImage}
-                                className="aspect-square rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-2 text-gray-400 hover:text-purple-600 hover:border-purple-200 transition-all bg-white"
-                                data-testid="profile-image-add"
+                                className="aspect-square flex flex-col items-center justify-center border-dashed"
                             >
-                                <Camera className="w-6 h-6" />
-                                <span className="text-[10px] font-bold uppercase">{getLabel('add_photo', language)}</span>
-                            </button>
+                                <Camera className="h-6 w-6" />
+                                <span className="text-xs">Ekle</span>
+                            </Button>
                         )}
                     </div>
                 </section>
 
-                {/* Personal Info Section */}
-                <section className="space-y-4">
-                    <Typography variant="h3" className="text-base font-semibold text-gray-700">{getLabel('personal_info', language)}</Typography>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white p-4 rounded-3xl border border-gray-100 shadow-sm">
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">{getLabel('label_name', language)}</label>
-                            <input
-                                type="text"
+                <Separator />
+
+                {/* Basic Info */}
+                <section className="space-y-6">
+                    <h3 className="text-sm font-bold text-muted-foreground">Temel Bilgiler</h3>
+                    <Card className="p-6 space-y-6">
+                        <div className="space-y-2">
+                            <Label htmlFor="name">Ad Soyad</Label>
+                            <Input
+                                id="name"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
-                                className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none text-gray-700 bg-slate-50/50"
-                                data-testid="profile-edit-name"
+                                placeholder="Adınız"
                             />
                         </div>
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">{getLabel('label_age', language)}</label>
-                            <input
-                                type="number"
-                                value={age}
-                                onChange={(e) => setAge(e.target.value)}
-                                min={APP_CONFIG.MIN_AGE}
-                                max={APP_CONFIG.MAX_AGE}
-                                className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none text-gray-700 bg-slate-50/50"
-                                data-testid="profile-edit-age"
-                            />
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="age">Yaş</Label>
+                                <Input
+                                    id="age"
+                                    type="number"
+                                    value={age}
+                                    onChange={(e) => setAge(e.target.value)}
+                                    placeholder="Yaşınız"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="city">Şehir</Label>
+                                <Input
+                                    id="city"
+                                    value={city}
+                                    onChange={(e) => setCity(e.target.value)}
+                                    placeholder="Şehriniz"
+                                />
+                            </div>
                         </div>
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">{getLabel('label_city', language)}</label>
-                            <input
-                                type="text"
-                                value={city}
-                                onChange={(e) => setCity(e.target.value)}
-                                className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none text-gray-700 bg-slate-50/50"
-                                data-testid="profile-edit-city"
-                            />
+                        <div className="space-y-2">
+                            <Label htmlFor="job">Meslek</Label>
+                            <Select value={job} onValueChange={setJob}>
+                                <SelectTrigger id="job">
+                                    <SelectValue placeholder="Mesleğinizi seçin" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {jobsList.map(j => <SelectItem key={j} value={j}>{getLabel(j, language)}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
                         </div>
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">{getLabel('label_job', language)}</label>
-                            <select
-                                value={job}
-                                onChange={(e) => setJob(e.target.value)}
-                                className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none text-gray-700 bg-slate-50/50"
-                                data-testid="profile-edit-job"
-                            >
-                                <option value="">{getLabel('select_default', language)}</option>
-                                {jobsList.map(j => <option key={j} value={j}>{getLabel(j, language)}</option>)}
-                            </select>
-                        </div>
-                    </div>
+                    </Card>
                 </section>
 
                 {/* Bio Section */}
-                <section className="space-y-3">
-                    <div className="flex justify-between items-end">
-                        <Typography variant="h3" className="text-base font-semibold text-gray-700">{getLabel('bio', language)}</Typography>
-                        <Typography variant="caption" className="text-purple-600 font-medium">{bio.length} / 500</Typography>
-                    </div>
-                    <textarea
-                        value={bio}
-                        onChange={(e) => setBio(e.target.value)}
-                        className="w-full h-32 p-4 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:outline-none text-gray-700 bg-white shadow-sm transition-all"
-                        placeholder={getLabel('placeholder_bio', language)}
-                        maxLength={500}
-                        data-testid="profile-edit-bio"
-                    />
-
-                    {bioTemplates.length > 0 && (
-                        <div className="space-y-2">
-                            <Typography variant="caption" className="text-gray-500 font-medium block">
-                                {getLabel('suggested_sentences', language)}
-                            </Typography>
-                            <div className="flex flex-wrap gap-2">
-                                {bioTemplates.map((template, idx) => (
-                                    <button
-                                        key={idx}
-                                        onClick={() => {
-                                            const newBio = bio ? `${bio}\n${template}` : template;
-                                            if (newBio.length <= 500) setBio(newBio);
-                                        }}
-                                        className="text-[11px] px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 border border-purple-100 transition-colors text-left sm:text-center"
-                                        data-testid={`bio-template-${idx}`}
-                                    >
-                                        + {template}
-                                    </button>
-                                ))}
-                            </div>
+                <section className="space-y-4">
+                    <Label htmlFor="bio" className="text-sm font-bold text-muted-foreground">Hakkımda</Label>
+                    <Card className="p-4 space-y-4">
+                        <Textarea
+                            id="bio"
+                            value={bio}
+                            onChange={(e) => setBio(e.target.value)}
+                            placeholder="Kendinizden bahsedin..."
+                        />
+                        <div className="flex flex-wrap gap-2 pt-2">
+                            {bioTemplates.slice(0, 3).map((t, idx) => (
+                                <Badge
+                                    key={idx}
+                                    variant="secondary"
+                                    className="cursor-pointer text-[10px]"
+                                    onClick={() => setBio(prev => prev ? `${prev} ${t}` : t)}
+                                >
+                                    + {t.substring(0, 15)}...
+                                </Badge>
+                            ))}
                         </div>
-                    )}
+                    </Card>
                 </section>
 
-                {/* Status & Intention Grid */}
-                <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <Typography variant="h3" className="text-sm font-semibold text-gray-500 uppercase tracking-wider">{getLabel('intention', language)}</Typography>
-                        <select
-                            value={intention}
-                            onChange={(e) => setIntention(e.target.value as IntentionId)}
-                            className="w-full p-3 rounded-xl border border-gray-200 bg-white shadow-sm focus:ring-2 focus:ring-purple-500 transition-all outline-none"
-                            data-testid="profile-edit-intention"
-                        >
-                            <option value="">{getLabel('select_default', language)}</option>
-                            {intentionsList.map(i => <option key={i} value={i}>{getLabel(i, language)}</option>)}
-                        </select>
-                    </div>
-                    <div className="space-y-2">
-                        <Typography variant="h3" className="text-sm font-semibold text-gray-500 uppercase tracking-wider">{getLabel('education', language)}</Typography>
-                        <select
-                            value={education}
-                            onChange={(e) => setEducation(e.target.value as EducationId)}
-                            className="w-full p-3 rounded-xl border border-gray-200 bg-white shadow-sm focus:ring-2 focus:ring-purple-500 transition-all outline-none"
-                            data-testid="profile-edit-education"
-                        >
-                            <option value="">{getLabel('select_default', language)}</option>
-                            {educationsList.map(e => <option key={e} value={e}>{getLabel(e, language)}</option>)}
-                        </select>
-                    </div>
-                    <div className="space-y-2">
-                        <Typography variant="h3" className="text-sm font-semibold text-gray-500 uppercase tracking-wider">{getLabel('maritalStatus', language)}</Typography>
-                        <select
-                            value={maritalStatus}
-                            onChange={(e) => setMaritalStatus(e.target.value as MaritalStatusId)}
-                            className="w-full p-3 rounded-xl border border-gray-200 bg-white shadow-sm focus:ring-2 focus:ring-purple-500 transition-all outline-none"
-                            data-testid="profile-edit-marital-status"
-                        >
-                            <option value="">{getLabel('select_default', language)}</option>
-                            {maritalStatusesList.map(s => <option key={s} value={s}>{getLabel(s, language)}</option>)}
-                        </select>
-                    </div>
+                {/* Details Section */}
+                <section className="space-y-6">
+                    <h3 className="text-sm font-bold text-muted-foreground">Detaylar</h3>
+                    <Card className="p-6 space-y-6">
+                        <div className="space-y-2">
+                            <Label htmlFor="intention">Niyet</Label>
+                            <Select value={intention} onValueChange={(v) => setIntention(v as IntentionId)}>
+                                <SelectTrigger id="intention">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {intentionsList.map(i => <SelectItem key={i} value={i}>{getLabel(i, language)}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="education">Eğitim</Label>
+                            <Select value={education} onValueChange={(v) => setEducation(v as EducationId)}>
+                                <SelectTrigger id="education">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {educationsList.map(e => <SelectItem key={e} value={e}>{getLabel(e, language)}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="marital">Medeni Durum</Label>
+                            <Select value={maritalStatus} onValueChange={(v) => setMaritalStatus(v as MaritalStatusId)}>
+                                <SelectTrigger id="marital">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {maritalStatusesList.map(s => <SelectItem key={s} value={s}>{getLabel(s, language)}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </Card>
                 </section>
 
                 {/* Hobbies Section */}
-                <section className="space-y-3">
-                    <Typography variant="h3" className="text-base font-semibold text-gray-700">{getLabel('hobbies', language)}</Typography>
+                <section className="space-y-4">
+                    <Label className="text-sm font-bold text-muted-foreground">Hobiler</Label>
                     <div className="flex flex-wrap gap-2">
                         {hobbiesList.map(hobby => (
-                            <button
+                            <Badge
                                 key={hobby}
+                                variant={selectedHobbies.includes(hobby) ? "default" : "outline"}
+                                className="cursor-pointer"
                                 onClick={() => toggleHobby(hobby)}
-                                className={cn(
-                                    "px-4 py-2 rounded-full text-sm font-medium transition-all border",
-                                    selectedHobbies.includes(hobby)
-                                        ? "bg-purple-600 text-white border-purple-600 shadow-md"
-                                        : "bg-white text-gray-600 border-gray-200 hover:border-purple-300"
-                                )}
-                                data-testid={`profile-edit-hobby-${hobby}`}
                             >
                                 {getLabel(hobby, language)}
-                            </button>
+                            </Badge>
                         ))}
                     </div>
                 </section>
 
-                {/* Save Button */}
-                <div className="pt-6">
+                <div className="pt-8">
                     <Button
                         onClick={handleSave}
-                        disabled={isSaving || selectedHobbies.length < APP_CONFIG.MIN_HOBBIES_COUNT}
-                        className="w-full h-14 rounded-2xl bg-purple-600 hover:bg-purple-700 text-lg font-bold shadow-xl shadow-purple-100 flex items-center justify-center gap-2 disabled:bg-gray-300 transition-all"
-                        data-testid="profile-save-btn"
+                        disabled={isSaving}
+                        className="w-full font-bold"
                     >
-                        <Save className={cn("w-5 h-5", isSaving && "animate-spin")} />
-                        {isSaving ? getLabel('saving', language) : getLabel('save', language)}
+                        {isSaving ? "Güncelleniyor..." : "Profilimi Güncelle"}
                     </Button>
-                    {selectedHobbies.length < APP_CONFIG.MIN_HOBBIES_COUNT && (
-                        <Typography variant="caption" className="text-red-500 text-center block mt-2 font-medium">
-                            {getLabel('min_hobbies_error', language, { min: APP_CONFIG.MIN_HOBBIES_COUNT })}
-                        </Typography>
-                    )}
                 </div>
             </main>
         </div>

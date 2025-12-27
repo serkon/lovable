@@ -132,7 +132,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const sendLike = async (profile: Profile) => {
     try {
-      await dbSendLike(profile);
+      await dbSendLike({
+        ...profile,
+        city: profile.location
+      });
       // We don't need to manually update sentRequests here because revalidatePath and refreshCurrentUser (if called) would handle it, 
       // but for instant UI let's keep local update:
       setSentRequests((prev) => [...prev, profile]);

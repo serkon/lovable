@@ -1,14 +1,14 @@
 "use client";
 
-import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
-import { Typography } from "@/components/ui/Typography";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { ArrowLeft, Clock, MapPin, Briefcase } from "lucide-react";
 import { useAppStore } from "@/context/AppStore";
 import Link from "next/link";
 import { getLabel } from "@/lib/translations";
 import { useState } from "react";
 import Image from "next/image";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 export default function SentRequestsPage() {
@@ -16,28 +16,28 @@ export default function SentRequestsPage() {
     const [loadingImages, setLoadingImages] = useState<Record<string, boolean>>({});
 
     return (
-        <div className="min-h-screen bg-slate-50 pb-20">
+        <div className="min-h-screen bg-background pb-20">
 
             {/* Header */}
-            <header className="bg-white p-4 shadow-sm flex items-center gap-4 px-6 sticky top-0 z-10">
+            <header className="bg-background h-16 border-b flex items-center gap-4 px-6 sticky top-0 z-10">
                 <Link href="/dashboard">
-                    <Button variant="ghost" size="icon" className="rounded-full">
-                        <ArrowLeft className="w-6 h-6 text-purple-700" />
+                    <Button variant="ghost" size="icon">
+                        <ArrowLeft className="w-6 h-6" />
                     </Button>
                 </Link>
-                <Typography variant="h3" className="text-purple-700">
+                <h3 className="font-bold">
                     {getLabel('sent_requests', language)}
-                </Typography>
+                </h3>
             </header>
 
             <main className="max-w-4xl mx-auto w-full p-4">
 
                 {sentRequests.length === 0 ? (
-                    <div className="text-center py-20 text-gray-500">
-                        <div className="bg-purple-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <Clock className="w-10 h-10 text-purple-400" />
+                    <div className="text-center py-20 text-muted-foreground">
+                        <div className="mx-auto mb-4 flex justify-center">
+                            <Clock className="w-12 h-12 text-muted-foreground/30" />
                         </div>
-                        <Typography variant="h3" className="text-gray-700 mb-2">{getLabel('no_sent_requests', language)}</Typography>
+                        <h3 className="text-xl font-bold mb-2">{getLabel('no_sent_requests', language)}</h3>
                         <p className="text-sm">{getLabel('first_step_desc', language)}</p>
                         <Link href="/dashboard" className="mt-6 inline-block">
                             <Button>{getLabel('start_exploring', language)}</Button>
@@ -46,51 +46,36 @@ export default function SentRequestsPage() {
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                         {sentRequests.map((profile) => (
-                            <Card data-testid={`sent-request-card-${profile.id}`} key={profile.id} className="overflow-hidden group hover:shadow-md transition-shadow">
-                                <div className="relative h-48 bg-gray-200">
+                            <Card key={profile.id} className="overflow-hidden border">
+                                <div className="relative h-48 bg-muted">
                                     <Image
                                         src={profile.imageUrl}
                                         alt={profile.name}
                                         fill
-                                        className={cn(
-                                            "object-cover transition-[opacity,filter,transform] duration-1000 ease-in-out",
-                                            loadingImages[profile.id] !== false ? "blur-2xl opacity-0 scale-110" : "blur-0 opacity-100 scale-100"
-                                        )}
+                                        className="object-cover"
                                         onLoad={() => setLoadingImages(prev => ({ ...prev, [profile.id]: false }))}
                                     />
-                                    {loadingImages[profile.id] !== false && (
-                                        <div className="absolute inset-0 flex items-center justify-center bg-gray-100/30 backdrop-blur-[2px] z-10 transition-opacity duration-800 pointer-events-none">
-                                            <div className="w-8 h-8 border-3 border-purple-200 border-t-purple-600 rounded-full animate-spin" />
-                                        </div>
-                                    )}
-                                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <span className="bg-white/90 text-purple-700 px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-2">
-                                            <Clock className="w-4 h-4" />
+                                    <div className="absolute top-2 right-2">
+                                        <Badge variant="secondary" className="flex items-center gap-1">
+                                            <Clock className="w-3 h-3" />
                                             {getLabel('waiting_reply', language)}
-                                        </span>
+                                        </Badge>
                                     </div>
                                 </div>
-                                <div className="p-4 bg-white flex flex-col justify-between flex-1">
-                                    <div>
-                                        <Typography variant="h3" className="text-lg">
-                                            {profile.name}, {profile.age}
-                                        </Typography>
-                                        <div className="text-sm text-gray-500 mt-1 flex items-center gap-1">
-                                            <MapPin className="w-3 h-3" />
-                                            {profile.location.split(',')[0]}
-                                        </div>
-                                        <div className="text-sm text-gray-500 mt-1 flex items-center gap-1">
-                                            <Briefcase className="w-3 h-3 text-purple-500" />
-                                            {getLabel(profile.job, language)}
-                                        </div>
+                                <div className="p-4 bg-card">
+                                    <h3 className="font-bold">
+                                        {profile.name}, {profile.age}
+                                    </h3>
+                                    <div className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                                        <MapPin className="w-3 h-3" />
+                                        {profile.location.split(',')[0]}
                                     </div>
 
                                     <Button
                                         variant="outline"
                                         size="sm"
                                         onClick={() => cancelRequest(profile.id)}
-                                        className="mt-4 w-full text-red-500 border-red-100 hover:bg-red-50 hover:text-red-700 h-9 text-xs"
-                                        data-testid={`cancel-request-btn-${profile.id}`}
+                                        className="mt-4 w-full text-destructive"
                                     >
                                         {getLabel('cancel_request', language)}
                                     </Button>

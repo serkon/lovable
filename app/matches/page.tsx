@@ -1,9 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
-import { Typography } from "@/components/ui/Typography";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { ArrowLeft, Video, MessageCircle } from "lucide-react";
 import { useAppStore } from "@/context/AppStore"; // Use Store
 import { DateScheduler } from "@/components/video-date/DateScheduler";
@@ -24,55 +23,50 @@ export default function MatchesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-20">
+    <div className="min-h-screen bg-background pb-20">
 
       {/* Header */}
-      <header className="bg-white p-4 shadow-sm flex items-center gap-4 px-6 sticky top-0 z-10">
+      <header className="bg-background p-4 border-b flex items-center gap-4 px-6 sticky top-0 z-10">
         <Link href="/dashboard">
           <Button variant="ghost" size="icon" className="rounded-full">
-            <ArrowLeft className="w-6 h-6 text-purple-700" />
+            <ArrowLeft className="w-6 h-6" />
           </Button>
         </Link>
-        <Typography variant="h3" className="text-purple-700">
+        <h3 className="text-xl font-bold">
           {getLabel('my_matches', language)}
-        </Typography>
+        </h3>
       </header>
 
       <main className="max-w-md mx-auto w-full p-4 space-y-4">
         {matches.length === 0 ? (
-          <div className="text-center py-20 text-gray-500">
+          <div className="text-center py-20 text-muted-foreground">
             <p>{getLabel('no_matches', language)}</p>
             <p className="text-sm">{getLabel('keep_liking', language)}</p>
           </div>
         ) : null}
 
         {matches.map((profile) => (
-          <Card data-testid={`match-card-${profile.id}`} key={profile.id} className="p-4 flex items-center gap-4 shadow-sm border border-purple-100 hover:shadow-md transition-shadow">
+          <Card key={profile.id} className="p-4 flex items-center gap-4 shadow-sm border hover:shadow-md transition-shadow">
             {/* Photo Avatar */}
-            <div className="relative w-16 h-16 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
+            <div className="relative w-16 h-16 rounded-full overflow-hidden bg-muted flex-shrink-0">
               <Image
                 src={profile.imageUrl}
                 alt={profile.name}
                 fill
                 className={cn(
-                  "object-cover transition-[opacity,filter,transform] duration-1000 ease-in-out",
-                  loadingImages[profile.id] !== false ? "blur-2xl opacity-0 scale-110" : "blur-0 opacity-100 scale-100"
+                  "object-cover transition-all duration-700",
+                  loadingImages[profile.id] !== false ? "blur-xl" : "blur-0"
                 )}
                 onLoad={() => setLoadingImages(prev => ({ ...prev, [profile.id]: false }))}
               />
-              {loadingImages[profile.id] !== false && (
-                <div className="absolute inset-0 flex items-center justify-center bg-gray-100/30 backdrop-blur-[2px] z-10 transition-opacity duration-800 pointer-events-none">
-                  <div className="w-6 h-6 border-2 border-purple-200 border-t-purple-600 rounded-full animate-spin" />
-                </div>
-              )}
             </div>
 
             {/* Info */}
             <div className="flex-1 min-w-0">
-              <Typography variant="h3" className="text-base truncate">
+              <h3 className="text-base font-semibold truncate">
                 {profile.name}
-              </Typography>
-              <p className="text-sm text-gray-500 truncate">
+              </h3>
+              <p className="text-sm text-muted-foreground truncate">
                 {getLabel(profile.job, language)} • {profile.location.split(',')[0]}
               </p>
             </div>
@@ -80,15 +74,15 @@ export default function MatchesPage() {
             {/* Actions */}
             <div className="flex items-center gap-2">
               <Link href={`/chat/${profile.id}`}>
-                <Button size="icon" variant="ghost" className="text-purple-600 hover:bg-purple-50" data-testid={`match-chat-btn-${profile.id}`}>
+                <Button size="icon" variant="ghost">
                   <MessageCircle className="w-6 h-6" />
                 </Button>
               </Link>
               <Button
                 size="icon"
                 onClick={() => handleVideoClick(profile.name)}
-                className="bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-full w-10 h-10"
-                data-testid={`match-video-btn-${profile.id}`}
+                variant="secondary"
+                className="rounded-full w-10 h-10"
               >
                 <Video className="w-5 h-5" />
               </Button>
