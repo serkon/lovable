@@ -10,6 +10,7 @@ import { getLabel } from "@/lib/translations";
 import { createGuestUser } from "@/lib/actions/userActions";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export default function Home() {
   const { language } = useAppStore();
@@ -35,11 +36,18 @@ export default function Home() {
           <Typography variant="body" className="hidden sm:block text-gray-500">
             {getLabel("already_member", language)}
           </Typography>
-          <Link href="/login">
-            <Button variant="outline" className="border-purple-200 text-purple-700 hover:bg-purple-50">
-              {getLabel("btn_login", language)}
-            </Button>
-          </Link>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Link href="/login">
+                <Button variant="outline" className="border-purple-200 text-purple-700 hover:bg-purple-50">
+                  {getLabel("btn_login", language)}
+                </Button>
+              </Link>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{language === 'tr' ? 'Hesabınıza giriş yapın' : 'Sign in to your account'}</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
       </header>
 
