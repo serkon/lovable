@@ -14,3 +14,4 @@
 - Veritabanınız tamamen Normalizasyon (3NF) kurallarına uyar.
 - "Single Source of Truth (SSOT)" ve "Data Normalization" terimlerini de gururla ekleyebiliriz. :)
 - Bunları ESLint suppress comment'leriyle düzeltelim
+- Yeni gelen kullanıcı yine hiçbir şifre girmeden profilini oluşturmaya başlasın (Frictionless).

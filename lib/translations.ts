@@ -211,6 +211,21 @@ export const translations = {
     profile_updated: "Profiliniz başarıyla güncellendi!",
     error_generic: "Bir hata oluştu.",
     min_hobbies_error: "En az {min} hobi seçmelisiniz.",
+
+    // Login Page
+    thousands_happy_couples: "BİNLERCE MUTLU ÇİFT",
+    login_quote: "Aşkın yaşı yoktur. İkinci baharınız sandığınızdan daha yakın.",
+    back_to_home: "Ana Sayfaya Dön",
+    login_subtitle: "Hesabınıza giriş yaparak sohbete devam edin.",
+    forgot_password: "Şifremi Unuttum",
+    login_error_generic: "Giriş yapılamadı. Lütfen bilgilerinizi kontrol edin.",
+    logging_in: "Giriş Yapılıyor...",
+    not_member_yet: "Henüz üye değil misiniz?",
+    sign_up_now: "Hemen Ücretsiz Kaydolun",
+    or: "VEYA",
+    legal_login_prefix: "Giriş yaparak",
+    legal_and: "ve",
+    legal_suffix: "'nı kabul etmiş olursunuz.",
   },
   en: {
     // Marital Statuses
@@ -421,6 +436,21 @@ export const translations = {
     profile_updated: "Profile updated successfully!",
     error_generic: "An error occurred.",
     min_hobbies_error: "You must select at least {min} hobbies.",
+
+    // Login Page
+    thousands_happy_couples: "THOUSANDS OF HAPPY COUPLES",
+    login_quote: "Love has no age. Your second spring is closer than you think.",
+    back_to_home: "Back to Home",
+    login_subtitle: "Log in to your account to continue chatting.",
+    forgot_password: "Forgot Password",
+    login_error_generic: "Login failed. Please check your credentials.",
+    logging_in: "Logging in...",
+    not_member_yet: "Not a member yet?",
+    sign_up_now: "Sign Up Free Now",
+    or: "OR",
+    legal_login_prefix: "By logging in, you agree to our",
+    legal_and: "and",
+    legal_suffix: ".",
   },
 };
 
