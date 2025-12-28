@@ -12,6 +12,17 @@ interface HeroProps {
     loading?: boolean;
 }
 
+const HERO_PROFILES = [
+    { img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2", name: "Ayşe", age: 45, loc: "İstanbul" },
+    { img: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d", name: "Mehmet", age: 52, loc: "Ankara" },
+    { img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330", name: "Zeynep", age: 48, loc: "İzmir" },
+    { img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d", name: "Ali", age: 55, loc: "Bursa" },
+    { img: "https://images.unsplash.com/photo-1580489944761-15a19d654956", name: "Fatma", age: 42, loc: "Antalya" },
+    { img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e", name: "Can", age: 50, loc: "Muğla" },
+    { img: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80", name: "Elif", age: 46, loc: "İstanbul" },
+    { img: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e", name: "Hasan", age: 58, loc: "İzmir" },
+];
+
 export function Hero({ language, onStart, loading }: HeroProps) {
     return (
         <section className="flex-1 flex flex-col justify-center items-center py-32 px-6 relative overflow-hidden">
@@ -26,19 +37,19 @@ export function Hero({ language, onStart, loading }: HeroProps) {
             <div className="atmosphere-item top-40 left-[15%] animate-float-x fast">
                 <Star className="w-6 h-6" />
             </div>
-            <div className="atmosphere-item top-[60%] left-[8%] animate-pulse-soft">
+            <div className="atmosphere-item top-[60%] left-[4%] animate-pulse-soft">
                 <Heart className="w-8 h-8" />
             </div>
             <div className="atmosphere-item top-32 right-[10%] animate-float-y fast">
                 <Star className="w-14 h-14" />
             </div>
-            <div className="atmosphere-item top-[50%] right-[5%] animate-float-x slow">
+            <div className="atmosphere-item top-[50%] right-[3%] animate-float-x slow">
                 <Heart className="w-10 h-10" />
             </div>
-            <div className="atmosphere-item bottom-20 right-[20%] animate-pulse-soft">
+            <div className="atmosphere-item bottom-10 right-[15%] animate-pulse-soft">
                 <Star className="w-8 h-8" />
             </div>
-            <div className="atmosphere-item bottom-40 left-[25%] animate-float-y">
+            <div className="atmosphere-item bottom-12 left-[10%] animate-float-y">
                 <Heart className="w-14 h-14" />
             </div>
 
@@ -71,38 +82,41 @@ export function Hero({ language, onStart, loading }: HeroProps) {
                         {loading ? "..." : getLabel('cta_button', language)}
                         <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-2 transition-transform" />
                     </Button>
+                    {/* Infinite Marquee of Profiles - "Butterfly Effect" */}
+                    <div className="w-full max-w-[90vw] overflow-hidden relative mt-12 mask-linear-fade py-6 -my-6">
+                        <div className="absolute left-0 top-0 bottom-0 w-20 z-10 bg-gradient-to-r from-background to-transparent pointer-events-none" />
+                        <div className="absolute right-0 top-0 bottom-0 w-20 z-10 bg-gradient-to-l from-background to-transparent pointer-events-none" />
 
-                    <div className="flex flex-col items-center gap-6">
-                        <div className="flex items-center gap-4">
-                            <div className="flex -space-x-3">
-                                {[1, 2, 3].map(i => (
-                                    <div key={i} className="relative w-10 h-10 transition-transform hover:scale-110 hover:z-10">
-                                        <Image
-                                            src={`https://i.pravatar.cc/100?u=${i + 10}`}
-                                            alt="user"
-                                            fill
-                                            className="rounded-full border-2 border-white shadow-md object-cover"
-                                        />
+                        <div className="flex gap-4 animate-scroll hover:pause w-max">
+                            {/* Duplicate the list to ensure seamless looping */}
+                            {[...HERO_PROFILES, ...HERO_PROFILES].map((profile, idx) => (
+                                <div
+                                    key={idx}
+                                    className="relative w-40 h-56 md:w-48 md:h-64 rounded-2xl overflow-hidden shrink-0 border-4 border-white shadow-lg bg-muted group cursor-pointer"
+                                >
+                                    <Image
+                                        src={profile.img}
+                                        alt="Member"
+                                        fill
+                                        className="object-cover transition-transform duration-700 group-hover:scale-110"
+                                    />
+                                    <div className="absolute inset-x-0 bottom-0 p-3 bg-white/60 backdrop-blur-md border-t border-white/30 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+                                        <p className="font-bold text-sm text-slate-900 leading-tight">{profile.name}, {profile.age}</p>
+                                        <p className="text-[10px] font-semibold text-slate-700 uppercase tracking-wide mt-0.5">{profile.loc}</p>
                                     </div>
-                                ))}
-                                <div className="w-10 h-10 rounded-full border-2 border-white shadow-md bg-secondary flex items-center justify-center text-[10px] font-bold text-primary transition-transform hover:scale-110 hover:z-10">
-                                    +2K
                                 </div>
-                            </div>
-                            <p className="text-sm font-medium text-muted-foreground leading-tight">
-                                {getLabel('join_couples', language)}
-                            </p>
+                            ))}
                         </div>
+                    </div>
 
-                        <div className="flex items-center gap-6 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/40 translate-y-2">
-                            <div className="flex items-center gap-2">
-                                <Shield className="w-3.5 h-3.5 text-green-500/50" />
-                                <span>{getLabel('verified_profiles', language)}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <Lock className="w-3.5 h-3.5 text-primary/40" />
-                                <span>{getLabel('secure_data', language)}</span>
-                            </div>
+                    <div className="flex items-center gap-6 mt-4">
+                        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground/60">
+                            <Shield className="w-3.5 h-3.5 text-green-500" />
+                            <span>{getLabel('verified_profiles', language)}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground/60">
+                            <Lock className="w-3.5 h-3.5 text-primary" />
+                            <span>{getLabel('secure_data', language)}</span>
                         </div>
                     </div>
                 </div>
