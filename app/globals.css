@@ -174,20 +174,21 @@
   p {
     @apply text-muted-foreground text-base leading-relaxed md:text-lg;
   }
+}
 
-  /* Custom Marquee Animation */
-  @keyframes scroll {
-    0% {
-      transform: translateX(0);
-    }
-    100% {
-      transform: translateX(calc(-50% - 1rem));
-    }
+/* Custom Marquee Animation - Global Scope */
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
   }
-  .animate-scroll {
-    animation: scroll 40s linear infinite;
+  100% {
+    transform: translateX(calc(-50% - 1rem));
   }
-  .animate-scroll:hover {
-    animation-play-state: paused;
-  }
+}
+
+.animate-scroll {
+  animation: scroll 25s linear infinite;
+}
+.animate-scroll:hover {
+  animation-play-state: paused;
 }

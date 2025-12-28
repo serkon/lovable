@@ -2,28 +2,20 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Heart, Star, Sparkles, ArrowRight, Shield, Lock } from "lucide-react";
+import { Heart, Star, Sparkles, ArrowRight, Shield, Lock, MessageCircle } from "lucide-react";
 import { getLabel } from "@/lib/translations";
 import Image from "next/image";
+
+import { HeroProfile } from "@/lib/actions/publicActions";
 
 interface HeroProps {
     language: "tr" | "en";
     onStart: () => void;
     loading?: boolean;
+    profiles?: HeroProfile[];
 }
 
-const HERO_PROFILES = [
-    { img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2", name: "Ayşe", age: 45, loc: "İstanbul" },
-    { img: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d", name: "Mehmet", age: 52, loc: "Ankara" },
-    { img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330", name: "Zeynep", age: 48, loc: "İzmir" },
-    { img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d", name: "Ali", age: 55, loc: "Bursa" },
-    { img: "https://images.unsplash.com/photo-1580489944761-15a19d654956", name: "Fatma", age: 42, loc: "Antalya" },
-    { img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e", name: "Can", age: 50, loc: "Muğla" },
-    { img: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80", name: "Elif", age: 46, loc: "İstanbul" },
-    { img: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e", name: "Hasan", age: 58, loc: "İzmir" },
-];
-
-export function Hero({ language, onStart, loading }: HeroProps) {
+export function Hero({ language, onStart, loading, profiles = [] }: HeroProps) {
     return (
         <section className="flex-1 flex flex-col justify-center items-center py-32 px-6 relative overflow-hidden">
             {/* Elite Background Decor */}
@@ -84,14 +76,15 @@ export function Hero({ language, onStart, loading }: HeroProps) {
                     </Button>
                     {/* Infinite Marquee of Profiles - "Butterfly Effect" */}
                     <div className="w-full max-w-[90vw] overflow-hidden relative mt-12 mask-linear-fade py-6 -my-6">
-                        <div className="absolute left-0 top-0 bottom-0 w-20 z-10 bg-gradient-to-r from-background to-transparent pointer-events-none" />
-                        <div className="absolute right-0 top-0 bottom-0 w-20 z-10 bg-gradient-to-l from-background to-transparent pointer-events-none" />
+                        <div className="absolute left-0 top-0 bottom-0 w-40 z-10 bg-gradient-to-r from-background to-transparent pointer-events-none" />
+                        <div className="absolute right-0 top-0 bottom-0 w-40 z-10 bg-gradient-to-l from-background to-transparent pointer-events-none" />
 
                         <div className="flex gap-4 animate-scroll hover:pause w-max">
                             {/* Duplicate the list to ensure seamless looping */}
-                            {[...HERO_PROFILES, ...HERO_PROFILES].map((profile, idx) => (
+                            {[...profiles, ...profiles].map((profile, idx) => (
                                 <div
                                     key={idx}
+                                    onClick={onStart}
                                     className="relative w-40 h-56 md:w-48 md:h-64 rounded-2xl overflow-hidden shrink-0 border-4 border-white shadow-lg bg-muted group cursor-pointer"
                                 >
                                     <Image
@@ -100,9 +93,19 @@ export function Hero({ language, onStart, loading }: HeroProps) {
                                         fill
                                         className="object-cover transition-transform duration-700 group-hover:scale-110"
                                     />
-                                    <div className="absolute inset-x-0 bottom-0 p-3 bg-white/60 backdrop-blur-md border-t border-white/30 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
-                                        <p className="font-bold text-sm text-slate-900 leading-tight">{profile.name}, {profile.age}</p>
-                                        <p className="text-[10px] font-semibold text-slate-700 uppercase tracking-wide mt-0.5">{profile.loc}</p>
+                                    <div className="absolute inset-x-0 bottom-0 p-3 bg-white/60 backdrop-blur-md border-t border-white/30 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 flex items-center justify-between gap-2">
+                                        <div className="min-w-0">
+                                            <p className="font-bold text-sm text-slate-900 leading-tight truncate">{profile.name}, {profile.age}</p>
+                                            <p className="text-[10px] font-semibold text-slate-700 uppercase tracking-wide mt-0.5 truncate">{profile.loc}</p>
+                                        </div>
+                                        <div className="flex gap-1.5 shrink-0">
+                                            <button className="w-7 h-7 rounded-full bg-white flex items-center justify-center text-primary shadow-sm hover:scale-110 transition-transform">
+                                                <Heart className="w-3.5 h-3.5 fill-current" />
+                                            </button>
+                                            <button className="w-7 h-7 rounded-full bg-white flex items-center justify-center text-blue-500 shadow-sm hover:scale-110 transition-transform">
+                                                <MessageCircle className="w-3.5 h-3.5 fill-current" />
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             ))}
