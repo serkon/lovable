@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Merriweather } from "next/font/google";
 import "./globals.css";
+import "./custom.scss";
 import { AppProvider } from "@/context/AppStore";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -24,7 +25,7 @@ export default function RootLayout({
     <html lang="tr">
       <body className={`${inter.variable} ${merriweather.variable} font-sans antialiased`}>
         <AppProvider>
-            {children}
+          {children}
         </AppProvider>
       </body>
     </html>
