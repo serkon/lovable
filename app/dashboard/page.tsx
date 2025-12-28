@@ -4,19 +4,20 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { X, MapPin, Briefcase, GraduationCap, Heart, SlidersHorizontal, Eye, EyeOff, User, BookOpen, MessageCircle, Clock, ChevronLeft, ChevronRight, Share2 } from "lucide-react";
+import { X, MapPin, Briefcase, GraduationCap, Heart, BookOpen, MessageCircle, Clock, ChevronLeft, ChevronRight, Share2 } from "lucide-react";
 import { FilterModal, FilterState } from "@/components/dashboard/FilterModal";
 import { IceBreakerModal } from "@/components/dashboard/IceBreakerModal";
 import { useAppStore } from "@/context/AppStore"; // Use Store
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { Logo } from "@/components/ui/Logo";
+import { Header } from "@/components/layout/Header";
 import { getLabel } from "@/lib/translations";
 import { Profile } from "@/lib/constants";
 import Image from "next/image";
 
 export default function DashboardPage() {
-  const { profiles, sendLike, passProfile, matches, resetProfiles, language, setLanguage } = useAppStore(); // Get from context
+  const { profiles, sendLike, passProfile, matches, resetProfiles, language } = useAppStore(); // Get from context
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMatched, setIsMatched] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -126,9 +127,7 @@ export default function DashboardPage() {
     }
   };
 
-  const toggleGhostMode = () => {
-    setIsGhostMode(prev => !prev);
-  };
+
 
   if (isFinished) {
     return (
@@ -213,52 +212,12 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-muted/30 flex flex-col">
 
       {/* Header - Refined & Compact */}
-      <header className="h-16 px-4 bg-background border-b flex justify-between items-center sticky top-0 z-30">
-        <Link href="/" className="flex items-center gap-2">
-          <Logo size={32} />
-          <span className="font-bold">{getLabel('app_name', language)}</span>
-        </Link>
-
-        <div className="flex items-center gap-2">
-          <Button size="icon" variant="ghost" onClick={toggleGhostMode}>
-            {isGhostMode ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-          </Button>
-
-          <Button size="icon" variant="ghost" onClick={() => setIsFilterOpen(true)}>
-            <SlidersHorizontal className="w-4 h-4" />
-          </Button>
-
-          <Link href="/sent-requests">
-            <Button size="icon" variant="ghost">
-              <Clock className="w-4 h-4" />
-            </Button>
-          </Link>
-
-          <Link href="/matches">
-            <Button size="icon" variant="ghost" className="relative">
-              <MessageCircle className="w-4 h-4" />
-              {matches.length > 0 && <span className="absolute top-1 right-1 w-2 h-2 bg-destructive rounded-full"></span>}
-            </Button>
-          </Link>
-
-          <Link href="/likes">
-            <Button size="icon" variant="ghost" className="relative">
-              <Heart className="w-4 h-4" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-destructive rounded-full"></span>
-            </Button>
-          </Link>
-
-          <Button variant="ghost" size="sm" onClick={() => setLanguage(language === "tr" ? "en" : "tr")}>
-            {language.toUpperCase()}
-          </Button>
-
-          <Link href="/profile">
-            <Button size="icon" variant="ghost">
-              <User className="w-4 h-4" />
-            </Button>
-          </Link>
-        </div>
-      </header>
+      <Header
+        variant="dashboard"
+        onOpenFilters={() => setIsFilterOpen(true)}
+        isGhostMode={isGhostMode}
+        onToggleGhostMode={() => setIsGhostMode(!isGhostMode)}
+      />
 
       <FilterModal isOpen={isFilterOpen} onClose={() => setIsFilterOpen(false)} onApply={(newFilters) => {
         setFilters(newFilters);

@@ -25,7 +25,7 @@ export function Logo({ className, size = 40, grayscale = false }: LogoProps) {
                         "fill-current",
                         grayscale ? "text-slate-400" : "text-white"
                     )}
-                    size={size * 0.5}
+                    size={size * 0.45}
                     strokeWidth={2.5}
                 />
             </div>
@@ -34,9 +34,9 @@ export function Logo({ className, size = 40, grayscale = false }: LogoProps) {
                     "font-serif font-bold tracking-tight transition-colors duration-500",
                     grayscale
                         ? "text-slate-400"
-                        : "text-slate-900 dark:text-white"
+                        : "text-neutral-900 dark:text-white"
                 )}
-                style={{ fontSize: size * 0.52 }}
+                style={{ fontSize: size * 0.5 }}
             >
                 SecondSpring
             </span>

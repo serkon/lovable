@@ -87,9 +87,33 @@ export const translations = {
     feature_real_desc: "Her profil tek tek kontrol edilir. Robotlara ve sahte hesaplara yer yok.",
     feature_safe_title: "%100 Güvenli",
     feature_safe_desc: "Telefon numaranız asla paylaşılmaz. Güvenle mesajlaşın.",
-    feature_easy_title: "Kolay Kullanım",
     feature_easy_desc:
       "Teknolojiyle aranız nasıl olursa olsun, bu uygulamayı rahatça kullanacaksınız.",
+    nav_story: "Hikayemiz",
+    nav_why_us: "Neden Biz?",
+    nav_faq: "Sık Sorulanlar",
+    nav_login_tooltip: "Hesabınıza giriş yapın",
+    hero_badge: "Gerçek aşkın yaşı yoktur",
+    join_couples: "Mutlu çiftler arasına katılın",
+    verified_profiles: "Onaylı Profiller",
+    secure_data: "Güvenli Veri",
+    footer_all_rights: "Tüm Hakları Saklıdır.",
+    footer_privacy: "Gizlilik Politikası",
+    footer_terms: "Kullanım Şartları",
+    footer_help: "Yardım Merkezi",
+    faq_title: "Sıkça Sorulan Sorular",
+    faq_q1: "Bu uygulama kimler için?",
+    faq_a1:
+      "Hayatının ikinci baharını yaşayan, 40 yaş üstü, samimi ve güvenilir dostluklar veya ciddi ilişkiler arayan herkes içindir.",
+    faq_q2: "Güvenliği nasıl sağlıyorsunuz?",
+    faq_a2:
+      "Her profili manuel olarak onaylıyoruz. Telefon numaranız ve kişisel verileriniz asla üçüncü taraflarla paylaşılmaz.",
+    faq_q3: "Uygulama ücretli mi?",
+    faq_a3:
+      "Temel özelliklerin kullanımı tamamen ücretsizdir. Daha fazla özellik ve özel ayrıcalıklar için premium seçeneklerimiz mevcuttur.",
+    faq_q4: "Sahte hesaplarla nasıl mücadele ediyorsunuz?",
+    faq_a4:
+      "Yapay zeka ve moderatör ekibimizle sahte hesapları anında tespit edip engelliyoruz. Sadece gerçek insanlar burada.",
 
     // Onboarding
     welcome: "Hoş Geldiniz",
@@ -275,9 +299,33 @@ export const translations = {
       "Every profile is checked individually. No room for robots or fake accounts.",
     feature_safe_title: "100% Secure",
     feature_safe_desc: "Your phone number is never shared. Message with confidence.",
-    feature_easy_title: "Easy to Use",
     feature_easy_desc:
       "No matter your relationship with technology, you will use this app comfortably.",
+    nav_story: "Our Story",
+    nav_why_us: "Why Us?",
+    nav_faq: "FAQ",
+    nav_login_tooltip: "Sign in to your account",
+    hero_badge: "Real love has no age limit",
+    join_couples: "Join our happy couples",
+    verified_profiles: "Verified Profiles",
+    secure_data: "Secure Data",
+    footer_all_rights: "All Rights Reserved.",
+    footer_privacy: "Privacy Policy",
+    footer_terms: "Terms of Service",
+    footer_help: "Help Center",
+    faq_title: "Frequently Asked Questions",
+    faq_q1: "Who is this app for?",
+    faq_a1:
+      "It's for anyone over 40 experiencing the second spring of life, looking for sincere, reliable friendships or serious relationships.",
+    faq_q2: "How do you ensure safety?",
+    faq_a2:
+      "We manually approve every profile. Your phone number and personal data are never shared with third parties.",
+    faq_q3: "Is the app free?",
+    faq_a3:
+      "The basic features are completely free to use. Premium options are available for more features and exclusive privileges.",
+    faq_q4: "How do you deal with fake accounts?",
+    faq_a4:
+      "We use AI and our moderator team to instantly detect and block fake accounts. Only real people are here.",
 
     // Onboarding
     welcome: "Welcome",

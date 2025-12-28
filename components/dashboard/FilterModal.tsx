@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { X, SlidersHorizontal, MapPin, Calendar, BookOpen, Heart } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { EducationId, MaritalStatusId } from "@/lib/constants";
 import { useAppStore } from "@/context/AppStore";
 import { getLabel } from "@/lib/translations";

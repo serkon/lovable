@@ -2,18 +2,17 @@
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, Clock, MapPin, Briefcase } from "lucide-react";
+import { ArrowLeft, Clock, MapPin } from "lucide-react";
 import { useAppStore } from "@/context/AppStore";
 import Link from "next/link";
 import { getLabel } from "@/lib/translations";
-import { useState } from "react";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+
 
 export default function SentRequestsPage() {
     const { sentRequests, cancelRequest, language } = useAppStore();
-    const [loadingImages, setLoadingImages] = useState<Record<string, boolean>>({});
+
 
     return (
         <div className="min-h-screen bg-background pb-20">
@@ -53,7 +52,6 @@ export default function SentRequestsPage() {
                                         alt={profile.name}
                                         fill
                                         className="object-cover"
-                                        onLoad={() => setLoadingImages(prev => ({ ...prev, [profile.id]: false }))}
                                     />
                                     <div className="absolute top-2 right-2">
                                         <Badge variant="secondary" className="flex items-center gap-1">
