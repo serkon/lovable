@@ -36,9 +36,9 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="min-h-screen w-full flex bg-background">
+        <div className="min-h-screen w-full flex bg-background" data-testid="login-page">
             {/* Left Side - Visual & Atmosphere */}
-            <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-orange-50">
+            <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-orange-50" data-testid="login-visual-side">
                 <Image
                     src="https://images.unsplash.com/photo-1511895426328-dc8714191300?q=80&w=2000&auto=format&fit=crop"
                     alt="Happy Couple Bright"
@@ -71,19 +71,19 @@ export default function LoginPage() {
             </div>
 
             {/* Right Side - Form */}
-            <div className="flex-1 flex flex-col relative bg-background">
+            <div className="flex-1 flex flex-col relative bg-background" data-testid="login-form-side">
                 {/* Back Button */}
-                <div className="absolute top-8 left-8">
+                {/* Header / Nav */}
+                <header className="w-full flex items-center p-6 sticky top-0 bg-background/80 backdrop-blur-sm lg:static lg:bg-transparent lg:backdrop-blur-none lg:absolute lg:top-8 lg:left-8 lg:w-auto z-20" data-testid="login-header">
                     <Link href="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm font-medium group">
                         <div className="p-2 rounded-full bg-secondary group-hover:bg-secondary/80 transition-colors">
                             <ArrowLeft className="w-4 h-4" />
                         </div>
-                        <span>{getLabel("back_to_home", language)}</span>
                     </Link>
-                </div>
+                </header>
 
                 <div className="flex-1 flex items-start justify-center p-6 pb-12">
-                    <div className="w-full max-w-sm mt-12">
+                    <div className="w-full max-w-sm lg:mt-12">
                         {/* Custom Brand Lockup - Centered & Spaced */}
                         <div className="flex flex-col items-center mb-16">
                             <Heart className="w-12 h-12 text-primary fill-current mb-3" />
@@ -101,9 +101,9 @@ export default function LoginPage() {
                         </div>
 
                         {/* Form */}
-                        <form onSubmit={handleSubmit} className="space-y-6">
+                        <form onSubmit={handleSubmit} className="space-y-6" data-testid="login-form">
                             <div className="space-y-4">
-                                <FormGroup label={getLabel("label_email", language)} htmlFor="email" error={errors.email}>
+                                <FormGroup label={getLabel("label_email", language)} htmlFor="email" error={errors.email} data-testid="email-container">
                                     <Input
                                         id="email"
                                         name="email"
@@ -117,8 +117,9 @@ export default function LoginPage() {
                                     label={getLabel("label_password", language)}
                                     htmlFor="password"
                                     error={errors.password}
+                                    data-testid="password-container"
                                     action={
-                                        <button type="button" className="text-xs font-medium text-primary hover:text-primary/80 transition-colors">
+                                        <button type="button" className="text-xs font-medium text-primary hover:text-primary/80 transition-colors" data-testid="forgot-password-button">
                                             {getLabel("forgot_password", language)}
                                         </button>
                                     }
@@ -133,7 +134,7 @@ export default function LoginPage() {
                             </div>
 
                             {errors.root && (
-                                <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm font-medium flex items-center justify-center text-center animate-in fade-in slide-in-from-top-1">
+                                <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm font-medium flex items-center justify-center text-center animate-in fade-in slide-in-from-top-1" data-testid="login-error-message">
                                     {errors.root}
                                 </div>
                             )}
@@ -142,6 +143,7 @@ export default function LoginPage() {
                                 type="submit"
                                 disabled={loading}
                                 className="w-full"
+                                data-testid="login-submit-button"
                             >
                                 {loading ? (
                                     <>
@@ -167,7 +169,7 @@ export default function LoginPage() {
 
 
                         {/* Footer */}
-                        <div className="text-center">
+                        <div className="text-center" data-testid="login-footer">
                             <p className="text-sm text-muted-foreground">
                                 {getLabel("not_member_yet", language)}{" "}
                                 <Link href="/onboarding" className="font-semibold text-primary hover:text-primary/80 hover:underline transition-all">
@@ -179,7 +181,7 @@ export default function LoginPage() {
                 </div>
 
                 <div className="space-y-4 h-12 my-4 flex items-center justify-center">
-                    <p className="text-xs text-center text-muted-foreground px-4 leading-relaxed">
+                    <p className="text-xxs text-center text-muted-foreground px-4 leading-relaxed">
                         {getLabel("legal_login_prefix", language)}{" "}
                         <Link href="/privacy" className="underline hover:text-foreground transition-colors">
                             {getLabel("footer_privacy", language)}

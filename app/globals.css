@@ -192,3 +192,10 @@
 .animate-scroll:hover {
   animation-play-state: paused;
 }
+
+@layer utilities {
+  .text-xxs {
+    font-size: 10px;
+    line-height: 14px;
+  }
+}
