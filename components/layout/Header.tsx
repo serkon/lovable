@@ -55,7 +55,7 @@ export function Header({
             <header className={cn("h-16 px-12 bg-background border-b flex justify-between items-center sticky top-0 z-50 shadow-2xs", className)}>
                 <Link href="/" className="flex items-center gap-2 group">
                     <Logo size={32} />
-                    <span className="font-serif font-bold tracking-tight text-lg hidden sm:block">SecondSpring</span>
+                    <span className="font-playfair font-bold tracking-tight text-lg hidden sm:block">SecondSpring</span>
                 </Link>
 
                 <div className="flex items-center gap-2">

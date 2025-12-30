@@ -31,7 +31,7 @@ export function Logo({ className, size = 40, grayscale = false }: LogoProps) {
             </div>
             <span
                 className={cn(
-                    "font-serif font-bold tracking-tight transition-colors duration-500",
+                    "font-playfair font-bold tracking-tight transition-colors duration-500",
                     grayscale
                         ? "text-slate-400"
                         : "text-neutral-900 dark:text-white"

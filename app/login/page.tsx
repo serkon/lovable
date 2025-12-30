@@ -12,6 +12,10 @@ import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
 import { useAppStore } from "@/context/AppStore";
 import { getLabel } from "@/lib/translations";
+import { toast } from "sonner"
+import { useDate } from "@/hooks/useDate";
+import { Header } from "@/components/login/Header";
+import { Form } from "@/components/login/Form";
 
 export default function LoginPage() {
     const { language } = useAppStore();
@@ -32,6 +36,12 @@ export default function LoginPage() {
         } else {
             setErrors({ root: result.error || getLabel("login_error_generic", language) });
             setLoading(false);
+
+            toast.error(getLabel("login_error_generic", language), {
+                position: 'top-center',
+                duration: 5000,
+                closeButton: true
+            });
         }
     }
 
@@ -40,7 +50,9 @@ export default function LoginPage() {
             {/* Left Side - Visual & Atmosphere */}
             <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-orange-50" data-testid="login-visual-side">
                 <Image
-                    src="https://images.unsplash.com/photo-1511895426328-dc8714191300?q=80&w=2000&auto=format&fit=crop"
+                    // src="https://images.unsplash.com/photo-1511895426328-dc8714191300?q=80&w=2000&auto=format&fit=crop"
+                    // src="https://images.unsplash.com/photo-1592419368977-209f0b916e1b?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                    src="https://images.unsplash.com/photo-1582298538104-fe2e74c27f59?q=80&w=1287&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                     alt="Happy Couple Bright"
                     fill
                     className="object-cover"
@@ -91,71 +103,12 @@ export default function LoginPage() {
                         </div>
 
                         {/* Header */}
-                        <div className="flex flex-col items-start text-left space-y-4">
-                            <div className="space-y-1">
-                                <h1 className="text-lg font-semibold tracking-tight text-neutral-600 mb-2">{getLabel("welcome", language)}</h1>
-                                <p className="text-muted-foreground text-sm mb-9">
-                                    {getLabel("login_subtitle", language)}
-                                </p>
-                            </div>
-                        </div>
+                        <Header />
 
                         {/* Form */}
-                        <form onSubmit={handleSubmit} className="space-y-6" data-testid="login-form">
-                            <div className="space-y-4">
-                                <FormGroup label={getLabel("label_email", language)} htmlFor="email" error={errors.email} data-testid="email-container">
-                                    <Input
-                                        id="email"
-                                        name="email"
-                                        type="email"
-                                        placeholder={getLabel("placeholder_email", language)}
-                                        required
-                                    />
-                                </FormGroup>
+                        <Form />
 
-                                <FormGroup
-                                    label={getLabel("label_password", language)}
-                                    htmlFor="password"
-                                    error={errors.password}
-                                    data-testid="password-container"
-                                    action={
-                                        <button type="button" className="text-xs font-medium text-primary hover:text-primary/80 transition-colors" data-testid="forgot-password-button">
-                                            {getLabel("forgot_password", language)}
-                                        </button>
-                                    }
-                                >
-                                    <Input
-                                        id="password"
-                                        name="password"
-                                        type="password"
-                                        required
-                                    />
-                                </FormGroup>
-                            </div>
-
-                            {errors.root && (
-                                <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm font-medium flex items-center justify-center text-center animate-in fade-in slide-in-from-top-1" data-testid="login-error-message">
-                                    {errors.root}
-                                </div>
-                            )}
-
-                            <Button
-                                type="submit"
-                                disabled={loading}
-                                className="w-full"
-                                data-testid="login-submit-button"
-                            >
-                                {loading ? (
-                                    <>
-                                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                        {getLabel("logging_in", language)}
-                                    </>
-                                ) : (
-                                    getLabel("btn_login", language)
-                                )}
-                            </Button>
-                        </form>
-
+                        {/* Seperator */}
                         <div className="relative my-8">
                             <div className="absolute inset-0 flex items-center">
                                 <Separator />
@@ -168,7 +121,7 @@ export default function LoginPage() {
                         </div>
 
 
-                        {/* Footer */}
+                        {/* Create an account */}
                         <div className="text-center" data-testid="login-footer">
                             <p className="text-sm text-muted-foreground">
                                 {getLabel("not_member_yet", language)}{" "}
@@ -180,6 +133,7 @@ export default function LoginPage() {
                     </div>
                 </div>
 
+                {/* Privacy and Policies */}
                 <div className="space-y-4 h-12 my-4 flex items-center justify-center">
                     <p className="text-xxs text-center text-muted-foreground px-4 leading-relaxed">
                         {getLabel("legal_login_prefix", language)}{" "}

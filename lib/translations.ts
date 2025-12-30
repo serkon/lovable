@@ -74,6 +74,7 @@ export const translations = {
     personal_info: "Kişisel Bilgiler",
     placeholder_bio: "Kendinizden bahsedin...",
     select_all: "Hepsi",
+    select_default: "Seçiniz",
     btn_login: "Giriş Yap",
     already_member: "Zaten üye misiniz?",
 
@@ -137,7 +138,6 @@ export const translations = {
     suggested_sentences: "Önerilen Cümleler (Tıklayarak Seçin)",
     more_details: "Biraz Daha Detay",
     help_us_find: "Size en uygun kişileri bulmamıza yardımcı olun",
-    select_default: "Seçiniz",
     min_hobbies_req: "Ortak noktalarınızı keşfetmek için en az {min} hobi seçin",
     btn_looks_great: "Harika Görünüyor!",
     profile_ready: "Profiliniz Hazır!",

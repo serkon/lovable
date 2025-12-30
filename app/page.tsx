@@ -39,11 +39,8 @@ export default function Home() {
       <main className="min-h-screen bg-background flex flex-col selection:bg-primary/10 selection:text-primary">
         <Header variant="landing" />
         <Hero language={language} onStart={handleStart} loading={loading} profiles={profiles} />
-
         <Features language={language} />
-
         <FAQ language={language} />
-
         <div className="max-w-6xl mx-auto px-6 w-full pb-10">
           <Footer language={language} />
         </div>

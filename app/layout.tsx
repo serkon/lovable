@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import { Inter, Merriweather } from "next/font/google";
+import { Inter, Merriweather, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import "./custom.scss";
 import { AppProvider } from "@/context/AppStore";
+import { Toaster } from "sonner";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const merriweather = Merriweather({
@@ -11,8 +12,14 @@ const merriweather = Merriweather({
   variable: "--font-serif",
 });
 
+export const playfair = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-playfair",
+});
+
 export const metadata: Metadata = {
-  title: "İkinci Bahar - 40+ Tanışma Platformu",
+  title: "Next Chapter - 40+ Tanışma Platformu",
   description: "Ciddi ve güvenilir arkadaşlıklar için doğru yerdesiniz.",
 };
 
@@ -23,9 +30,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="tr">
-      <body className={`${inter.variable} ${merriweather.variable} font-sans antialiased`}>
+      <body className={`${inter.variable} ${merriweather.variable} ${playfair.variable} font-sans antialiased`}>
         <AppProvider>
           {children}
+          <Toaster />
         </AppProvider>
       </body>
     </html>
