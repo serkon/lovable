@@ -32,6 +32,8 @@ const HOBBIES = [
   { id: "hobby_gardening", name: "Bahçe İşleri" },
   { id: "hobby_fishing", name: "Balık Tutma" },
   { id: "hobby_crafts", name: "El Sanatları" },
+  { id: "hobby_technology", name: "Teknoloji" },
+  { id: "hobby_travel", name: "Seyahat" },
 ];
 
 const BIO_TEMPLATES = [

@@ -1,37 +1,23 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  Sparkles,
-  Heart,
-  GraduationCap,
-  BookOpen,
-  Check,
-  ChevronLeft,
-  Camera,
-  Shield
-} from "lucide-react";
-import { Logo } from "@/components/ui/Logo";
+import { Check, ChevronLeft } from "lucide-react";
+import { Logo } from "@/components/ui/logo";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/context/AppStore";
 import { getLabel } from "@/lib/translations";
-import { APP_CONFIG } from "@/lib/config";
 import { updateUserProfile, registerUser } from "@/lib/actions/userActions";
-import { getBioTemplates, getHobbies, getMaritalStatuses, getEducations, getIntentions, getJobs } from "@/lib/actions/contentActions";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
+  getBioTemplates,
+  getHobbies,
+  getMaritalStatuses,
+  getEducations,
+  getIntentions,
+  getJobs,
+} from "@/lib/actions/contentActions";
+
 import { StepGender } from "@/components/onboarding/StepGender";
 import { StepBasicInfo } from "@/components/onboarding/StepBasicInfo";
 import { StepAboutMe } from "@/components/onboarding/StepAboutMe";
@@ -39,8 +25,6 @@ import { StepDetails } from "@/components/onboarding/StepDetails";
 import { StepHobbies } from "@/components/onboarding/StepHobbies";
 import { StepPreview } from "@/components/onboarding/StepPreview";
 import StepPassword from "@/components/onboarding/StepPassword";
-
-const COUNTRIES = ["Türkiye", "Germany", "United Kingdom", "United States", "Netherlands", "France", "Other"];
 
 export type OnboardingData = {
   name: string;
@@ -94,7 +78,7 @@ export default function OnboardingPage() {
         getMaritalStatuses(),
         getEducations(),
         getIntentions(),
-        getJobs()
+        getJobs(),
       ]);
       setBioTemplates(dbBioTemplates || []);
       setHobbiesList(dbHobbies || []);
@@ -142,7 +126,7 @@ export default function OnboardingPage() {
       router.push("/dashboard");
     } catch (error) {
       console.error("Failed to save profile:", error);
-      alert(getLabel('error_generic', language));
+      alert(getLabel("error_generic", language));
       setLoading(false);
     }
   };
@@ -160,7 +144,7 @@ export default function OnboardingPage() {
     setData((prev) => {
       const exists = prev.bio.includes(template);
       if (exists) {
-        const newBio = prev.bio.replace(template, "").replace(/\s\s+/g, ' ').trim();
+        const newBio = prev.bio.replace(template, "").replace(/\s\s+/g, " ").trim();
         return { ...prev, bio: newBio };
       } else {
         const newBio = prev.bio ? `${prev.bio} ${template}` : template;
@@ -170,27 +154,24 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center py-8 px-4">
+    <div className="bg-background flex min-h-screen flex-col items-center px-4 py-8">
       <Logo size={48} className="mb-6" />
 
       {/* Progress Stepper */}
-      <div className="w-full max-w-md flex items-center justify-between mb-8 px-2">
+      <div className="mb-8 flex w-full max-w-md items-center justify-between px-2">
         {[1, 2, 3, 4, 5, 6, 7].map((s) => (
-          <div key={s} className="flex items-center flex-1 last:flex-none">
+          <div key={s} className="flex flex-1 items-center last:flex-none">
             <div
               className={cn(
-                "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors",
+                "flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-colors",
                 step >= s ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
               )}
             >
-              {step > s ? <Check className="w-4 h-4" /> : s}
+              {step > s ? <Check className="h-4 w-4" /> : s}
             </div>
             {s < 7 && (
               <div
-                className={cn(
-                  "h-1 flex-1 mx-2 rounded-full",
-                  step > s ? "bg-primary" : "bg-muted"
-                )}
+                className={cn("mx-2 h-1 flex-1 rounded-full", step > s ? "bg-primary" : "bg-muted")}
               />
             )}
           </div>
@@ -199,19 +180,13 @@ export default function OnboardingPage() {
 
       <div className="w-full max-w-lg">
         {step > 1 && (
-          <Button
-            variant="ghost"
-            onClick={prevStep}
-            className="flex items-center gap-1 mb-4"
-          >
-            <ChevronLeft className="w-4 h-4" /> {getLabel('back', language)}
+          <Button variant="ghost" onClick={prevStep} className="mb-4 flex items-center gap-1">
+            <ChevronLeft className="h-4 w-4" /> {getLabel("back", language)}
           </Button>
         )}
 
         {/* STEP 1: GENDER */}
-        {step === 1 && (
-          <StepGender data={data} setData={setData} nextStep={nextStep} />
-        )}
+        {step === 1 && <StepGender data={data} setData={setData} nextStep={nextStep} />}
 
         {/* STEP 2: BASIC INFO */}
         {step === 2 && (
@@ -220,28 +195,42 @@ export default function OnboardingPage() {
 
         {/* STEP 3: BIO / ABOUT ME */}
         {step === 3 && (
-          <StepAboutMe data={data} setData={setData} bioTemplates={bioTemplates} toggleBioTemplate={toggleBioTemplate} nextStep={nextStep} />
+          <StepAboutMe
+            data={data}
+            setData={setData}
+            bioTemplates={bioTemplates}
+            toggleBioTemplate={toggleBioTemplate}
+            nextStep={nextStep}
+          />
         )}
 
         {/* STEP 4: DETAILS */}
         {step === 4 && (
-          <StepDetails data={data} setData={setData} nextStep={nextStep} intentionsList={intentionsList} educationsList={educationsList} maritalStatusesList={maritalStatusesList} />
+          <StepDetails
+            data={data}
+            setData={setData}
+            nextStep={nextStep}
+            intentionsList={intentionsList}
+            educationsList={educationsList}
+            maritalStatusesList={maritalStatusesList}
+          />
         )}
 
         {/* STEP 5: HOBBIES */}
         {step === 5 && (
-          <StepHobbies data={data} setData={setData} hobbiesList={hobbiesList} nextStep={nextStep} />
+          <StepHobbies
+            data={data}
+            setData={setData}
+            hobbiesList={hobbiesList}
+            nextStep={nextStep}
+          />
         )}
 
         {/* STEP 6: PREVIEW */}
-        {step === 6 && (
-          <StepPreview data={data} nextStep={nextStep} />
-        )}
+        {step === 6 && <StepPreview data={data} nextStep={nextStep} />}
 
         {/* STEP 7: SECURE ACCOUNT */}
-        {step === 7 && (
-          <StepPassword data={data} setData={setData} nextStep={nextStep} />
-        )}
+        {step === 7 && <StepPassword data={data} setData={setData} nextStep={nextStep} />}
 
         {/* STEP 7: FINISH */}
         {step === 7 && (
@@ -251,7 +240,7 @@ export default function OnboardingPage() {
               disabled={loading || !data.email || !data.password}
               className="w-full"
             >
-              {loading ? getLabel('saving', language) : getLabel('btn_complete_auth', language)}
+              {loading ? getLabel("saving", language) : getLabel("btn_complete_auth", language)}
             </Button>
 
             <Button
@@ -260,14 +249,14 @@ export default function OnboardingPage() {
               disabled={loading}
               className="w-full"
             >
-              {getLabel('btn_skip_auth', language)}
+              {getLabel("btn_skip_auth", language)}
             </Button>
           </div>
         )}
 
-        <div className="text-center pt-8">
-          <p className="text-xs text-muted-foreground font-medium">
-            {getLabel('step_count', language, { step: step })}
+        <div className="pt-8 text-center">
+          <p className="text-muted-foreground text-xs font-medium">
+            {getLabel("step_count", language, { step: step })}
           </p>
         </div>
       </div>

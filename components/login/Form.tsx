@@ -10,91 +10,90 @@ import { FormGroup } from "@/components/ui/form-group";
 
 import { useAppStore } from "@/context/AppStore";
 import { getLabel } from "@/lib/translations";
-import { toast } from "sonner"
+import { toast } from "sonner";
 
 export function Form() {
-    const { language } = useAppStore();
-    const [errors, setErrors] = useState<{ root?: string; email?: string; password?: string }>({});
-    const [loading, setLoading] = useState(false);
-    const router = useRouter();
+  const { language } = useAppStore();
+  const [errors, setErrors] = useState<{ root?: string; email?: string; password?: string }>({});
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setErrors({});
+    setLoading(true);
 
-    async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-        event.preventDefault();
-        setErrors({});
-        setLoading(true);
+    const formData = new FormData(event.currentTarget);
+    const result = await loginUser(formData);
 
-        const formData = new FormData(event.currentTarget);
-        const result = await loginUser(formData);
+    if (result.success) {
+      router.push("/dashboard");
+    } else {
+      setErrors({ root: result.error || getLabel("login_error_generic", language) });
+      setLoading(false);
 
-        if (result.success) {
-            router.push("/dashboard");
-        } else {
-            setErrors({ root: result.error || getLabel("login_error_generic", language) });
-            setLoading(false);
-
-            toast.error(getLabel("login_error_generic", language), {
-                position: 'top-center',
-                duration: 5000,
-                closeButton: true
-            });
-        }
+      toast.error(getLabel("login_error_generic", language), {
+        position: "top-center",
+        duration: 5000,
+        closeButton: true,
+      });
     }
+  }
 
-    return (
-        <form onSubmit={handleSubmit} className="space-y-6" data-testid="login-form">
-            <div className="space-y-4">
-                <FormGroup label={getLabel("label_email", language)} htmlFor="email" error={errors.email} data-testid="email-container">
-                    <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        placeholder={getLabel("placeholder_email", language)}
-                        required
-                    />
-                </FormGroup>
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6" data-testid="login-form">
+      <div className="space-y-4">
+        <FormGroup
+          label={getLabel("label_email", language)}
+          error={errors.email}
+          data-testid="email-container"
+        >
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            placeholder={getLabel("placeholder_email", language)}
+            required
+          />
+        </FormGroup>
 
-                <FormGroup
-                    label={getLabel("label_password", language)}
-                    htmlFor="password"
-                    error={errors.password}
-                    data-testid="password-container"
-                    action={
-                        <button type="button" className="text-xs font-medium text-primary hover:text-primary/80 transition-colors" data-testid="forgot-password-button">
-                            {getLabel("forgot_password", language)}
-                        </button>
-                    }
-                >
-                    <Input
-                        id="password"
-                        name="password"
-                        type="password"
-                        required
-                    />
-                </FormGroup>
-            </div>
-
-            {errors.root && (
-                <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm font-medium flex items-center justify-center text-center animate-in fade-in slide-in-from-top-1" data-testid="login-error-message">
-                    {errors.root}
-                </div>
-            )}
-
-            <Button
-                type="submit"
-                disabled={loading}
-                className="w-full"
-                data-testid="login-submit-button"
+        <FormGroup
+          label={getLabel("label_password", language)}
+          error={errors.password}
+          data-testid="password-container"
+          action={
+            <button
+              type="button"
+              className="text-primary hover:text-primary/80 text-xs font-medium transition-colors"
+              data-testid="forgot-password-button"
             >
-                {loading ? (
-                    <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        {getLabel("logging_in", language)}
-                    </>
-                ) : (
-                    getLabel("btn_login", language)
-                )}
-            </Button>
-        </form>
-    )
+              {getLabel("forgot_password", language)}
+            </button>
+          }
+        >
+          <Input id="password" name="password" type="password" required />
+        </FormGroup>
+      </div>
+
+      {errors.root && (
+        <div
+          className="bg-destructive/10 text-destructive animate-in fade-in slide-in-from-top-1 flex items-center justify-center rounded-lg p-3 text-center text-sm font-medium"
+          data-testid="login-error-message"
+        >
+          {errors.root}
+        </div>
+      )}
+
+      <Button type="submit" disabled={loading} className="w-full" data-testid="login-submit-button">
+        {loading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            {getLabel("logging_in", language)}
+          </>
+        ) : (
+          getLabel("btn_login", language)
+        )}
+      </Button>
+    </form>
+  );
 }
