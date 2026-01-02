@@ -15,7 +15,7 @@ export default function SentRequestsPage() {
 
 
     return (
-        <div className="min-h-screen bg-background pb-20">
+        <div className="min-h-screen bg-background pb-20" data-testid="sent-requests-page-container">
 
             {/* Header */}
             <header className="bg-background h-16 border-b flex items-center gap-4 px-6 sticky top-0 z-10">
@@ -29,10 +29,10 @@ export default function SentRequestsPage() {
                 </h3>
             </header>
 
-            <main className="max-w-4xl mx-auto w-full p-4">
+            <main className="max-w-4xl mx-auto w-full p-4" data-testid="sent-requests-main">
 
                 {sentRequests.length === 0 ? (
-                    <div className="text-center py-20 text-muted-foreground">
+                    <div className="text-center py-20 text-muted-foreground" data-testid="sent-requests-empty-state">
                         <div className="mx-auto mb-4 flex justify-center">
                             <Clock className="w-12 h-12 text-muted-foreground/30" />
                         </div>
@@ -43,9 +43,9 @@ export default function SentRequestsPage() {
                         </Link>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4" data-testid="sent-requests-grid">
                         {sentRequests.map((profile) => (
-                            <Card key={profile.id} className="overflow-hidden border">
+                            <Card key={profile.id} className="overflow-hidden border" data-testid="sent-request-card">
                                 <div className="relative h-48 bg-muted">
                                     <Image
                                         src={profile.imageUrl}

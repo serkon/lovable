@@ -1,45 +1,73 @@
 import { getLabel } from "@/lib/translations";
 import { useAppStore } from "@/context/AppStore";
-import { cn } from "@/lib/utils";
-import { User, ArrowRight } from "lucide-react";
-import { Card } from "@/components/ui/card";
+import { Lock, Venus, Mars, NonBinary } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ChoiceCard, ChoiceOption } from "@/components/ui/choice-card";
 import { OnboardingData } from "@/app/onboarding/page";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useMemo } from "react";
 
 interface StepProps {
-    data: OnboardingData;
-    setData: Dispatch<SetStateAction<OnboardingData>>;
-    nextStep: () => void;
+  data: OnboardingData;
+  setData: Dispatch<SetStateAction<OnboardingData>>;
+  nextStep: () => void;
+  getGendersList: () => string[];
 }
 
-export function StepGender({ data, setData, nextStep }: StepProps) {
-    const { language } = useAppStore();
+// Gender ID to icon mapping
+const genderIconMap: Record<string, React.ReactNode> = {
+  gender_female: <Mars />,
+  gender_male: <Venus />,
+  gender_non_binary: <NonBinary />,
+};
 
-    return (
-        <div className="space-y-8">
-            <div className="space-y-2 text-center">
-                <h2 className="text-2xl font-bold">{getLabel("welcome", language)}</h2>
-                <p className="text-muted-foreground">{getLabel("start_with_gender", language)}</p>
-            </div>
-            <div className="grid gap-4">
-                {["gender_female", "gender_male"].map((gid) => (
-                    <Card
-                        key={gid}
-                        onClick={() => {
-                            setData({ ...data, gender: gid });
-                            nextStep();
-                        }}
-                        className={cn(
-                            "flex cursor-pointer items-center gap-4 p-4",
-                            data.gender === gid ? "border-primary bg-muted" : "hover:bg-accent"
-                        )}
-                    >
-                        <User className="h-6 w-6" />
-                        <h3 className="font-semibold">{getLabel(gid, language)}</h3>
-                        <ArrowRight className="text-muted-foreground ml-auto h-4 w-4" />
-                    </Card>
-                ))}
-            </div>
-        </div>
-    );
+export function StepGender({ data, setData, nextStep, getGendersList }: StepProps) {
+  const { language } = useAppStore();
+
+  const gendersList = getGendersList();
+
+  const options = useMemo<ChoiceOption[]>(() => {
+    return gendersList.map((genderId) => ({
+      id: genderId,
+      label: getLabel(genderId, language),
+      icon: genderIconMap[genderId] || <Mars />,
+    }));
+  }, [gendersList, language]);
+
+  return (
+    <>
+      <div className="mb-10 space-y-3 text-center">
+        <h1 className="text-foreground text-4xl font-bold tracking-tight md:text-5xl">
+          {getLabel("gender_question", language)}
+        </h1>
+        <p className="text-muted-foreground mx-auto max-w-lg text-lg leading-relaxed">
+          {getLabel("gender_subtitle", language)}
+        </p>
+      </div>
+
+      <div className="mb-10 flex w-full flex-col gap-6">
+        {options.map((opt) => (
+          <ChoiceCard
+            key={opt.id}
+            option={opt}
+            isSelected={data.gender === opt.id}
+            onSelect={() => setData({ ...data, gender: opt.id })}
+            size="lg"
+          />
+        ))}
+      </div>
+
+      <div className="text-neutral-foreground mb-8 flex items-center justify-center gap-2 text-sm font-medium">
+        <Lock className="h-4 w-4" />
+        <span>{getLabel("gender_visible_notice", language)}</span>
+      </div>
+
+      <Button
+        onClick={nextStep}
+        disabled={!data.gender}
+        className="h-14 w-full max-w-[400px] rounded-xl text-lg font-medium shadow-lg transition-all disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {getLabel("btn_continue", language)}
+      </Button>
+    </>
+  );
 }

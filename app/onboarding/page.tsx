@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Check, ChevronLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { Logo } from "@/components/ui/logo";
 import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
 import { useAppStore } from "@/context/AppStore";
 import { getLabel } from "@/lib/translations";
 import { updateUserProfile, registerUser } from "@/lib/actions/userActions";
@@ -16,6 +15,7 @@ import {
   getEducations,
   getIntentions,
   getJobs,
+  getGenders,
 } from "@/lib/actions/contentActions";
 
 import { StepGender } from "@/components/onboarding/StepGender";
@@ -25,6 +25,7 @@ import { StepDetails } from "@/components/onboarding/StepDetails";
 import { StepHobbies } from "@/components/onboarding/StepHobbies";
 import { StepPreview } from "@/components/onboarding/StepPreview";
 import StepPassword from "@/components/onboarding/StepPassword";
+import { StepIndicator } from "@/components/ui/step-indicator";
 
 export type OnboardingData = {
   name: string;
@@ -46,13 +47,21 @@ export default function OnboardingPage() {
   const router = useRouter();
   const { language } = useAppStore();
   const [step, setStep] = useState(1);
+  const [jobsList, setJobsList] = useState<string[]>([]);
+  const [gendersList, setGendersList] = useState<string[]>([]);
+  const [bioTemplates, setBioTemplates] = useState<string[]>([]);
+  const [hobbiesList, setHobbiesList] = useState<string[]>([]);
+  const [maritalStatusesList, setMaritalStatusesList] = useState<string[]>([]);
+  const [educationsList, setEducationsList] = useState<string[]>([]);
+  const [intentionsList, setIntentionsList] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
   const [data, setData] = useState<OnboardingData>({
     name: "",
     age: "",
     city: "",
     country: "Türkiye",
     job: "",
-    gender: "",
+    gender: gendersList[0] || "",
     bio: "",
     intention: "",
     education: "",
@@ -61,38 +70,8 @@ export default function OnboardingPage() {
     email: "",
     password: "",
   });
-  const [jobsList, setJobsList] = useState<string[]>([]);
-
-  const [bioTemplates, setBioTemplates] = useState<string[]>([]);
-  const [hobbiesList, setHobbiesList] = useState<string[]>([]);
-  const [maritalStatusesList, setMaritalStatusesList] = useState<string[]>([]);
-  const [educationsList, setEducationsList] = useState<string[]>([]);
-  const [intentionsList, setIntentionsList] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const [dbBioTemplates, dbHobbies, dbMarital, dbEdu, dbIntention, dbJobs] = await Promise.all([
-        getBioTemplates(),
-        getHobbies(),
-        getMaritalStatuses(),
-        getEducations(),
-        getIntentions(),
-        getJobs(),
-      ]);
-      setBioTemplates(dbBioTemplates || []);
-      setHobbiesList(dbHobbies || []);
-      setMaritalStatusesList(dbMarital || []);
-      setEducationsList(dbEdu || []);
-      setIntentionsList(dbIntention || []);
-      setJobsList(dbJobs || []);
-    };
-    fetchData();
-  }, []);
-
   const nextStep = () => setStep((s) => s + 1);
   const prevStep = () => setStep((s) => s - 1);
-
   const handleFinish = async (skipAuth = false) => {
     setLoading(true);
     try {
@@ -131,54 +110,49 @@ export default function OnboardingPage() {
     }
   };
 
-  const toggleHobby = (hobby: string) => {
-    setData((prev) => ({
-      ...prev,
-      hobbies: prev.hobbies.includes(hobby)
-        ? prev.hobbies.filter((h) => h !== hobby)
-        : [...prev.hobbies, hobby],
-    }));
-  };
+  useEffect(() => {
+    const fetchData = async () => {
+      const [dbBioTemplates, dbHobbies, dbMarital, dbEdu, dbIntention, dbJobs, dbGenders] =
+        await Promise.all([
+          getBioTemplates(),
+          getHobbies(),
+          getMaritalStatuses(),
+          getEducations(),
+          getIntentions(),
+          getJobs(),
+          getGenders(),
+        ]);
+      setBioTemplates(dbBioTemplates || []);
+      setHobbiesList(dbHobbies || []);
+      setMaritalStatusesList(dbMarital || []);
+      setEducationsList(dbEdu || []);
+      setIntentionsList(dbIntention || []);
+      setJobsList(dbJobs || []);
+      setGendersList(dbGenders || []);
 
-  const toggleBioTemplate = (template: string) => {
-    setData((prev) => {
-      const exists = prev.bio.includes(template);
-      if (exists) {
-        const newBio = prev.bio.replace(template, "").replace(/\s\s+/g, " ").trim();
-        return { ...prev, bio: newBio };
-      } else {
-        const newBio = prev.bio ? `${prev.bio} ${template}` : template;
-        return { ...prev, bio: newBio };
+      if (dbGenders && dbGenders.length > 0) {
+        setData((prev) => ({
+          ...prev,
+          gender: dbGenders[0],
+        }));
       }
-    });
-  };
+    };
+    fetchData();
+  }, []);
 
   return (
-    <div className="bg-background flex min-h-screen flex-col items-center px-4 py-8">
+    <div
+      className="bg-background flex min-h-screen flex-col items-center px-4 py-8"
+      data-testid="onboarding-page-container"
+    >
       <Logo size={48} className="mb-6" />
 
       {/* Progress Stepper */}
-      <div className="mb-8 flex w-full max-w-md items-center justify-between px-2">
-        {[1, 2, 3, 4, 5, 6, 7].map((s) => (
-          <div key={s} className="flex flex-1 items-center last:flex-none">
-            <div
-              className={cn(
-                "flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-colors",
-                step >= s ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-              )}
-            >
-              {step > s ? <Check className="h-4 w-4" /> : s}
-            </div>
-            {s < 7 && (
-              <div
-                className={cn("mx-2 h-1 flex-1 rounded-full", step > s ? "bg-primary" : "bg-muted")}
-              />
-            )}
-          </div>
-        ))}
+      <div className="flex w-full max-w-md justify-center" data-testid="onboarding-progress">
+        <StepIndicator currentStep={step} totalSteps={7} onStepClick={setStep} />
       </div>
 
-      <div className="w-full max-w-lg">
+      <div className="flex w-full max-w-lg flex-col items-center" data-testid="onboarding-content">
         {step > 1 && (
           <Button variant="ghost" onClick={prevStep} className="mb-4 flex items-center gap-1">
             <ChevronLeft className="h-4 w-4" /> {getLabel("back", language)}
@@ -186,7 +160,14 @@ export default function OnboardingPage() {
         )}
 
         {/* STEP 1: GENDER */}
-        {step === 1 && <StepGender data={data} setData={setData} nextStep={nextStep} />}
+        {step === 1 && (
+          <StepGender
+            data={data}
+            setData={setData}
+            nextStep={nextStep}
+            getGendersList={() => gendersList}
+          />
+        )}
 
         {/* STEP 2: BASIC INFO */}
         {step === 2 && (
@@ -199,7 +180,6 @@ export default function OnboardingPage() {
             data={data}
             setData={setData}
             bioTemplates={bioTemplates}
-            toggleBioTemplate={toggleBioTemplate}
             nextStep={nextStep}
           />
         )}

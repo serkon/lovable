@@ -10,7 +10,7 @@ interface FooterProps {
 
 export function Footer({ language }: FooterProps) {
     return (
-        <div className="border-t pt-10 mt-10 flex flex-col md:flex-row justify-between items-center gap-6">
+        <div className="border-t pt-10 mt-10 flex flex-col md:flex-row justify-between items-center gap-6" data-testid="footer-container">
             <div className="text-xs text-muted-foreground opacity-70">
                 © {new Date().getFullYear()} SecondSpring. {getLabel('footer_all_rights', language)}
             </div>

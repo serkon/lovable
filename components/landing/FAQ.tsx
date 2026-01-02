@@ -20,8 +20,8 @@ export function FAQ({ language }: FAQProps) {
     ];
 
     return (
-        <section id="faq" className="py-20 relative scroll-mt-24">
-            <div className="max-w-3xl mx-auto px-6">
+        <section id="faq" className="py-20 relative scroll-mt-24" data-testid="faq-section">
+            <div className="max-w-3xl mx-auto px-6" data-testid="faq-container">
                 <div className="flex flex-col items-center text-center mb-16 space-y-4">
                     <div className="w-12 h-12 bg-primary/10 text-primary rounded-2xl flex items-center justify-center mb-2">
                         <HelpCircle className="w-6 h-6" />
@@ -32,7 +32,7 @@ export function FAQ({ language }: FAQProps) {
                     <div className="h-1 w-12 bg-primary/20 rounded-full" />
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-4" data-testid="faq-list">
                     {faqs.map((faq, index) => (
                         <div
                             key={index}

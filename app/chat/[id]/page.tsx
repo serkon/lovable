@@ -28,7 +28,7 @@ export default function ChatPage() {
 
   if (!profile) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-8 space-y-4 text-center">
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-8 space-y-4 text-center" data-testid="chat-not-found">
         <h2 className="text-xl font-bold">Profil Bulunamadı</h2>
         <p className="text-muted-foreground">Profil bulunamadı veya henüz eşleşmediniz.</p>
         <Link href="/matches">
@@ -53,7 +53,7 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-background">
+    <div className="flex flex-col h-screen bg-background" data-testid="chat-page-container">
 
       {/* Header */}
       <header className="bg-background h-16 border-b flex items-center justify-between px-4 sticky top-0 z-10">
@@ -90,7 +90,7 @@ export default function ChatPage() {
       </header>
 
       {/* Chat Area */}
-      <main className="flex-1 overflow-y-auto p-4 space-y-4">
+      <main className="flex-1 overflow-y-auto p-4 space-y-4" data-testid="chat-main">
         <div className="text-center text-[10px] text-muted-foreground my-4 font-bold uppercase tracking-widest">Bugün</div>
 
         {history.map((msg, idx) => (
@@ -117,7 +117,7 @@ export default function ChatPage() {
       </main>
 
       {/* Input Area */}
-      <footer className="bg-background p-4 border-t sticky bottom-0">
+      <footer className="bg-background p-4 border-t sticky bottom-0" data-testid="chat-input-area">
         <div className="flex gap-2 items-center max-w-4xl mx-auto">
           <Input
             value={message}

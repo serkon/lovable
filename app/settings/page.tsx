@@ -105,7 +105,7 @@ export default function SettingsPage() {
     ];
 
     return (
-        <div className="min-h-screen bg-background flex flex-col">
+        <div className="min-h-screen bg-background flex flex-col" data-testid="settings-page-container">
             {/* Header */}
             <header className="sticky top-0 z-30 flex h-16 items-center gap-3 bg-background border-b px-4">
                 <Link href="/profile">
@@ -118,7 +118,7 @@ export default function SettingsPage() {
                 </h3>
             </header>
 
-            <main className="mx-auto w-full max-w-2xl p-4 space-y-8">
+            <main className="mx-auto w-full max-w-2xl p-4 space-y-8" data-testid="settings-main">
                 {settingsGroups.map((group, idx) => (
                     <div key={idx} className="space-y-3">
                         <h4 className="px-2 text-xs font-semibold text-muted-foreground">

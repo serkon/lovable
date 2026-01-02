@@ -143,7 +143,7 @@ export default function DashboardPage() {
 
   if (isFinished) {
     return (
-      <div className="bg-background flex min-h-screen flex-col">
+      <div className="bg-background flex min-h-screen flex-col" data-testid="dashboard-empty-state">
         {/* Header - Compact for empty state */}
         <header className="bg-background flex h-16 items-center justify-between border-b px-4">
           <div className="flex items-center gap-2">
@@ -178,7 +178,7 @@ export default function DashboardPage() {
           </div>
         </header>
 
-        <div className="flex flex-1 flex-col items-center justify-center space-y-6 p-6 text-center">
+        <div className="flex flex-1 flex-col items-center justify-center space-y-6 p-6 text-center" data-testid="dashboard-empty-content">
           <div className="bg-muted rounded-full p-6">
             <Heart className="text-muted-foreground h-12 w-12" />
           </div>
@@ -219,7 +219,7 @@ export default function DashboardPage() {
 
   if (isMatched) {
     return (
-      <div className="bg-primary animate-in zoom-in flex min-h-screen flex-col items-center justify-center space-y-8 p-6 text-center duration-300">
+      <div className="bg-primary animate-in zoom-in flex min-h-screen flex-col items-center justify-center space-y-8 p-6 text-center duration-300" data-testid="dashboard-match-success">
         <div className="bg-background rounded-full p-8 shadow-2xl">
           <Heart className="text-primary fill-primary h-16 w-16 animate-pulse" />
         </div>
@@ -240,7 +240,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="bg-muted/30 flex min-h-screen flex-col">
+    <div className="bg-muted/30 flex min-h-screen flex-col" data-testid="dashboard-container">
       {/* Header - Refined & Compact */}
       <Header
         variant="dashboard"
@@ -265,7 +265,7 @@ export default function DashboardPage() {
         targetName={currentProfile?.name}
       />
 
-      <main className="relative mx-auto flex w-full max-w-2xl flex-1 flex-col items-center px-4 md:px-0">
+      <main className="relative mx-auto flex w-full max-w-2xl flex-1 flex-col items-center px-4 md:px-0" data-testid="dashboard-main">
         {/* Navigation - Left */}
         <Button
           variant="ghost"
@@ -277,7 +277,7 @@ export default function DashboardPage() {
           <ChevronLeft className="h-6 w-6" />
         </Button>
 
-        <Card className="my-6 flex w-full flex-col overflow-hidden border" key={currentProfile.id}>
+        <Card className="my-6 flex w-full flex-col overflow-hidden border" key={currentProfile.id} data-testid="dashboard-profile-card">
           <div className="bg-muted relative h-[60vh] w-full" data-testid="profile-photo-area">
             <div className="absolute top-4 left-4 z-20 flex flex-col gap-2">
               <Badge variant="secondary">{getLabel(currentProfile.intention, language)}</Badge>
@@ -379,7 +379,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="bg-background space-y-6 p-6">
+          <div className="bg-background space-y-6 p-6" data-testid="dashboard-profile-details">
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-muted/50 flex items-center gap-2 rounded-xl p-3">
                 <Briefcase className="text-muted-foreground h-4 w-4" />

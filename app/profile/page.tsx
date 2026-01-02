@@ -137,7 +137,7 @@ export default function ProfilePage() {
     };
 
     return (
-        <div className="min-h-screen bg-background pb-20">
+        <div className="min-h-screen bg-background pb-20" data-testid="profile-page-container">
             {/* Header */}
             <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background px-4">
                 <div className="flex items-center gap-2">
@@ -160,9 +160,9 @@ export default function ProfilePage() {
                 </div>
             </header>
 
-            <main className="mx-auto max-w-xl px-4 py-8 space-y-10">
+            <main className="mx-auto max-w-xl px-4 py-8 space-y-10" data-testid="profile-main">
                 {/* Photo Section */}
-                <section className="space-y-4">
+                <section className="space-y-4" data-testid="profile-photos-section">
                     <div className="flex items-center justify-between px-1">
                         <Label className="text-xs font-bold text-muted-foreground">Fotoğraflar</Label>
                         <span className="text-xs text-muted-foreground">{userImages.length}/6</span>
@@ -197,7 +197,7 @@ export default function ProfilePage() {
                 <Separator />
 
                 {/* Basic Info */}
-                <section className="space-y-6">
+                <section className="space-y-6" data-testid="profile-basic-info-section">
                     <h3 className="text-sm font-bold text-muted-foreground">Temel Bilgiler</h3>
                     <Card className="p-6 space-y-6">
                         <div className="space-y-2">
@@ -245,7 +245,7 @@ export default function ProfilePage() {
                 </section>
 
                 {/* Bio Section */}
-                <section className="space-y-4">
+                <section className="space-y-4" data-testid="profile-bio-section">
                     <Label htmlFor="bio" className="text-sm font-bold text-muted-foreground">Hakkımda</Label>
                     <Card className="p-4 space-y-4">
                         <Textarea
@@ -270,7 +270,7 @@ export default function ProfilePage() {
                 </section>
 
                 {/* Details Section */}
-                <section className="space-y-6">
+                <section className="space-y-6" data-testid="profile-details-section">
                     <h3 className="text-sm font-bold text-muted-foreground">Detaylar</h3>
                     <Card className="p-6 space-y-6">
                         <div className="space-y-2">
@@ -310,7 +310,7 @@ export default function ProfilePage() {
                 </section>
 
                 {/* Hobbies Section */}
-                <section className="space-y-4">
+                <section className="space-y-4" data-testid="profile-hobbies-section">
                     <Label className="text-sm font-bold text-muted-foreground">Hobiler</Label>
                     <div className="flex flex-wrap gap-2">
                         {hobbiesList.map(hobby => (

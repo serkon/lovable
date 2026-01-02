@@ -17,7 +17,7 @@ export default function LikesPage() {
     const [loadingImages, setLoadingImages] = useState<Record<string, boolean>>({});
 
     return (
-        <div className="min-h-screen bg-background pb-20">
+        <div className="min-h-screen bg-background pb-20" data-testid="likes-page-container">
             {/* Header */}
             <header className="bg-background p-4 border-b flex items-center gap-4 px-6 sticky top-0 z-10">
                 <Link href="/dashboard">
@@ -30,7 +30,7 @@ export default function LikesPage() {
                 </h3>
             </header>
 
-            <main className="max-w-2xl mx-auto w-full p-4 space-y-6">
+            <main className="max-w-2xl mx-auto w-full p-4 space-y-6" data-testid="likes-main">
                 <div className="bg-muted p-4 rounded-md">
                     <p className="text-muted-foreground text-center text-sm font-medium">
                         {getLabel('likes_subtitle', language)}
@@ -38,13 +38,13 @@ export default function LikesPage() {
                 </div>
 
                 {likesReceived.length === 0 && (
-                    <div className="text-center py-20 text-muted-foreground">
+                    <div className="text-center py-20 text-muted-foreground" data-testid="likes-empty-state">
                         <p>{getLabel('no_new_likes', language)}</p>
                     </div>
                 )}
 
                 {likesReceived.map((profile) => (
-                    <Card key={profile.id} className="overflow-hidden shadow-sm flex flex-col sm:flex-row h-auto animate-in slide-in-from-bottom duration-300">
+                    <Card key={profile.id} className="overflow-hidden shadow-sm flex flex-col sm:flex-row h-auto animate-in slide-in-from-bottom duration-300" data-testid="like-card">
                         {/* Photo Area */}
                         <div className="relative h-64 sm:h-auto sm:w-1/3 bg-muted">
                             <Image

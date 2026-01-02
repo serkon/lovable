@@ -46,7 +46,7 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="min-h-screen w-full flex bg-background" data-testid="login-page">
+        <div className="min-h-screen w-full flex bg-background" data-testid="login-page-container">
             {/* Left Side - Visual & Atmosphere */}
             <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-orange-50" data-testid="login-visual-side">
                 <Image
@@ -94,8 +94,8 @@ export default function LoginPage() {
                     </Link>
                 </header>
 
-                <div className="flex-1 flex items-start justify-center p-6 pb-12">
-                    <div className="w-full max-w-sm lg:mt-12">
+                <div className="flex-1 flex items-start justify-center p-6 pb-12" data-testid="login-form-container">
+                    <div className="w-full max-w-sm lg:mt-12" data-testid="login-form-wrapper">
                         {/* Custom Brand Lockup - Centered & Spaced */}
                         <div className="flex flex-col items-center mb-16">
                             <Heart className="w-12 h-12 text-primary fill-current mb-3" />

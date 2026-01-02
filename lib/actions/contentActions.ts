@@ -2,6 +2,13 @@
 
 import { prisma } from "@/lib/prisma";
 
+export async function getGenders() {
+  const genders = await prisma.gender.findMany({
+    orderBy: { sortOrder: "asc" },
+  });
+  return genders.map((g) => g.id);
+}
+
 export async function getJobs() {
   const jobs = await prisma.job.findMany({
     orderBy: { sortOrder: "asc" },

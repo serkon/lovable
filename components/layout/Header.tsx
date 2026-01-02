@@ -67,6 +67,7 @@ export function Header({
   if (variant === "dashboard") {
     return (
       <header
+        data-testid="header-dashboard"
         className={cn(
           "bg-background sticky top-0 z-50 flex h-16 items-center justify-between border-b px-12 shadow-2xs",
           className
@@ -155,6 +156,7 @@ export function Header({
   if (variant === "simple" || variant === "auth") {
     return (
       <header
+        data-testid="header-auth"
         className={cn(
           "sticky top-0 z-50 flex h-16 items-center justify-between border-b bg-white/70 px-12 shadow-2xs backdrop-blur-2xl",
           className
@@ -171,6 +173,7 @@ export function Header({
   // Default: Landing Variant
   return (
     <header
+      data-testid="header-landing"
       className={cn(
         "sticky top-0 z-50 flex h-24 items-center justify-between border-b border-white/20 bg-white/70 px-12 shadow-2xs backdrop-blur-2xl transition-all duration-300",
         className

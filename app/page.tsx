@@ -36,12 +36,15 @@ export default function Home() {
 
   return (
     <TooltipProvider>
-      <main className="min-h-screen bg-background flex flex-col selection:bg-primary/10 selection:text-primary">
+      <main
+        data-testid="home-page"
+        className="bg-background selection:bg-primary/10 selection:text-primary flex min-h-screen flex-col"
+      >
         <Header variant="landing" />
         <Hero language={language} onStart={handleStart} loading={loading} profiles={profiles} />
         <Features language={language} />
         <FAQ language={language} />
-        <div className="max-w-6xl mx-auto px-6 w-full pb-10">
+        <div data-testid="footer-container" className="mx-auto w-full max-w-6xl px-6 pb-10">
           <Footer language={language} />
         </div>
       </main>

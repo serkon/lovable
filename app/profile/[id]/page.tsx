@@ -97,7 +97,7 @@ export default function PublicProfilePage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 space-y-4">
+            <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 space-y-4" data-testid="profile-loading">
                 <Skeleton className="h-[60vh] w-full max-w-md rounded-xl" />
                 <div className="w-full max-w-md space-y-2">
                     <Skeleton className="h-8 w-3/4" />
@@ -109,7 +109,7 @@ export default function PublicProfilePage() {
 
     if (!profile) {
         return (
-            <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center space-y-4">
+            <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center space-y-4" data-testid="profile-not-found">
                 <h2 className="text-2xl font-bold">Profil Bulunamadı</h2>
                 <p className="text-muted-foreground">Aradığınız kişi artık aramızda olmayabilir.</p>
                 <Link href="/dashboard">
@@ -120,7 +120,7 @@ export default function PublicProfilePage() {
     }
 
     return (
-        <div className="min-h-screen bg-background pb-20">
+        <div className="min-h-screen bg-background pb-20" data-testid="public-profile-page-container">
             {/* Header */}
             <header className="bg-background/80 backdrop-blur-md h-16 px-4 flex justify-between items-center sticky top-0 z-40 border-b">
                 <Button variant="ghost" size="icon" onClick={() => router.back()}>
@@ -132,7 +132,7 @@ export default function PublicProfilePage() {
                 </Button>
             </header>
 
-            <main className="max-w-md mx-auto p-4 space-y-6">
+            <main className="max-w-md mx-auto p-4 space-y-6" data-testid="public-profile-main">
                 {/* Photo Card */}
                 <Card className="overflow-hidden relative aspect-[3/4] p-0 border">
                     {displayImages.length > 1 && (

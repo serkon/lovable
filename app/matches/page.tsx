@@ -23,7 +23,7 @@ export default function MatchesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-20" data-testid="matches-page-container">
 
       {/* Header */}
       <header className="bg-background p-4 border-b flex items-center gap-4 px-6 sticky top-0 z-10">
@@ -37,16 +37,16 @@ export default function MatchesPage() {
         </h3>
       </header>
 
-      <main className="max-w-md mx-auto w-full p-4 space-y-4">
+      <main className="max-w-md mx-auto w-full p-4 space-y-4" data-testid="matches-main">
         {matches.length === 0 ? (
-          <div className="text-center py-20 text-muted-foreground">
+          <div className="text-center py-20 text-muted-foreground" data-testid="matches-empty-state">
             <p>{getLabel('no_matches', language)}</p>
             <p className="text-sm">{getLabel('keep_liking', language)}</p>
           </div>
         ) : null}
 
         {matches.map((profile) => (
-          <Card key={profile.id} className="p-4 flex items-center gap-4 shadow-sm border hover:shadow-md transition-shadow">
+          <Card key={profile.id} className="p-4 flex items-center gap-4 shadow-sm border hover:shadow-md transition-shadow" data-testid="match-card">
             {/* Photo Avatar */}
             <div className="relative w-16 h-16 rounded-full overflow-hidden bg-muted flex-shrink-0">
               <Image
