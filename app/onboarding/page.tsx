@@ -20,7 +20,6 @@ import {
 import { StepGender } from "@/components/onboarding/StepGender";
 import { StepBasicInfo } from "@/components/onboarding/StepBasicInfo";
 import { StepAboutMe } from "@/components/onboarding/StepAboutMe";
-import { StepDetails } from "@/components/onboarding/StepDetails";
 import { StepHobbies } from "@/components/onboarding/StepHobbies";
 import { StepPreview } from "@/components/onboarding/StepPreview";
 import StepPassword from "@/components/onboarding/StepPassword";
@@ -28,7 +27,8 @@ import { StepIndicator } from "@/components/ui/step-indicator";
 import React from "react";
 
 export type OnboardingData = {
-  name: string;
+  firstName: string;
+  lastName: string;
   age: string;
   city: string;
   country: string;
@@ -40,6 +40,7 @@ export type OnboardingData = {
   maritalStatus: string;
   hobbies: string[];
   email?: string;
+  phone?: string;
   password?: string;
 };
 
@@ -56,7 +57,8 @@ export default function OnboardingPage() {
   const [intentionsList, setIntentionsList] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<OnboardingData>({
-    name: "",
+    firstName: "",
+    lastName: "",
     age: "",
     city: "",
     country: "Türkiye",
@@ -76,7 +78,8 @@ export default function OnboardingPage() {
     setLoading(true);
     try {
       await updateUserProfile({
-        name: data.name,
+        firstName: data.firstName,
+        lastName: data.lastName,
         age: parseInt(data.age),
         city: data.city,
         job: data.job,
@@ -86,6 +89,8 @@ export default function OnboardingPage() {
         education: data.education,
         maritalStatus: data.maritalStatus,
         hobbies: data.hobbies,
+        phone: data.phone,
+        email: data.email,
       });
 
       if (!skipAuth && data.email && data.password) {
@@ -152,7 +157,7 @@ export default function OnboardingPage() {
         {/* Progress Stepper */}
         <StepIndicator
           currentStep={step}
-          totalSteps={7}
+          totalSteps={6}
           onStepClick={setStep}
           data-testid="onboarding-progress"
         />
@@ -172,9 +177,17 @@ export default function OnboardingPage() {
             />
           )}
 
-          {/* STEP 2: BASIC INFO */}
+          {/* STEP 2: BASIC INFO & DETAILS */}
           {step === 2 && (
-            <StepBasicInfo data={data} setData={setData} nextStep={nextStep} jobsList={jobsList} />
+            <StepBasicInfo
+              data={data}
+              setData={setData}
+              nextStep={nextStep}
+              jobsList={jobsList}
+              intentionsList={intentionsList}
+              educationsList={educationsList}
+              maritalStatusesList={maritalStatusesList}
+            />
           )}
 
           {/* STEP 3: BIO / ABOUT ME */}
@@ -187,20 +200,8 @@ export default function OnboardingPage() {
             />
           )}
 
-          {/* STEP 4: DETAILS */}
+          {/* STEP 4: HOBBIES */}
           {step === 4 && (
-            <StepDetails
-              data={data}
-              setData={setData}
-              nextStep={nextStep}
-              intentionsList={intentionsList}
-              educationsList={educationsList}
-              maritalStatusesList={maritalStatusesList}
-            />
-          )}
-
-          {/* STEP 5: HOBBIES */}
-          {step === 5 && (
             <StepHobbies
               data={data}
               setData={setData}
@@ -209,14 +210,14 @@ export default function OnboardingPage() {
             />
           )}
 
-          {/* STEP 6: PREVIEW */}
-          {step === 6 && <StepPreview data={data} nextStep={nextStep} />}
+          {/* STEP 5: PREVIEW */}
+          {step === 5 && <StepPreview data={data} setData={setData} nextStep={nextStep} />}
 
-          {/* STEP 7: SECURE ACCOUNT */}
-          {step === 7 && <StepPassword data={data} setData={setData} nextStep={nextStep} />}
+          {/* STEP 6: SECURE ACCOUNT */}
+          {step === 6 && <StepPassword data={data} setData={setData} nextStep={nextStep} />}
 
-          {/* STEP 7: FINISH */}
-          {step === 7 && (
+          {/* STEP 6: FINISH */}
+          {step === 6 && (
             <div className="space-y-3 pt-4">
               <Button
                 onClick={() => handleFinish(false)}

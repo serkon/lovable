@@ -52,7 +52,8 @@ export async function getCurrentUser() {
 export async function createGuestUser() {
   const user = await prisma.user.create({
     data: {
-      name: "",
+      firstName: "",
+      lastName: "",
       age: 0,
       bio: "",
     },
@@ -118,7 +119,8 @@ export async function registerUser(data: { email: string; password: string; coun
 }
 
 export async function updateUserProfile(data: {
-  name?: string;
+  firstName?: string;
+  lastName?: string;
   age?: number;
   city?: string;
   job?: string;
@@ -128,6 +130,8 @@ export async function updateUserProfile(data: {
   education?: string;
   intention?: string;
   hobbies?: string[];
+  email?: string;
+  phone?: string;
   images?: string[];
 }) {
   const currentUser = await getCurrentUser();
@@ -200,7 +204,8 @@ export async function updateUserProfile(data: {
 
 export async function sendLike(targetProfile: {
   id: string | number;
-  name: string;
+  firstName: string;
+  lastName: string;
   age: number;
   city: string;
   bio: string;
@@ -231,7 +236,8 @@ export async function sendLike(targetProfile: {
     update: {},
     create: {
       id: targetProfile.id.toString(),
-      name: targetProfile.name,
+      firstName: targetProfile.firstName,
+      lastName: targetProfile.lastName,
       age: targetProfile.age,
       city: targetProfile.city,
       bio: targetProfile.bio,

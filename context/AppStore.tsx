@@ -79,7 +79,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const refreshCurrentUser = async () => {
     try {
-      const user = await getCurrentUser() as unknown as ExtendedUser;
+      const user = (await getCurrentUser()) as unknown as ExtendedUser;
 
       if (user) {
         // Transform hobbies from Relation[] to string[] if needed for display helper
@@ -90,28 +90,35 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }
 
         // Transform likesSent to Profile objects for sentRequests
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const dbSentRequests = user.likesSent?.map((like: any) => {
-          const target = like.receiver;
-          if (!target) return null;
-          return {
-            id: target.id,
-            name: target.name || "",
-            age: target.age || 0,
-            location: target.city || "",
-            distance: 0,
-            job: target.job?.id || "",
-            bio: target.bio || "",
-            imageUrl: target.images?.[0]?.url || "https://via.placeholder.com/400",
-            images: Array.isArray(target.images) ? target.images.map((img: { url: string }) => img.url) : [],
-            education: target.education?.id || "edu_elementary",
-            maritalStatus: target.maritalStatus?.id || "ms_private",
-            intention: target.intention?.id || "int_chat",
-            hobbies: Array.isArray(target.hobbies) ? target.hobbies.map((h: { id: string }) => h.id) : [],
-            gender: target.gender?.id || "",
-            iceBreaker: ""
-          } as Profile;
-        }).filter((p): p is Profile => p !== null) || [];
+        const dbSentRequests =
+          user.likesSent
+            ?.map((like) => {
+              const target = like.receiver;
+              if (!target) return null;
+              return {
+                id: target.id,
+                firstName: target.firstName || "",
+                lastName: target.lastName || "",
+                age: target.age || 0,
+                location: target.city || "",
+                distance: 0,
+                job: target.job?.id || "",
+                bio: target.bio || "",
+                imageUrl: target.images?.[0]?.url || "https://via.placeholder.com/400",
+                images: Array.isArray(target.images)
+                  ? target.images.map((img: { url: string }) => img.url)
+                  : [],
+                education: target.education?.id || "edu_elementary",
+                maritalStatus: target.maritalStatus?.id || "ms_private",
+                intention: target.intention?.id || "int_chat",
+                hobbies: Array.isArray(target.hobbies)
+                  ? target.hobbies.map((h: { id: string }) => h.id)
+                  : [],
+                gender: target.gender?.id || "",
+                iceBreaker: "",
+              } as Profile;
+            })
+            .filter((p): p is Profile => p !== null) || [];
 
         setSentRequests(dbSentRequests);
       }
@@ -134,9 +141,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     try {
       await dbSendLike({
         ...profile,
-        city: profile.location
+        city: profile.location,
       });
-      // We don't need to manually update sentRequests here because revalidatePath and refreshCurrentUser (if called) would handle it, 
+      // We don't need to manually update sentRequests here because revalidatePath and refreshCurrentUser (if called) would handle it,
       // but for instant UI let's keep local update:
       setSentRequests((prev) => [...prev, profile]);
       setProfiles((prev) => prev.filter((p) => p.id !== profile.id));
@@ -184,7 +191,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         resetProfiles,
         refreshCurrentUser,
         language,
-        setLanguage
+        setLanguage,
       }}
     >
       {children}

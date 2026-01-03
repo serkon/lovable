@@ -108,7 +108,7 @@ export default function DashboardPage() {
 
   const handleSendIceBreaker = (question: string) => {
     if (currentProfile) {
-      setLastLikedName(currentProfile.name);
+      setLastLikedName(`${currentProfile.firstName} ${currentProfile.lastName}`);
       setLastQuestion(question);
       sendLike(currentProfile);
       setIsMatched(true);
@@ -122,8 +122,8 @@ export default function DashboardPage() {
   const handleShare = async () => {
     if (!currentProfile) return;
     const shareData = {
-      title: `${currentProfile.name} - ${getLabel("app_name", language)}`,
-      text: `${currentProfile.name} (${currentProfile.age}) profilini gör!`,
+      title: `${currentProfile.firstName} ${currentProfile.lastName} - ${getLabel("app_name", language)}`,
+      text: `${currentProfile.firstName} ${currentProfile.lastName} (${currentProfile.age}) profilini gör!`,
       url: `${window.location.origin}/profile/${currentProfile.id}`,
     };
 
@@ -268,7 +268,7 @@ export default function DashboardPage() {
         isOpen={isIceBreakerOpen}
         onClose={() => setIsIceBreakerOpen(false)}
         onSend={handleSendIceBreaker}
-        targetName={currentProfile?.name}
+        targetName={`${currentProfile?.firstName} ${currentProfile?.lastName}`}
       />
 
       <main
@@ -345,7 +345,7 @@ export default function DashboardPage() {
               <Image
                 key={`${currentProfile.id}-${imageIndex}`}
                 src={displayImages[imageIndex]}
-                alt={currentProfile.name}
+                alt={`${currentProfile.firstName} ${currentProfile.lastName}`}
                 fill
                 className={cn(
                   "object-cover transition-all duration-700",
@@ -383,7 +383,7 @@ export default function DashboardPage() {
 
             <div className="bg-background/80 absolute right-0 bottom-0 left-0 border-t p-6">
               <h2 className="text-2xl font-bold">
-                {currentProfile.name}, {currentProfile.age}
+                {currentProfile.firstName} {currentProfile.lastName}, {currentProfile.age}
               </h2>
               <div className="text-muted-foreground mt-1 flex items-center gap-1 text-sm">
                 <MapPin className="h-3 w-3" />
@@ -403,13 +403,13 @@ export default function DashboardPage() {
               <div className="bg-muted/50 flex items-center gap-2 rounded-xl p-3">
                 <BookOpen className="text-muted-foreground h-4 w-4" />
                 <span className="text-sm font-medium">
-                  {getLabel(currentProfile.education, language)}
+                  {getLabel(currentProfile.maritalStatus, language)}
                 </span>
               </div>
               <div className="bg-muted/50 col-span-2 flex items-center gap-2 rounded-xl p-3">
                 <GraduationCap className="text-muted-foreground h-4 w-4" />
                 <span className="text-sm font-medium">
-                  {getLabel(currentProfile.maritalStatus, language)}
+                  {getLabel(currentProfile.education, language)}
                 </span>
               </div>
             </div>

@@ -34,7 +34,8 @@ export const fetchProfilesFromAPI = async (count: number = 20): Promise<Profile[
       // Map DB User to Frontend Profile using slugs (IDs) for i18n
       return {
         id: user.id,
-        name: user.name || "İsimsiz",
+        firstName: user.firstName || "İsimsiz",
+        lastName: user.lastName || "",
         age: user.age || 0,
         location: user.city || "Bilinmiyor",
         distance: Math.floor(Math.random() * 20) + 1,

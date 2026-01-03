@@ -4,7 +4,8 @@ export type IntentionId = string;
 
 export interface Profile {
   id: string | number;
-  name: string;
+  firstName: string;
+  lastName: string;
   age: number;
   location: string;
   distance: number;
