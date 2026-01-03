@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft } from "lucide-react";
-import { Logo } from "@/components/ui/logo";
+import { Header } from "@/components/layout/Header";
 import { useRouter } from "next/navigation";
 import { useAppStore } from "@/context/AppStore";
 import { getLabel } from "@/lib/translations";
@@ -26,6 +25,7 @@ import { StepHobbies } from "@/components/onboarding/StepHobbies";
 import { StepPreview } from "@/components/onboarding/StepPreview";
 import StepPassword from "@/components/onboarding/StepPassword";
 import { StepIndicator } from "@/components/ui/step-indicator";
+import React from "react";
 
 export type OnboardingData = {
   name: string;
@@ -141,105 +141,109 @@ export default function OnboardingPage() {
   }, []);
 
   return (
-    <div
-      className="bg-background flex min-h-screen flex-col items-center px-4 py-8"
-      data-testid="onboarding-page-container"
-    >
-      <Logo size={48} className="mb-6" />
+    <React.Fragment>
+      <Header
+        variant="landing"
+        onBack={step > 1 ? prevStep : undefined}
+        backHref={step === 1 ? "/" : undefined}
+      />
 
-      {/* Progress Stepper */}
-      <div className="flex w-full max-w-md justify-center" data-testid="onboarding-progress">
-        <StepIndicator currentStep={step} totalSteps={7} onStepClick={setStep} />
-      </div>
+      <div className="flex w-full flex-col items-center" data-testid="onboarding">
+        {/* Progress Stepper */}
+        <StepIndicator
+          currentStep={step}
+          totalSteps={7}
+          onStepClick={setStep}
+          data-testid="onboarding-progress"
+        />
 
-      <div className="flex w-full max-w-lg flex-col items-center" data-testid="onboarding-content">
-        {step > 1 && (
-          <Button variant="ghost" onClick={prevStep} className="mb-4 flex items-center gap-1">
-            <ChevronLeft className="h-4 w-4" /> {getLabel("back", language)}
-          </Button>
-        )}
+        {/* Content */}
+        <div
+          className="flex w-full max-w-lg flex-col items-center"
+          data-testid="onboarding-content"
+        >
+          {/* STEP 1: GENDER */}
+          {step === 1 && (
+            <StepGender
+              data={data}
+              setData={setData}
+              nextStep={nextStep}
+              getGendersList={() => gendersList}
+            />
+          )}
 
-        {/* STEP 1: GENDER */}
-        {step === 1 && (
-          <StepGender
-            data={data}
-            setData={setData}
-            nextStep={nextStep}
-            getGendersList={() => gendersList}
-          />
-        )}
+          {/* STEP 2: BASIC INFO */}
+          {step === 2 && (
+            <StepBasicInfo data={data} setData={setData} nextStep={nextStep} jobsList={jobsList} />
+          )}
 
-        {/* STEP 2: BASIC INFO */}
-        {step === 2 && (
-          <StepBasicInfo data={data} setData={setData} nextStep={nextStep} jobsList={jobsList} />
-        )}
+          {/* STEP 3: BIO / ABOUT ME */}
+          {step === 3 && (
+            <StepAboutMe
+              data={data}
+              setData={setData}
+              bioTemplates={bioTemplates}
+              nextStep={nextStep}
+            />
+          )}
 
-        {/* STEP 3: BIO / ABOUT ME */}
-        {step === 3 && (
-          <StepAboutMe
-            data={data}
-            setData={setData}
-            bioTemplates={bioTemplates}
-            nextStep={nextStep}
-          />
-        )}
+          {/* STEP 4: DETAILS */}
+          {step === 4 && (
+            <StepDetails
+              data={data}
+              setData={setData}
+              nextStep={nextStep}
+              intentionsList={intentionsList}
+              educationsList={educationsList}
+              maritalStatusesList={maritalStatusesList}
+            />
+          )}
 
-        {/* STEP 4: DETAILS */}
-        {step === 4 && (
-          <StepDetails
-            data={data}
-            setData={setData}
-            nextStep={nextStep}
-            intentionsList={intentionsList}
-            educationsList={educationsList}
-            maritalStatusesList={maritalStatusesList}
-          />
-        )}
+          {/* STEP 5: HOBBIES */}
+          {step === 5 && (
+            <StepHobbies
+              data={data}
+              setData={setData}
+              hobbiesList={hobbiesList}
+              nextStep={nextStep}
+            />
+          )}
 
-        {/* STEP 5: HOBBIES */}
-        {step === 5 && (
-          <StepHobbies
-            data={data}
-            setData={setData}
-            hobbiesList={hobbiesList}
-            nextStep={nextStep}
-          />
-        )}
+          {/* STEP 6: PREVIEW */}
+          {step === 6 && <StepPreview data={data} nextStep={nextStep} />}
 
-        {/* STEP 6: PREVIEW */}
-        {step === 6 && <StepPreview data={data} nextStep={nextStep} />}
+          {/* STEP 7: SECURE ACCOUNT */}
+          {step === 7 && <StepPassword data={data} setData={setData} nextStep={nextStep} />}
 
-        {/* STEP 7: SECURE ACCOUNT */}
-        {step === 7 && <StepPassword data={data} setData={setData} nextStep={nextStep} />}
+          {/* STEP 7: FINISH */}
+          {step === 7 && (
+            <div className="space-y-3 pt-4">
+              <Button
+                onClick={() => handleFinish(false)}
+                disabled={loading || !data.email || !data.password}
+                className="w-full"
+              >
+                {loading ? getLabel("saving", language) : getLabel("btn_complete_auth", language)}
+              </Button>
 
-        {/* STEP 7: FINISH */}
-        {step === 7 && (
-          <div className="space-y-3 pt-4">
-            <Button
-              onClick={() => handleFinish(false)}
-              disabled={loading || !data.email || !data.password}
-              className="w-full"
-            >
-              {loading ? getLabel("saving", language) : getLabel("btn_complete_auth", language)}
-            </Button>
+              <Button
+                variant="ghost"
+                onClick={() => handleFinish(true)}
+                disabled={loading}
+                className="w-full"
+              >
+                {getLabel("btn_skip_auth", language)}
+              </Button>
+            </div>
+          )}
 
-            <Button
-              variant="ghost"
-              onClick={() => handleFinish(true)}
-              disabled={loading}
-              className="w-full"
-            >
-              {getLabel("btn_skip_auth", language)}
-            </Button>
+          <div className="pt-8 text-center">
+            <p className="text-muted-foreground text-xs font-medium">
+              {getLabel("step_count", language, { step: step })}
+            </p>
           </div>
-        )}
-
-        <div className="pt-8 text-center">
-          <p className="text-muted-foreground text-xs font-medium">
-            {getLabel("step_count", language, { step: step })}
-          </p>
         </div>
       </div>
-    </div>
+    </React.Fragment>
   );
 }

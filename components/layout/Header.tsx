@@ -16,69 +16,119 @@ import {
   EyeOff,
   User,
   Settings,
+  ChevronLeft,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 
 interface HeaderProps {
-  variant?: "landing" | "dashboard" | "auth" | "simple";
+  variant?: "landing" | "auth" | "simple";
   onOpenFilters?: () => void;
   isGhostMode?: boolean;
   onToggleGhostMode?: () => void;
+  onBack?: () => void;
+  backHref?: string;
   className?: string;
 }
 
+// --- Local Sub-components ---
+const HeaderLogo = ({ onBack, backHref }: { onBack?: () => void; backHref?: string }) => (
+  <div className="flex items-center gap-4">
+    {(onBack || backHref) && (
+      <>
+        {backHref ? (
+          <Link
+            href={backHref}
+            className="text-muted-foreground hover:text-foreground bg-secondary/50 flex h-9 w-9 items-center justify-center rounded-full transition-colors"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </Link>
+        ) : (
+          <button
+            onClick={onBack}
+            className="text-muted-foreground hover:text-foreground bg-secondary/50 flex h-9 w-9 items-center justify-center rounded-full transition-colors"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+        )}
+      </>
+    )}
+    <Link href="/" className="group flex items-center gap-2">
+      <Logo size={42} />
+    </Link>
+  </div>
+);
+
+const LanguageSwitcher = ({
+  language,
+  onLanguageChange,
+}: {
+  language: "tr" | "en";
+  onLanguageChange: (lang: "tr" | "en") => void;
+}) => (
+  <div className="bg-secondary/50 border-border/50 flex items-center gap-2 rounded-full border p-1">
+    {(["tr", "en"] as const).map((lang) => (
+      <button
+        key={lang}
+        onClick={() => onLanguageChange(lang)}
+        className={cn(
+          "rounded-full px-3 py-1 text-[10px] font-bold transition-all",
+          language === lang
+            ? "text-primary bg-white shadow-sm"
+            : "text-muted-foreground/60 hover:text-foreground"
+        )}
+      >
+        {lang.toUpperCase()}
+      </button>
+    ))}
+  </div>
+);
+
+const NavLinks = ({ language }: { language: "tr" | "en" }) => (
+  <nav className="hidden items-center gap-10 lg:flex">
+    {[
+      { id: "nav_story", href: "#" },
+      { id: "nav_why_us", href: "#why-us" },
+      { id: "nav_faq", href: "#faq" },
+    ].map((link) => (
+      <a
+        key={link.id}
+        href={link.href}
+        className="text-muted-foreground hover:text-primary group relative text-[14px] font-semibold transition-colors"
+      >
+        {getLabel(link.id, language)}
+        <span className="bg-primary absolute -bottom-1 left-0 h-[2px] w-0 rounded-full transition-all group-hover:w-full" />
+      </a>
+    ))}
+  </nav>
+);
+
+// --- Main Header Component ---
 export function Header({
   variant = "landing",
   onOpenFilters,
   isGhostMode,
   onToggleGhostMode,
+  onBack,
+  backHref,
   className,
 }: HeaderProps) {
   const { language, setLanguage, matches, currentUser } = useAppStore();
 
-  const commonLanguageSwitcher = (
-    <div className="bg-secondary/50 border-border/50 flex items-center gap-2 rounded-full border p-1">
-      <button
-        onClick={() => setLanguage("tr")}
-        className={cn(
-          "rounded-full px-3 py-1 text-[10px] font-bold transition-all",
-          language === "tr"
-            ? "text-primary bg-white shadow-sm"
-            : "text-muted-foreground/60 hover:text-foreground"
-        )}
-      >
-        TR
-      </button>
-      <button
-        onClick={() => setLanguage("en")}
-        className={cn(
-          "rounded-full px-3 py-1 text-[10px] font-bold transition-all",
-          language === "en"
-            ? "text-primary bg-white shadow-sm"
-            : "text-muted-foreground/60 hover:text-foreground"
-        )}
-      >
-        EN
-      </button>
-    </div>
-  );
+  const langSwitcher = <LanguageSwitcher language={language} onLanguageChange={setLanguage} />;
 
-  if (variant === "dashboard") {
+  const logo = <HeaderLogo onBack={onBack} backHref={backHref} />;
+
+  if (variant === "auth") {
     return (
       <header
-        data-testid="header-dashboard"
+        data-testid="header-auth"
         className={cn(
           "bg-background sticky top-0 z-50 flex h-16 items-center justify-between border-b px-12 shadow-2xs",
           className
         )}
       >
-        <Link href="/" className="group flex items-center gap-2">
-          <Logo size={32} />
-          <span className="font-playfair hidden text-lg font-bold tracking-tight sm:block">
-            SecondSpring
-          </span>
-        </Link>
+        {logo}
 
         <div className="flex items-center gap-2">
           {onToggleGhostMode && (
@@ -153,19 +203,17 @@ export function Header({
     );
   }
 
-  if (variant === "simple" || variant === "auth") {
+  if (variant === "simple") {
     return (
       <header
-        data-testid="header-auth"
+        data-testid="header-simple"
         className={cn(
           "sticky top-0 z-50 flex h-16 items-center justify-between border-b bg-white/70 px-12 shadow-2xs backdrop-blur-2xl",
           className
         )}
       >
-        <Link href="/">
-          <Logo size={36} />
-        </Link>
-        {commonLanguageSwitcher}
+        {logo}
+        {langSwitcher}
       </header>
     );
   }
@@ -179,41 +227,12 @@ export function Header({
         className
       )}
     >
-      {/* Left: Logo */}
-      <div className="flex flex-1 items-center">
-        <Link href="/">
-          <Logo size={40} />
-        </Link>
-      </div>
+      <div className="flex flex-1 items-center">{logo}</div>
 
-      {/* Center: Navigation */}
-      <nav className="hidden items-center gap-10 lg:flex">
-        <a
-          href="#"
-          className="text-muted-foreground hover:text-primary group relative text-[14px] font-semibold transition-colors"
-        >
-          {getLabel("nav_story", language)}
-          <span className="bg-primary absolute -bottom-1 left-0 h-[2px] w-0 rounded-full transition-all group-hover:w-full" />
-        </a>
-        <a
-          href="#why-us"
-          className="text-muted-foreground hover:text-primary group relative text-[14px] font-semibold transition-colors"
-        >
-          {getLabel("nav_why_us", language)}
-          <span className="bg-primary absolute -bottom-1 left-0 h-[2px] w-0 rounded-full transition-all group-hover:w-full" />
-        </a>
-        <a
-          href="#faq"
-          className="text-muted-foreground hover:text-primary group relative text-[14px] font-semibold transition-colors"
-        >
-          {getLabel("nav_faq", language)}
-          <span className="bg-primary absolute -bottom-1 left-0 h-[2px] w-0 rounded-full transition-all group-hover:w-full" />
-        </a>
-      </nav>
+      <NavLinks language={language} />
 
-      {/* Right: Actions */}
       <div className="flex flex-1 items-center justify-end gap-6">
-        {commonLanguageSwitcher}
+        {langSwitcher}
 
         <div className="bg-border/50 h-4 w-[1px]" />
 

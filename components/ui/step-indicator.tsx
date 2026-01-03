@@ -14,7 +14,7 @@ export const StepIndicator: React.FC<StepIndicatorProps> = ({
   onStepClick,
 }) => {
   return (
-    <div className="my-8 flex min-h-[40px] items-center gap-2 sm:gap-4">
+    <div className="mt-16 mb-8 flex min-h-[40px] items-center gap-1 sm:gap-2">
       {[...Array(totalSteps)].map((_, index) => {
         const stepNum = index + 1;
         const isCompleted = stepNum < currentStep;
