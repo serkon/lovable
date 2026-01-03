@@ -1,21 +1,20 @@
 import type { Metadata } from "next";
-import { Inter, Merriweather, Playfair_Display } from "next/font/google";
+import { Playfair_Display, DM_Sans } from "next/font/google";
 import "./globals.css";
 import "./custom.scss";
 import { AppProvider } from "@/context/AppStore";
 import { Toaster } from "sonner";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-const merriweather = Merriweather({
-  weight: ["300", "400", "700", "900"],
-  subsets: ["latin"],
-  variable: "--font-serif",
-});
-
 export const playfair = Playfair_Display({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-playfair",
+});
+
+const dm_sans = DM_Sans({
+  weight: ["300", "400", "700", "900"],
+  subsets: ["latin"],
+  variable: "--font-dm-sans",
 });
 
 export const metadata: Metadata = {
@@ -28,9 +27,11 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  console.log("asdasdasd02");
+
   return (
     <html lang="tr">
-      <body className={`${inter.variable} ${merriweather.variable} ${playfair.variable} font-sans antialiased`}>
+      <body className={`${dm_sans.variable} ${playfair.variable} antialiased`}>
         <AppProvider>
           {children}
           <Toaster />

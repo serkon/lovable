@@ -50,6 +50,7 @@ export function ChoiceCard({
   iconContainerClassName,
 }: ChoiceCardProps) {
   const sizes = sizeClasses[size];
+  console.log(sizes);
 
   return (
     <div
@@ -80,9 +81,9 @@ export function ChoiceCard({
           </div>
         </div>
       )}
-      <h3 className={cn("flex-1 font-medium", !className?.includes("text-") && sizes.text)}>
+      <p className={cn("font-dm-sans flex-1", !className?.includes("text-") && sizes.text)}>
         {option.label}
-      </h3>
+      </p>
       <div
         className={cn(
           "flex items-center justify-center rounded-full border-2 transition-all",
