@@ -15,8 +15,8 @@ interface StepProps {
 
 // Gender ID to icon mapping
 const genderIconMap: Record<string, React.ReactNode> = {
-  gender_female: <Mars />,
-  gender_male: <Venus />,
+  gender_female: <Venus />,
+  gender_male: <Mars />,
   gender_non_binary: <NonBinary />,
 };
 
@@ -56,7 +56,7 @@ export function StepGender({ data, setData, nextStep, getGendersList }: StepProp
         ))}
       </div>
 
-      <div className="text-neutral-foreground mb-8 flex items-center justify-center gap-2 text-sm font-medium">
+      <div className="mb-8 flex items-center justify-center gap-2 text-xs font-medium text-neutral-400">
         <Lock className="h-4 w-4" />
         <span>{getLabel("gender_visible_notice", language)}</span>
       </div>

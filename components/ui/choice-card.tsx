@@ -19,24 +19,24 @@ interface ChoiceCardProps {
 
 const sizeClasses = {
   sm: {
-    card: "p-3 gap-3 rounded-lg border",
+    card: "p-3 gap-3 rounded-lg",
     iconCircle: "h-8 w-8",
     svgContainer: "h-4 w-4",
     text: "text-sm",
     check: "h-4 w-4",
   },
   md: {
-    card: "p-4 gap-4 rounded-xl border",
+    card: "p-4 gap-4 rounded-xl",
     iconCircle: "h-10 w-10",
     svgContainer: "h-6 w-6",
     text: "text-base",
     check: "h-5 w-5",
   },
   lg: {
-    card: "p-4 gap-5 rounded-2xl border-2 hover:shadow-lg",
-    iconCircle: "h-10 w-10",
-    svgContainer: "h-6 w-6",
-    text: "text-lg",
+    card: "p-4 gap-5 rounded-lg hover:shadow-lg",
+    iconCircle: "h-[42px] w-[42px]",
+    svgContainer: "h-5 w-5",
+    text: "text-base",
     check: "h-6 w-6",
   },
 };
@@ -59,8 +59,10 @@ export function ChoiceCard({
         "bg-card flex cursor-pointer items-center transition-all",
         sizes.card,
         isSelected
-          ? cn("border-primary bg-primary/5 dark:bg-primary/10", size === "lg" && "border-[3px]")
-          : "border-border",
+          ? cn("ring-primary bg-primary/5 dark:bg-primary/10 ring-2", size === "lg" && "ring-[3px]")
+          : "border-border border",
+        // Remove border from base classes if selected to avoid double borders with ring
+        isSelected && "border-transparent",
         className
       )}
     >
@@ -81,7 +83,12 @@ export function ChoiceCard({
           </div>
         </div>
       )}
-      <p className={cn("font-dm-sans flex-1", !className?.includes("text-") && sizes.text)}>
+      <p
+        className={cn(
+          "flex-1 font-medium text-neutral-700",
+          !className?.includes("text-") && sizes.text
+        )}
+      >
         {option.label}
       </p>
       <div
