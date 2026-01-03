@@ -57,3 +57,23 @@ export async function getIntentions() {
   });
   return intentions.map((i) => i.id);
 }
+
+export async function getProfileMetadata() {
+  const [hobbies, bioTemplates, maritalStatuses, educations, intentions, jobs] = await Promise.all([
+    getHobbies(),
+    getBioTemplates(),
+    getMaritalStatuses(),
+    getEducations(),
+    getIntentions(),
+    getJobs(),
+  ]);
+
+  return {
+    hobbies,
+    bioTemplates,
+    maritalStatuses,
+    educations,
+    intentions,
+    jobs,
+  };
+}

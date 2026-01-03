@@ -88,7 +88,8 @@ const ICE_BREAKERS = [
 
 const MOCK_USERS = [
   {
-    name: "Ayşe",
+    firstName: "Ayşe",
+    lastName: "Yılmaz",
     age: 48,
     city: "İstanbul, Kadıköy",
     jobId: "job_retired_teacher",
@@ -105,7 +106,8 @@ const MOCK_USERS = [
     genderId: "gender_female",
   },
   {
-    name: "Murat",
+    firstName: "Murat",
+    lastName: "Demir",
     age: 52,
     city: "İstanbul, Beşiktaş",
     jobId: "job_architect",
@@ -121,7 +123,8 @@ const MOCK_USERS = [
     genderId: "gender_male",
   },
   {
-    name: "Zeynep",
+    firstName: "Zeynep",
+    lastName: "Kaya",
     age: 45,
     city: "İzmir, Karşıyaka",
     jobId: "job_doctor",
@@ -138,7 +141,8 @@ const MOCK_USERS = [
     genderId: "gender_female",
   },
   {
-    name: "Ahmet",
+    firstName: "Ahmet",
+    lastName: "Öztürk",
     age: 58,
     city: "Ankara, Çankaya",
     jobId: "job_banker",
@@ -154,7 +158,8 @@ const MOCK_USERS = [
     genderId: "gender_male",
   },
   {
-    name: "Sema",
+    firstName: "Sema",
+    lastName: "Aydın",
     age: 49,
     city: "İstanbul, Kadıköy",
     jobId: "job_pharmacist",
@@ -169,7 +174,8 @@ const MOCK_USERS = [
     genderId: "gender_female",
   },
   {
-    name: "Kemal",
+    firstName: "Kemal",
+    lastName: "Aras",
     age: 55,
     city: "İstanbul, Üsküdar",
     jobId: "job_retired_officer",
@@ -184,7 +190,8 @@ const MOCK_USERS = [
     genderId: "gender_male",
   },
   {
-    name: "Feride",
+    firstName: "Feride",
+    lastName: "Bulut",
     age: 46,
     city: "İstanbul, Bakırköy",
     jobId: "job_lawyer",
@@ -199,7 +206,8 @@ const MOCK_USERS = [
     genderId: "gender_female",
   },
   {
-    name: "Haluk",
+    firstName: "Haluk",
+    lastName: "Güneş",
     age: 60,
     city: "İzmir, Urla",
     jobId: "job_retired_officer",
@@ -214,7 +222,8 @@ const MOCK_USERS = [
     genderId: "gender_male",
   },
   {
-    name: "Nurten",
+    firstName: "Nurten",
+    lastName: "Yıldız",
     age: 53,
     city: "Bursa, Nilüfer",
     jobId: "job_retired_teacher",
@@ -229,7 +238,8 @@ const MOCK_USERS = [
     genderId: "gender_female",
   },
   {
-    name: "Metin",
+    firstName: "Metin",
+    lastName: "Çelik",
     age: 58,
     city: "Antalya, Konyaaltı",
     jobId: "job_chef",
@@ -244,7 +254,8 @@ const MOCK_USERS = [
     genderId: "gender_male",
   },
   {
-    name: "Sevil",
+    firstName: "Sevil",
+    lastName: "Koç",
     age: 50,
     city: "Ankara, Çankaya",
     jobId: "job_academic",
@@ -259,7 +270,8 @@ const MOCK_USERS = [
     genderId: "gender_female",
   },
   {
-    name: "Orhan",
+    firstName: "Orhan",
+    lastName: "Şahin",
     age: 62,
     city: "Muğla, Bodrum",
     jobId: "job_artisan",
@@ -274,7 +286,8 @@ const MOCK_USERS = [
     genderId: "gender_male",
   },
   {
-    name: "Leman",
+    firstName: "Leman",
+    lastName: "Tekin",
     age: 55,
     city: "İstanbul, Sarıyer",
     jobId: "job_doctor",
@@ -289,7 +302,8 @@ const MOCK_USERS = [
     genderId: "gender_female",
   },
   {
-    name: "Cemil",
+    firstName: "Cemil",
+    lastName: "Aksu",
     age: 59,
     city: "İzmir, Alsancak",
     jobId: "job_engineer",
@@ -304,7 +318,8 @@ const MOCK_USERS = [
     genderId: "gender_male",
   },
   {
-    name: "Nazan",
+    firstName: "Nazan",
+    lastName: "Yavuz",
     age: 47,
     city: "İstanbul, Beyoğlu",
     jobId: "job_writer",
@@ -319,7 +334,8 @@ const MOCK_USERS = [
     genderId: "gender_female",
   },
   {
-    name: "Faruk",
+    firstName: "Faruk",
+    lastName: "Kurt",
     age: 56,
     city: "Bursa, Osmangazi",
     jobId: "job_banker",
@@ -334,7 +350,8 @@ const MOCK_USERS = [
     genderId: "gender_male",
   },
   {
-    name: "Gülten",
+    firstName: "Gülten",
+    lastName: "Sönmez",
     age: 61,
     city: "Adana, Çukurova",
     jobId: "job_retired_teacher",
@@ -349,7 +366,8 @@ const MOCK_USERS = [
     genderId: "gender_female",
   },
   {
-    name: "Rıza",
+    firstName: "Rıza",
+    lastName: "Pala",
     age: 65,
     city: "Trabzon, Ortahisar",
     jobId: "job_retired_officer",
@@ -462,8 +480,11 @@ async function main() {
     await prisma.user.create({
       data: {
         ...rest,
-        email: `${userData.name.toLowerCase().replace(/[^a-z0-9]/g, "")}${userIndex}@example.com`,
+        email: `${userData.firstName.toLowerCase()}${userIndex}@example.com`,
         password: "password123",
+        phone: `05${Math.floor(Math.random() * 900 + 100)}${Math.floor(Math.random() * 1000000)
+          .toString()
+          .padStart(7, "0")}`,
         country: "Türkiye",
         job: { connect: { id: jobId } },
         gender: { connect: { id: genderId } },

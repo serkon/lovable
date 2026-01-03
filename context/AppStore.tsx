@@ -45,6 +45,9 @@ export type ExtendedUser = Prisma.UserGetPayload<{
     };
   };
 }> & {
+  firstName?: string | null;
+  lastName?: string | null;
+  phone?: string | null;
   hobbiesArray?: string[];
 };
 
@@ -93,7 +96,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         const dbSentRequests =
           user.likesSent
             ?.map((like) => {
-              const target = like.receiver;
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const target = like.receiver as any;
               if (!target) return null;
               return {
                 id: target.id,
@@ -114,7 +118,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
                 hobbies: Array.isArray(target.hobbies)
                   ? target.hobbies.map((h: { id: string }) => h.id)
                   : [],
-                gender: target.gender?.id || "",
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                gender: (target as any).gender?.id || "",
                 iceBreaker: "",
               } as Profile;
             })

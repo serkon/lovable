@@ -19,7 +19,20 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "i.pravatar.cc",
       },
+      {
+        protocol: "https",
+        hostname: "chatgpt.com",
+      },
+      {
+        protocol: "https",
+        hostname: "files.oaiusercontent.com",
+      },
     ],
+  },
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "10mb",
+    },
   },
 };
 

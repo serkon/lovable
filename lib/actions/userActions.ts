@@ -2,6 +2,9 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { writeFile, unlink } from "fs/promises";
+import path from "path";
+import { checkProfilePhoto } from "./aiActions";
 
 const USER_INCLUDE = {
   job: true,
@@ -45,6 +48,12 @@ export async function getCurrentUser() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any,
   });
+
+  if (!user) {
+    // If the cookie exists but the user is gone (e.g. DB reset), clear the cookie
+    (await cookies()).delete("userId");
+    return null;
+  }
 
   return user;
 }
@@ -293,4 +302,44 @@ export async function getUserById(id: string) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     include: USER_INCLUDE as any,
   });
+}
+
+export async function uploadImage(formData: FormData) {
+  const file = formData.get("file") as File;
+  if (!file) return null;
+
+  try {
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+
+    // AI Photo Check
+    const aiCheck = await checkProfilePhoto(buffer, file.type);
+
+    const filename = `${Date.now()}-${file.name.replace(/\s+/g, "-")}`;
+    const publicDir = path.join(process.cwd(), "public/uploads");
+    const filePath = path.join(publicDir, filename);
+
+    await writeFile(filePath, buffer);
+
+    return {
+      url: `/uploads/${filename}`,
+      aiCheck,
+    };
+  } catch (error) {
+    console.error("Upload error:", error);
+    return null;
+  }
+}
+export async function deleteImage(imageUrl: string) {
+  if (!imageUrl.startsWith("/uploads/")) return { success: false };
+
+  try {
+    const filename = imageUrl.replace("/uploads/", "");
+    const filePath = path.join(process.cwd(), "public/uploads", filename);
+    await unlink(filePath);
+    return { success: true };
+  } catch (error) {
+    console.error("Delete error:", error);
+    return { success: false };
+  }
 }

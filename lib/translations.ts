@@ -154,7 +154,7 @@ export const translations = {
     best_candidates: "Sizin için en iyi adayları hazırladık.",
     no_bio_yet: "Henüz bir biyografi yazılmadı...",
     start_meeting: "Hemen Tanışmaya Başla!",
-    step_count: "Adım {step} / 7",
+    step_count: "Adım {step} / 6",
     auth_title: "Hesabınızı Güvenceye Alın",
     auth_desc:
       "Profilleri kaybetmemek ve istediğiniz zaman giriş yapmak için bir şifre belirleyin.",
@@ -389,7 +389,7 @@ export const translations = {
     best_candidates: "We have prepared the best candidates for you.",
     no_bio_yet: "No bio written yet...",
     start_meeting: "Start Meeting Now!",
-    step_count: "Step {step} / 7",
+    step_count: "Step {step} / 6",
     auth_title: "Secure Your Account",
     auth_desc: "Set a password to avoid losing profiles and to log in anytime.",
     label_country: "Country",

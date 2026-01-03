@@ -2,340 +2,782 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Camera, Settings, X } from "lucide-react";
+import {
+  ArrowLeft,
+  Camera,
+  Settings,
+  X,
+  Plus,
+  Sun,
+  User,
+  Smile,
+  Sparkles,
+  RefreshCw,
+} from "lucide-react";
 import Link from "next/link";
 import { useAppStore } from "@/context/AppStore";
 import { getLabel } from "@/lib/translations";
-import { updateUserProfile } from "@/lib/actions/userActions";
-import { getHobbies, getBioTemplates, getMaritalStatuses, getEducations, getIntentions, getJobs } from "@/lib/actions/contentActions";
+import { updateUserProfile, uploadImage, deleteImage } from "@/lib/actions/userActions";
+import { fetchBioSuggestions, Suggestion } from "@/lib/actions/aiActions";
+import { useRef } from "react";
+import * as LucideIcons from "lucide-react";
+import { getProfileMetadata } from "@/lib/actions/contentActions";
 import { MaritalStatusId, EducationId, IntentionId } from "@/lib/constants";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-
+import { FormGroup } from "@/components/ui/form-group";
+import { cn } from "@/lib/utils";
+import { Heart, GraduationCap, BookOpen, Phone, Mail, MapPin } from "lucide-react";
 import Image from "next/image";
 
 export default function ProfilePage() {
-    const { language, currentUser, refreshCurrentUser } = useAppStore();
+  const { language, currentUser, refreshCurrentUser } = useAppStore();
 
-    // Local form state
-    const [name, setName] = useState("");
-    const [age, setAge] = useState("");
-    const [city, setCity] = useState("");
-    const [job, setJob] = useState("");
-    const [bio, setBio] = useState("");
-    const [selectedHobbies, setSelectedHobbies] = useState<string[]>([]);
-    const [maritalStatus, setMaritalStatus] = useState<MaritalStatusId>("ms_private");
-    const [education, setEducation] = useState<EducationId>("edu_elementary");
-    const [intention, setIntention] = useState<IntentionId>("int_chat");
-    const [userImages, setUserImages] = useState<string[]>([]);
-    const [isSaving, setIsSaving] = useState(false);
+  // Local form state
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [age, setAge] = useState("");
+  const [city, setCity] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [job, setJob] = useState("");
+  const [bio, setBio] = useState("");
+  const [selectedHobbies, setSelectedHobbies] = useState<string[]>([]);
+  const [maritalStatus, setMaritalStatus] = useState<MaritalStatusId>("ms_private");
+  const [education, setEducation] = useState<EducationId>("edu_elementary");
+  const [intention, setIntention] = useState<IntentionId>("int_chat");
+  const [userImages, setUserImages] = useState<string[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isGeneratingBio, setIsGeneratingBio] = useState(false);
+  const [aiSuggestions, setAiSuggestions] = useState<Suggestion[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Dynamic content state
-    const [hobbiesList, setHobbiesList] = useState<string[]>([]);
-    const [bioTemplates, setBioTemplates] = useState<string[]>([]);
-    const [maritalStatusesList, setMaritalStatusesList] = useState<string[]>([]);
-    const [educationsList, setEducationsList] = useState<string[]>([]);
-    const [intentionsList, setIntentionsList] = useState<string[]>([]);
-    const [jobsList, setJobsList] = useState<string[]>([]);
+  // Dynamic content state
+  const [hobbiesList, setHobbiesList] = useState<string[]>([]);
+  const [bioTemplates, setBioTemplates] = useState<string[]>([]);
+  const [maritalStatusesList, setMaritalStatusesList] = useState<string[]>([]);
+  const [educationsList, setEducationsList] = useState<string[]>([]);
+  const [intentionsList, setIntentionsList] = useState<string[]>([]);
+  const [jobsList, setJobsList] = useState<string[]>([]);
 
-    // Fetch dynamic content on mount
-    useEffect(() => {
-        const loadContent = async () => {
-            const [dbHobbies, dbTemplates, dbMarital, dbEdu, dbIntention, dbJobs] = await Promise.all([
-                getHobbies(),
-                getBioTemplates(),
-                getMaritalStatuses(),
-                getEducations(),
-                getIntentions(),
-                getJobs()
-            ]);
-            setHobbiesList(dbHobbies || []);
-            setBioTemplates(dbTemplates || []);
-            setMaritalStatusesList(dbMarital || []);
-            setEducationsList(dbEdu || []);
-            setIntentionsList(dbIntention || []);
-            setJobsList(dbJobs || []);
-        };
-        loadContent();
-    }, []);
+  // Fetch dynamic content on mount
+  useEffect(() => {
+    const loadContent = async () => {
+      const data = await getProfileMetadata();
+      setHobbiesList(data.hobbies || []);
+      setBioTemplates(data.bioTemplates || []);
+      setMaritalStatusesList(data.maritalStatuses || []);
+      setEducationsList(data.educations || []);
+      setIntentionsList(data.intentions || []);
+      setJobsList(data.jobs || []);
 
-    // Sync with store data when component mounts or currentUser changes
-    useEffect(() => {
-        if (currentUser) {
-            setName(currentUser.name || "");
-            setAge(currentUser.age?.toString() || "");
-            setCity(currentUser.city || "");
-            setJob(currentUser.job?.id || "");
-            setBio(currentUser.bio || "");
-            setMaritalStatus(currentUser.maritalStatus?.id as MaritalStatusId || "ms_private");
-            setEducation(currentUser.education?.id as EducationId || "edu_elementary");
-            setIntention(currentUser.intention?.id as IntentionId || "int_chat");
-
-            if (currentUser.images && currentUser.images.length > 0) {
-                setUserImages(currentUser.images.map(img => img.url));
-            }
-
-            if (currentUser.hobbies) {
-                setSelectedHobbies(currentUser.hobbies.map(h => h.id));
-            } else if (currentUser.hobbiesArray) {
-                setSelectedHobbies(currentUser.hobbiesArray);
-            }
-        }
-    }, [currentUser]);
-
-    const toggleHobby = (hobby: string) => {
-        setSelectedHobbies(prev =>
-            prev.includes(hobby) ? prev.filter(h => h !== hobby) : [...prev, hobby]
-        );
+      // Load initial AI suggestions
+      const aiData = await fetchBioSuggestions();
+      setAiSuggestions(aiData);
     };
+    loadContent();
+  }, []);
 
-    const addImage = () => {
-        const url = prompt(getLabel('prompt_image_url', language) || "Lütfen bir resim URL'si girin:");
-        if (url && url.startsWith('http')) {
-            setUserImages(prev => [...prev, url].slice(0, 6));
-        }
-    };
+  const refreshAiSuggestions = async () => {
+    setIsGeneratingBio(true);
+    try {
+      const data = await fetchBioSuggestions();
+      setAiSuggestions(data);
+    } finally {
+      setIsGeneratingBio(false);
+    }
+  };
 
-    const removeImage = (index: number) => {
-        setUserImages(prev => prev.filter((_, i) => i !== index));
-    };
+  // Sync with store data when component mounts or currentUser changes
+  useEffect(() => {
+    if (currentUser) {
+      setFirstName(currentUser.firstName || "");
+      setLastName(currentUser.lastName || "");
+      const userAge = currentUser.age?.toString() || "";
+      setAge(userAge === "0" ? "" : userAge);
+      setCity(currentUser.city || "");
+      setEmail(currentUser.email || "");
+      setPhone(currentUser.phone || "");
+      setJob(currentUser.job?.id || "");
+      setBio(currentUser.bio || "");
+      setMaritalStatus((currentUser.maritalStatus?.id as MaritalStatusId) || "ms_private");
+      setEducation((currentUser.education?.id as EducationId) || "edu_elementary");
+      setIntention((currentUser.intention?.id as IntentionId) || "int_chat");
 
-    const handleSave = async () => {
-        setIsSaving(true);
-        try {
-            await updateUserProfile({
-                name,
-                age: parseInt(age),
-                city,
-                job,
-                bio,
-                hobbies: selectedHobbies,
-                images: userImages,
-                maritalStatus,
-                education,
-                intention
-            });
-            await refreshCurrentUser();
-            alert(getLabel('profile_updated_success', language));
-        } catch (error) {
-            console.error("Save failed:", error);
-            alert(getLabel('error_generic', language));
-        } finally {
-            setIsSaving(false);
-        }
-    };
+      if (currentUser.images && currentUser.images.length > 0) {
+        setUserImages(currentUser.images.map((img) => img.url));
+      }
 
-    return (
-        <div className="min-h-screen bg-background pb-20" data-testid="profile-page-container">
-            {/* Header */}
-            <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background px-4">
-                <div className="flex items-center gap-2">
-                    <Link href="/dashboard">
-                        <Button variant="ghost" size="icon">
-                            <ArrowLeft className="h-5 w-5" />
-                        </Button>
-                    </Link>
-                    <h1 className="font-bold">Profilimi Düzenle</h1>
-                </div>
-                <div className="flex gap-2">
-                    <Link href="/settings">
-                        <Button variant="ghost" size="icon">
-                            <Settings className="h-5 w-5" />
-                        </Button>
-                    </Link>
-                    <Button onClick={handleSave} disabled={isSaving}>
-                        Kaydet
-                    </Button>
-                </div>
-            </header>
+      if (currentUser.hobbies) {
+        setSelectedHobbies(currentUser.hobbies.map((h) => h.id));
+      } else if (currentUser.hobbiesArray) {
+        setSelectedHobbies(currentUser.hobbiesArray);
+      }
+    }
+  }, [currentUser]);
 
-            <main className="mx-auto max-w-xl px-4 py-8 space-y-10" data-testid="profile-main">
-                {/* Photo Section */}
-                <section className="space-y-4" data-testid="profile-photos-section">
-                    <div className="flex items-center justify-between px-1">
-                        <Label className="text-xs font-bold text-muted-foreground">Fotoğraflar</Label>
-                        <span className="text-xs text-muted-foreground">{userImages.length}/6</span>
-                    </div>
-                    <div className="grid grid-cols-3 gap-2">
-                        {userImages.map((url, idx) => (
-                            <div key={idx} className="relative aspect-square bg-muted border overflow-hidden">
-                                <Image src={url} alt="Profile" fill className="object-cover" />
-                                <Button
-                                    variant="destructive"
-                                    size="icon"
-                                    onClick={() => removeImage(idx)}
-                                    className="absolute right-1 top-1 h-6 w-6"
-                                >
-                                    <X className="h-3 w-3" />
-                                </Button>
-                            </div>
-                        ))}
-                        {userImages.length < 6 && (
-                            <Button
-                                variant="outline"
-                                onClick={addImage}
-                                className="aspect-square flex flex-col items-center justify-center border-dashed"
-                            >
-                                <Camera className="h-6 w-6" />
-                                <span className="text-xs">Ekle</span>
-                            </Button>
-                        )}
-                    </div>
-                </section>
-
-                <Separator />
-
-                {/* Basic Info */}
-                <section className="space-y-6" data-testid="profile-basic-info-section">
-                    <h3 className="text-sm font-bold text-muted-foreground">Temel Bilgiler</h3>
-                    <Card className="p-6 space-y-6">
-                        <div className="space-y-2">
-                            <Label htmlFor="name">Ad Soyad</Label>
-                            <Input
-                                id="name"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                placeholder="Adınız"
-                            />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="age">Yaş</Label>
-                                <Input
-                                    id="age"
-                                    type="number"
-                                    value={age}
-                                    onChange={(e) => setAge(e.target.value)}
-                                    placeholder="Yaşınız"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="city">Şehir</Label>
-                                <Input
-                                    id="city"
-                                    value={city}
-                                    onChange={(e) => setCity(e.target.value)}
-                                    placeholder="Şehriniz"
-                                />
-                            </div>
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="job">Meslek</Label>
-                            <Select value={job} onValueChange={setJob}>
-                                <SelectTrigger id="job">
-                                    <SelectValue placeholder="Mesleğinizi seçin" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {jobsList.map(j => <SelectItem key={j} value={j}>{getLabel(j, language)}</SelectItem>)}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </Card>
-                </section>
-
-                {/* Bio Section */}
-                <section className="space-y-4" data-testid="profile-bio-section">
-                    <Label htmlFor="bio" className="text-sm font-bold text-muted-foreground">Hakkımda</Label>
-                    <Card className="p-4 space-y-4">
-                        <Textarea
-                            id="bio"
-                            value={bio}
-                            onChange={(e) => setBio(e.target.value)}
-                            placeholder="Kendinizden bahsedin..."
-                        />
-                        <div className="flex flex-wrap gap-2 pt-2">
-                            {bioTemplates.slice(0, 3).map((t, idx) => (
-                                <Badge
-                                    key={idx}
-                                    variant="secondary"
-                                    className="cursor-pointer text-[10px]"
-                                    onClick={() => setBio(prev => prev ? `${prev} ${t}` : t)}
-                                >
-                                    + {t.substring(0, 15)}...
-                                </Badge>
-                            ))}
-                        </div>
-                    </Card>
-                </section>
-
-                {/* Details Section */}
-                <section className="space-y-6" data-testid="profile-details-section">
-                    <h3 className="text-sm font-bold text-muted-foreground">Detaylar</h3>
-                    <Card className="p-6 space-y-6">
-                        <div className="space-y-2">
-                            <Label htmlFor="intention">Niyet</Label>
-                            <Select value={intention} onValueChange={(v) => setIntention(v as IntentionId)}>
-                                <SelectTrigger id="intention">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {intentionsList.map(i => <SelectItem key={i} value={i}>{getLabel(i, language)}</SelectItem>)}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="education">Eğitim</Label>
-                            <Select value={education} onValueChange={(v) => setEducation(v as EducationId)}>
-                                <SelectTrigger id="education">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {educationsList.map(e => <SelectItem key={e} value={e}>{getLabel(e, language)}</SelectItem>)}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="marital">Medeni Durum</Label>
-                            <Select value={maritalStatus} onValueChange={(v) => setMaritalStatus(v as MaritalStatusId)}>
-                                <SelectTrigger id="marital">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {maritalStatusesList.map(s => <SelectItem key={s} value={s}>{getLabel(s, language)}</SelectItem>)}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </Card>
-                </section>
-
-                {/* Hobbies Section */}
-                <section className="space-y-4" data-testid="profile-hobbies-section">
-                    <Label className="text-sm font-bold text-muted-foreground">Hobiler</Label>
-                    <div className="flex flex-wrap gap-2">
-                        {hobbiesList.map(hobby => (
-                            <Badge
-                                key={hobby}
-                                variant={selectedHobbies.includes(hobby) ? "default" : "outline"}
-                                className="cursor-pointer"
-                                onClick={() => toggleHobby(hobby)}
-                            >
-                                {getLabel(hobby, language)}
-                            </Badge>
-                        ))}
-                    </div>
-                </section>
-
-                <div className="pt-8">
-                    <Button
-                        onClick={handleSave}
-                        disabled={isSaving}
-                        className="w-full font-bold"
-                    >
-                        {isSaving ? "Güncelleniyor..." : "Profilimi Güncelle"}
-                    </Button>
-                </div>
-            </main>
-        </div>
+  const toggleHobby = (hobby: string) => {
+    setSelectedHobbies((prev) =>
+      prev.includes(hobby) ? prev.filter((h) => h !== hobby) : [...prev, hobby]
     );
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const result = await uploadImage(formData);
+      if (result && result.url) {
+        setUserImages((prev) => [...prev, result.url]);
+
+        // Show AI Feedback
+        if (result.aiCheck) {
+          const { feedback, isApproved } = result.aiCheck;
+          alert(`${isApproved ? "✅" : "⚠️"} AI Görsel Analizi:\n${feedback.message}`);
+        }
+      } else {
+        alert("Görsel yüklenemedi. Lütfen tekrar deneyin.");
+      }
+    } catch (error) {
+      console.error("Upload handler error:", error);
+      alert("Bir hata oluştu.");
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const addImage = () => {
+    fileInputRef.current?.click();
+  };
+
+  const removeImage = async (index: number) => {
+    const imageUrl = userImages[index];
+    setUserImages((prev) => prev.filter((_, i) => i !== index));
+    if (imageUrl) {
+      await deleteImage(imageUrl);
+    }
+  };
+
+  const setAsPrimary = (index: number) => {
+    if (index === 0) return;
+    setUserImages((prev) => {
+      const newImages = [...prev];
+      const selected = newImages[index];
+      newImages.splice(index, 1);
+      newImages.unshift(selected);
+      return newImages;
+    });
+  };
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      await updateUserProfile({
+        firstName,
+        lastName,
+        age: parseInt(age),
+        city,
+        email,
+        phone,
+        job,
+        bio,
+        hobbies: selectedHobbies,
+        images: userImages,
+        maritalStatus,
+        education,
+        intention,
+      });
+      await refreshCurrentUser();
+      alert(getLabel("profile_updated_success", language));
+    } catch (error) {
+      console.error("Save failed:", error);
+      alert(getLabel("error_generic", language));
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <div className="bg-background min-h-screen pb-24" data-testid="profile-page-container">
+      {/* Header */}
+      <header className="bg-background/80 sticky top-0 z-[50] flex h-20 items-center justify-between border-b px-8 backdrop-blur-xl">
+        <div className="flex items-center gap-4">
+          <Link href="/dashboard">
+            <Button variant="ghost" size="icon" className="bg-secondary/50 rounded-full">
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-xl font-bold tracking-tight">Profilimi Düzenle</h1>
+            <p className="text-muted-foreground hidden text-xs font-medium sm:block">
+              {getLabel("personal_info", language)}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <Link href="/settings" className="hidden sm:block">
+            <Button variant="ghost" size="icon" className="rounded-full">
+              <Settings className="h-5 w-5" />
+            </Button>
+          </Link>
+          <Button
+            onClick={handleSave}
+            disabled={isSaving}
+            className="shadow-primary/20 rounded-full px-6 font-bold shadow-lg transition-all hover:scale-105 active:scale-95"
+          >
+            {isSaving ? getLabel("saving", language) : getLabel("save", language)}
+          </Button>
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-2xl space-y-16 px-6 py-10" data-testid="profile-main">
+        {/* Photo Section */}
+        <section className="space-y-8" data-testid="profile-photos-section">
+          <div className="relative py-4">
+            <div className="absolute inset-0 flex items-center">
+              <span className="border-muted-foreground/10 w-full border-t" />
+            </div>
+            <div className="relative flex justify-center uppercase">
+              <span className="bg-background text-muted-foreground/60 px-6 text-[10px] font-bold tracking-[0.2em]">
+                PROFİL FOTOĞRAFLARI
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between px-1">
+            <p className="text-muted-foreground text-xs font-medium">
+              Profilinizi tamamlamak için dilediğiniz kadar fotoğraf ekleyebilirsiniz.
+            </p>
+            <Badge variant="secondary" className="rounded-full px-3 py-1 font-bold">
+              {userImages.length} Fotoğraf
+            </Badge>
+          </div>
+
+          <div className="mx-auto w-full space-y-6">
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+              {/* Primary Photo Slot (First in Grid) */}
+              <div
+                className={cn(
+                  "group relative aspect-square overflow-hidden rounded-3xl border-2 border-dashed shadow-md transition-all sm:col-span-2 sm:row-span-2",
+                  userImages[0]
+                    ? "border-transparent"
+                    : "border-primary/20 bg-primary/5 hover:border-primary/40"
+                )}
+              >
+                {userImages[0] ? (
+                  <>
+                    <Image
+                      src={userImages[0]}
+                      alt="Main Profile"
+                      fill
+                      className="object-cover transition-all duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-4 opacity-0 transition-opacity group-hover:opacity-100">
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => removeImage(0)}
+                        className="w-full rounded-xl font-bold"
+                      >
+                        <X className="mr-2 h-4 w-4" /> Kaldır
+                      </Button>
+                    </div>
+                    <div className="absolute top-4 left-4">
+                      <Badge className="bg-primary/90 border-none px-3 py-1 text-[10px] font-bold tracking-widest text-white uppercase shadow-lg backdrop-blur-sm">
+                        ANA FOTOĞRAF
+                      </Badge>
+                    </div>
+                  </>
+                ) : (
+                  <button
+                    onClick={addImage}
+                    disabled={isUploading}
+                    className="flex h-full w-full flex-col items-center justify-center gap-3 p-6 text-center transition-all focus:outline-none"
+                  >
+                    <div className="bg-primary/10 text-primary rounded-full p-4 shadow-sm">
+                      <Camera className="h-8 w-8" />
+                    </div>
+                    <span className="text-primary/70 text-xs font-bold tracking-wider uppercase">
+                      Fotoğraf Yükle
+                    </span>
+                  </button>
+                )}
+              </div>
+
+              {/* Secondary Photos Grid */}
+              {userImages.slice(1).map((url, idx) => (
+                <div
+                  key={idx + 1}
+                  className="group border-muted-foreground/10 bg-muted/30 relative aspect-square overflow-hidden rounded-2xl border shadow-sm transition-all hover:shadow-md"
+                >
+                  <Image
+                    src={url}
+                    alt={`Gallery ${idx + 1}`}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+
+                  {/* Hover Actions */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/60 opacity-0 transition-opacity group-hover:opacity-100">
+                    <button
+                      onClick={() => setAsPrimary(idx + 1)}
+                      className="text-primary w-[80%] rounded-xl bg-white/90 py-2 text-[10px] font-bold tracking-wider uppercase transition-all hover:bg-white active:scale-95"
+                    >
+                      Ana Yap
+                    </button>
+                    <button
+                      onClick={() => removeImage(idx + 1)}
+                      className="bg-destructive/90 hover:bg-destructive w-[80%] rounded-xl py-2 text-[10px] font-bold tracking-wider text-white uppercase transition-all active:scale-95"
+                    >
+                      Sil
+                    </button>
+                  </div>
+                </div>
+              ))}
+
+              {/* Add Button at the end */}
+              {userImages.length < 12 && (
+                <button
+                  onClick={addImage}
+                  disabled={isUploading}
+                  className="bg-muted/30 border-muted-foreground/10 hover:border-primary/30 flex aspect-square flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed transition-all active:scale-95"
+                >
+                  <div className="bg-background text-muted-foreground group-hover:text-primary rounded-full p-2 shadow-sm">
+                    {isUploading ? (
+                      <RefreshCw className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Plus className="h-6 w-6" />
+                    )}
+                  </div>
+                  <span className="text-muted-foreground text-[10px] font-bold tracking-wider uppercase">
+                    Ekle
+                  </span>
+                </button>
+              )}
+            </div>
+
+            {/* Compact Photo Tips (Reverted Design) */}
+            <div className="space-y-8 pt-4">
+              <div className="relative flex items-center justify-center">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="border-muted-foreground/10 w-full border-t"></div>
+                </div>
+                <span className="bg-background text-muted-foreground/60 relative px-4 text-[10px] font-bold tracking-[0.2em] uppercase">
+                  MÜKEMMEL FOTOĞRAF TÜYOLARI
+                </span>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="bg-muted/50 text-muted-foreground/70 flex h-12 w-12 items-center justify-center rounded-full">
+                    <Sun className="h-5 w-5" />
+                  </div>
+                  <span className="text-muted-foreground/80 text-center text-[10px] font-medium tracking-tight uppercase">
+                    İyi Işık
+                  </span>
+                </div>
+                <div className="flex flex-col items-center gap-3">
+                  <div className="bg-muted/50 text-muted-foreground/70 flex h-12 w-12 items-center justify-center rounded-full">
+                    <User className="h-5 w-5" />
+                  </div>
+                  <span className="text-muted-foreground/80 text-center text-[10px] font-medium tracking-tight uppercase">
+                    Yalnız Çekim
+                  </span>
+                </div>
+                <div className="flex flex-col items-center gap-3">
+                  <div className="bg-muted/50 text-muted-foreground/70 flex h-12 w-12 items-center justify-center rounded-full">
+                    <Smile className="h-5 w-5" />
+                  </div>
+                  <span className="text-muted-foreground/80 text-center text-[10px] font-medium tracking-tight uppercase">
+                    Net Yüz
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            accept="image/*"
+            className="hidden"
+          />
+        </section>
+
+        {/* Basic Info */}
+        <section className="space-y-10" data-testid="profile-basic-info-section">
+          <div className="relative py-4">
+            <div className="absolute inset-0 flex items-center">
+              <span className="border-muted-foreground/10 w-full border-t" />
+            </div>
+            <div className="relative flex justify-center uppercase">
+              <span className="bg-background text-muted-foreground/60 px-6 text-[10px] font-bold tracking-[0.2em]">
+                KİMLİK BİLGİLERİ
+              </span>
+            </div>
+          </div>
+
+          <div className="w-full space-y-8">
+            {/* Row 1: Adı, Soyadı, Yaş'ı */}
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <FormGroup label={getLabel("label_first_name", language)}>
+                <Input
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  placeholder={getLabel("placeholder_first_name", language)}
+                  className="h-12 rounded-xl"
+                />
+              </FormGroup>
+
+              <FormGroup label={getLabel("label_last_name", language)}>
+                <Input
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  placeholder={getLabel("placeholder_last_name", language)}
+                  className="h-12 rounded-xl"
+                />
+              </FormGroup>
+
+              <FormGroup label={getLabel("label_age", language)}>
+                <Input
+                  type="number"
+                  value={age}
+                  onChange={(e) => setAge(e.target.value)}
+                  placeholder={getLabel("placeholder_age", language)}
+                  className="h-12 rounded-xl"
+                />
+              </FormGroup>
+            </div>
+
+            {/* Separator for Contact */}
+            <div className="relative py-2">
+              <div className="absolute inset-0 flex items-center">
+                <span className="border-muted-foreground/10 w-full border-t" />
+              </div>
+              <div className="relative flex justify-center uppercase">
+                <span className="bg-background text-muted-foreground/60 px-6 text-[10px] font-bold tracking-[0.2em]">
+                  İLETİŞİM BİLGİLERİ
+                </span>
+              </div>
+            </div>
+
+            {/* Row 1.5: Telefon ve Email */}
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <FormGroup
+                label={
+                  <span className="flex items-center gap-1">
+                    <Phone className="h-3 w-3" /> {getLabel("label_phone", language)}
+                  </span>
+                }
+              >
+                <Input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder={getLabel("placeholder_phone", language)}
+                  className="h-12 rounded-xl"
+                />
+              </FormGroup>
+
+              <FormGroup
+                label={
+                  <span className="flex items-center gap-1">
+                    <Mail className="h-3 w-3" /> {getLabel("label_email", language)}
+                  </span>
+                }
+              >
+                <Input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder={getLabel("placeholder_email", language)}
+                  className="h-12 rounded-xl"
+                />
+              </FormGroup>
+            </div>
+
+            {/* Separator */}
+            <div className="relative py-4">
+              <div className="absolute inset-0 flex items-center">
+                <span className="border-muted-foreground/10 w-full border-t" />
+              </div>
+              <div className="relative flex justify-center uppercase">
+                <span className="bg-background text-muted-foreground/60 px-6 text-[10px] font-bold tracking-[0.2em]">
+                  BİRAZ DAHA DETAY
+                </span>
+              </div>
+            </div>
+
+            {/* Row 2: Şehir ve Eğitim */}
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <FormGroup
+                label={
+                  <span className="flex items-center gap-1">
+                    <MapPin className="h-3 w-3" /> {getLabel("label_city", language)}
+                  </span>
+                }
+              >
+                <Input
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  placeholder={getLabel("placeholder_city", language)}
+                  className="h-12 rounded-xl"
+                />
+              </FormGroup>
+
+              <FormGroup
+                label={
+                  <span className="flex items-center gap-1">
+                    <GraduationCap className="h-3 w-3" /> {getLabel("education", language)}
+                  </span>
+                }
+              >
+                <Select value={education} onValueChange={(v) => setEducation(v as EducationId)}>
+                  <SelectTrigger className="h-12 w-full rounded-xl">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {educationsList.map((e) => (
+                      <SelectItem key={e} value={e}>
+                        {getLabel(e, language)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormGroup>
+            </div>
+
+            {/* Row 3: Meslek ve Medeni Durum */}
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <FormGroup label={getLabel("label_job", language)}>
+                <Select value={job} onValueChange={setJob}>
+                  <SelectTrigger className="h-12 w-full rounded-xl">
+                    <SelectValue placeholder={getLabel("select_default", language)} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {jobsList.map((j) => (
+                      <SelectItem key={j} value={j}>
+                        {getLabel(j, language)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormGroup>
+
+              <FormGroup
+                label={
+                  <span className="flex items-center gap-1">
+                    <BookOpen className="h-3 w-3" /> {getLabel("maritalStatus", language)}
+                  </span>
+                }
+              >
+                <Select
+                  value={maritalStatus}
+                  onValueChange={(v) => setMaritalStatus(v as MaritalStatusId)}
+                >
+                  <SelectTrigger className="h-12 w-full rounded-xl">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {maritalStatusesList.map((s) => (
+                      <SelectItem key={s} value={s}>
+                        {getLabel(s, language)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormGroup>
+            </div>
+
+            {/* Separator for Purpose */}
+            <div className="relative py-2">
+              <div className="absolute inset-0 flex items-center">
+                <span className="border-muted-foreground/10 w-full border-t" />
+              </div>
+              <div className="relative flex justify-center uppercase">
+                <span className="bg-background text-muted-foreground/60 px-6 text-[10px] font-bold tracking-[0.2em]">
+                  TANIŞMA AMACI
+                </span>
+              </div>
+            </div>
+
+            {/* Row 4: Tanışma Amacı (Full Width match onboarding vibes) */}
+            <div className="grid grid-cols-1">
+              <FormGroup
+                label={
+                  <span className="flex items-center gap-1">
+                    <Heart className="h-3 w-3" /> {getLabel("intention", language)}
+                  </span>
+                }
+              >
+                <Select value={intention} onValueChange={(v) => setIntention(v as IntentionId)}>
+                  <SelectTrigger className="h-12 w-full rounded-xl">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {intentionsList.map((i) => (
+                      <SelectItem key={i} value={i}>
+                        {getLabel(i, language)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormGroup>
+            </div>
+          </div>
+        </section>
+
+        <section className="space-y-8" data-testid="profile-bio-section">
+          <div className="relative py-4">
+            <div className="absolute inset-0 flex items-center">
+              <span className="border-muted-foreground/10 w-full border-t" />
+            </div>
+            <div className="relative flex justify-center uppercase">
+              <span className="bg-background text-muted-foreground/60 px-6 text-[10px] font-bold tracking-[0.2em]">
+                KENDİNİZDEN BAHSEDİN
+              </span>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <Card className="border-muted-foreground/10 bg-muted/5 focus-within:ring-primary/20 overflow-hidden rounded-[2rem] p-6 shadow-none transition-all focus-within:ring-2">
+              <Textarea
+                id="bio"
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                placeholder={getLabel("placeholder_bio", language)}
+                className="placeholder:text-muted-foreground/40 min-h-[200px] resize-none border-none bg-transparent p-0 text-lg leading-relaxed focus-visible:ring-0"
+              />
+            </Card>
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between px-1">
+                <span className="text-primary flex items-center gap-2 text-xs font-bold tracking-widest uppercase">
+                  <Sparkles className="h-3 w-3" /> YAPAY ZEKA ÖNERİLERİ
+                </span>
+                <button
+                  onClick={refreshAiSuggestions}
+                  disabled={isGeneratingBio}
+                  className="text-muted-foreground hover:text-primary transition-colors disabled:opacity-50"
+                >
+                  <RefreshCw className={cn("h-4 w-4", isGeneratingBio && "animate-spin")} />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {isGeneratingBio
+                  ? Array(4)
+                      .fill(0)
+                      .map((_, i) => (
+                        <div
+                          key={i}
+                          className="bg-muted/50 h-12 w-full animate-pulse rounded-2xl"
+                        />
+                      ))
+                  : aiSuggestions.length > 0
+                    ? aiSuggestions.map((suggestion, idx) => {
+                        const IconComp =
+                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                          (LucideIcons as any)[
+                            suggestion.icon
+                              .split("-")
+                              .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+                              .join("")
+                          ] || Sparkles;
+                        return (
+                          <button
+                            key={idx}
+                            onClick={() =>
+                              setBio((prev) =>
+                                prev ? `${prev} ${suggestion.text}` : suggestion.text
+                              )
+                            }
+                            className="group bg-background border-muted-foreground/10 hover:border-primary/30 flex items-center gap-3 rounded-2xl border p-4 text-left shadow-sm transition-all hover:shadow-md active:scale-[0.98]"
+                          >
+                            <div className="bg-primary/5 text-primary group-hover:bg-primary flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors group-hover:text-white">
+                              <IconComp className="h-4 w-4" />
+                            </div>
+                            <span className="text-muted-foreground group-hover:text-foreground text-xs leading-tight font-medium transition-colors">
+                              {suggestion.text}
+                            </span>
+                          </button>
+                        );
+                      })
+                    : bioTemplates.slice(0, 4).map((t, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => setBio((prev) => (prev ? `${prev} ${t}` : t))}
+                          className="bg-muted/30 hover:bg-muted/50 rounded-2xl p-4 text-left text-xs font-medium transition-all"
+                        >
+                          {t}
+                        </button>
+                      ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Hobbies Section */}
+        <section className="space-y-10" data-testid="profile-hobbies-section">
+          <div className="relative py-4">
+            <div className="absolute inset-0 flex items-center">
+              <span className="border-muted-foreground/10 w-full border-t" />
+            </div>
+            <div className="relative flex justify-center uppercase">
+              <span className="bg-background text-muted-foreground/60 px-6 text-[10px] font-bold tracking-[0.2em]">
+                İLGİ ALANLARI VE HOBİLER
+              </span>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {hobbiesList.map((hobby) => {
+              const isSelected = selectedHobbies.includes(hobby);
+              return (
+                <button
+                  key={hobby}
+                  onClick={() => toggleHobby(hobby)}
+                  className={cn(
+                    "rounded-full px-4 py-2 text-xs font-bold shadow-sm transition-all active:scale-95",
+                    isSelected
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground hover:bg-muted/80"
+                  )}
+                >
+                  {getLabel(hobby, language)}
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        <div className="pt-10">
+          <Button
+            onClick={handleSave}
+            disabled={isSaving}
+            size="lg"
+            className="shadow-primary/20 w-full rounded-2xl py-8 text-lg font-bold shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
+          >
+            {isSaving ? getLabel("saving", language) : "Değişiklikleri Kaydet"}
+          </Button>
+        </div>
+      </main>
+    </div>
+  );
 }

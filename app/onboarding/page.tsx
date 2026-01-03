@@ -16,6 +16,7 @@ import {
   getJobs,
   getGenders,
 } from "@/lib/actions/contentActions";
+import { getCurrentUser, createGuestUser } from "@/lib/actions/userActions";
 
 import { StepGender } from "@/components/onboarding/StepGender";
 import { StepBasicInfo } from "@/components/onboarding/StepBasicInfo";
@@ -70,6 +71,7 @@ export default function OnboardingPage() {
     maritalStatus: "",
     hobbies: [],
     email: "",
+    phone: "",
     password: "",
   });
   const nextStep = () => setStep((s) => s + 1);
@@ -77,6 +79,13 @@ export default function OnboardingPage() {
   const handleFinish = async (skipAuth = false) => {
     setLoading(true);
     try {
+      // Ensure we have a valid session before updating
+      const user = await getCurrentUser();
+      if (!user) {
+        console.log("No session found, creating guest user...");
+        await createGuestUser();
+      }
+
       await updateUserProfile({
         firstName: data.firstName,
         lastName: data.lastName,
@@ -117,6 +126,13 @@ export default function OnboardingPage() {
 
   useEffect(() => {
     const fetchData = async () => {
+      // Ensure a valid session exists as soon as the page loads
+      const user = await getCurrentUser();
+      if (!user) {
+        console.log("No valid session found on mount, creating guest user...");
+        await createGuestUser();
+      }
+
       const [dbBioTemplates, dbHobbies, dbMarital, dbEdu, dbIntention, dbJobs, dbGenders] =
         await Promise.all([
           getBioTemplates(),
