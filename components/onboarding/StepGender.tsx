@@ -64,7 +64,8 @@ export function StepGender({ data, setData, nextStep, getGendersList }: StepProp
       <Button
         onClick={nextStep}
         disabled={!data.gender}
-        className="h-14 w-full max-w-[400px] rounded-xl text-lg font-medium shadow-lg transition-all disabled:cursor-not-allowed disabled:opacity-50"
+        size="lg"
+        className="w-full max-w-[400px] shadow-lg transition-all"
       >
         {getLabel("btn_continue", language)}
       </Button>
