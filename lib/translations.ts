@@ -119,7 +119,7 @@ export const translations = {
     // Onboarding
     welcome: "Hoş Geldiniz",
     start_with_gender: "Cinsiyetinizi seçerek başlayalım",
-    gender_question: "Kendinizi nasıl tanımlıyorsunuz?",
+    gender_question: "Cinsiyetinizi Seçin",
     gender_subtitle: "Bu, tercihlerinize göre size en uygun eşleşmeleri bulmamıza yardımcı olur.",
     gender_visible_notice: "Cinsiyetiniz profilinizde görünür.",
     gender_female: "Kadın",
@@ -349,7 +349,7 @@ export const translations = {
     // Onboarding
     welcome: "Welcome",
     start_with_gender: "Let's start by choosing your gender",
-    gender_question: "How do you identify?",
+    gender_question: "What is your gender?",
     gender_subtitle: "This helps us find you the right matches based on your preferences.",
     gender_visible_notice: "Your gender is visible on your profile.",
     gender_female: "Woman",
