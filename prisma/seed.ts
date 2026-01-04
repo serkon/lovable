@@ -388,7 +388,7 @@ const MOCK_USERS = [
     bio: "Karadeniz'in hırçın dalgaları gibiydim duruldum. Huzur arıyorum.",
     hobbies: ["hobby_fishing", "hobby_nature"],
     images: [
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=800&h=1000",
+      "https://images.unsplash.com/photo-1492288991661-058aa541ff43?auto=format&fit=crop&q=80&w=800&h=1000",
     ],
     genderId: "gender_male",
   },

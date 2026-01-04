@@ -17,9 +17,23 @@ import {
   User,
   Settings,
   ChevronLeft,
+  LogOut,
+  CreditCard,
+  Activity,
+  Sun,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+  DropdownMenuGroup,
+} from "@/components/ui/dropdown-menu";
+import { logoutUser } from "@/lib/actions/userActions";
 
 interface HeaderProps {
   variant?: "landing" | "auth" | "simple";
@@ -132,12 +146,7 @@ export function Header({
 
         <div className="flex items-center gap-2">
           {onToggleGhostMode && (
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={onToggleGhostMode}
-              className="rounded-full"
-            >
+            <Button size="icon" variant="ghost" onClick={onToggleGhostMode}>
               {isGhostMode ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </Button>
           )}
@@ -174,30 +183,103 @@ export function Header({
 
           <div className="bg-border/50 mx-1 h-4 w-[1px]" />
 
-          <Link href="/profile">
-            <Button
-              size="icon"
-              variant="ghost"
-              className="border-border/50 relative overflow-hidden rounded-full border"
+          <DropdownMenu modal={false}>
+            <DropdownMenuTrigger asChild>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="border-border/50 relative overflow-hidden rounded-full border"
+              >
+                {currentUser?.images?.[0]?.url ? (
+                  <Image
+                    src={currentUser.images[0].url}
+                    alt="Profile"
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <User className="h-4 w-4" />
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              className="w-60 rounded-xl border-0 p-2 shadow-2xl ring-1 ring-black/5 backdrop-blur-3xl"
             >
-              {currentUser?.images?.[0]?.url ? (
-                <Image
-                  src={currentUser.images[0].url}
-                  alt="Profile"
-                  fill
-                  className="object-cover"
-                />
-              ) : (
-                <User className="h-4 w-4" />
-              )}
-            </Button>
-          </Link>
+              {/* User Header */}
+              <DropdownMenuLabel className="flex flex-col items-center justify-center p-0 pt-6 pb-4 font-normal">
+                <div className="bg-background relative mb-4 h-24 w-24 overflow-hidden rounded-full shadow-xl ring-4 ring-white">
+                  {currentUser?.images?.[0]?.url ? (
+                    <Image
+                      src={currentUser.images[0].url}
+                      alt="Profile"
+                      fill
+                      className="object-cover transition-transform hover:scale-105"
+                    />
+                  ) : (
+                    <User className="text-muted-foreground m-auto h-10 w-10" />
+                  )}
+                </div>
+                <div className="text-center">
+                  <h4 className="text-foreground text-lg font-bold">
+                    {currentUser?.firstName} {currentUser?.lastName}
+                  </h4>
+                  <p className="text-muted-foreground text-xs font-medium">{currentUser?.email}</p>
+                </div>
+              </DropdownMenuLabel>
 
-          <Link href="/settings">
-            <Button size="icon" variant="ghost" className="rounded-full">
-              <Settings className="h-4 w-4" />
-            </Button>
-          </Link>
+              <DropdownMenuSeparator className="bg-border/30 my-2" />
+
+              <DropdownMenuGroup className="p-1">
+                <DropdownMenuItem asChild>
+                  <Link href="/profile" className="cursor-pointer">
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Profil</span>
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem asChild>
+                  <Link href="/settings" className="cursor-pointer">
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Ayarlar</span>
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem asChild>
+                  <Link href="/settings/billing" className="cursor-pointer">
+                    <CreditCard className="mr-2 h-4 w-4" />
+                    <span>Ödemeler</span>
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem asChild>
+                  <Link href="/activity" className="cursor-pointer">
+                    <Activity className="mr-2 h-4 w-4" />
+                    <span>Hareketler</span>
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem asChild>
+                  <Link href="#" className="cursor-pointer">
+                    <Sun className="mr-2 h-4 w-4" />
+                    <span>Görünüm</span>
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+
+              <DropdownMenuSeparator />
+
+              <DropdownMenuItem
+                className="text-destructive focus:text-destructive cursor-pointer"
+                onClick={async () => {
+                  await logoutUser();
+                }}
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Çıkış Yap</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </header>
     );
@@ -242,7 +324,7 @@ export function Header({
               <span className="text-muted-foreground hidden text-[13px] font-bold md:block">
                 {currentUser.firstName || "Profilim"}
               </span>
-              <Link href="/profile">
+              <Link href="/profile" title={currentUser.firstName || "Profilim"}>
                 <Button
                   variant="ghost"
                   size="sm"
