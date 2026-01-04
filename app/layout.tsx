@@ -27,8 +27,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  console.log("asdasdasd02");
-
   return (
     <html lang="tr">
       <body className={`${dm_sans.variable} ${playfair.variable} antialiased`}>

@@ -148,60 +148,40 @@ export async function updateUserProfile(data: {
 
   const { job, gender, hobbies, images, education, maritalStatus, intention, ...rest } = data;
 
+  // Explicitly remove password and id to prevent accidental overwrites
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { password, id, ...safeData } = rest as any;
+
+  // Build the update object dynamically to only include provided fields
+  const changes: any = { ...safeData };
+
+  if (job) changes.job = { connect: { id: job } };
+  if (gender) changes.gender = { connect: { id: gender } };
+  if (education) changes.education = { connect: { id: education } };
+  if (maritalStatus) changes.maritalStatus = { connect: { id: maritalStatus } };
+  if (intention) changes.intention = { connect: { id: intention } };
+
+  if (hobbies) {
+    changes.hobbies = {
+      set: [], // Clear current hobbies
+      connect: hobbies.map((id: string) => ({ id })),
+    };
+  }
+
+  if (images) {
+    changes.images = {
+      deleteMany: {}, // Clear current images
+      create: images.map((url: string, index: number) => ({
+        url,
+        order: index,
+      })),
+    };
+  }
+
   const updated = await prisma.user.update({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     where: { id: (currentUser as any).id },
-    data: {
-      ...rest,
-      // Handle Job relation
-      ...(job && {
-        job: {
-          connect: { id: job },
-        },
-      }),
-      // Handle Gender relation
-      ...(gender && {
-        gender: {
-          connect: { id: gender },
-        },
-      }),
-      // Handle Hobbies relation (replaces existing if updated)
-      ...(hobbies && {
-        hobbies: {
-          set: [], // Clear current hobbies
-          connect: hobbies.map((id: string) => ({ id })),
-        },
-      }),
-      // Handle Images relation
-      ...(images && {
-        images: {
-          deleteMany: {}, // Clear current images
-          create: images.map((url: string, index: number) => ({
-            url,
-            order: index,
-          })),
-        },
-      }),
-      // Handle Education relation
-      ...(education && {
-        education: {
-          connect: { id: education },
-        },
-      }),
-      // Handle Marital Status relation
-      ...(maritalStatus && {
-        maritalStatus: {
-          connect: { id: maritalStatus },
-        },
-      }),
-      // Handle Intention relation
-      ...(intention && {
-        intention: {
-          connect: { id: intention },
-        },
-      }),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any,
+    data: changes,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     include: USER_INCLUDE as any,
   });

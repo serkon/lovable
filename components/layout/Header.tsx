@@ -237,19 +237,47 @@ export function Header({
         <div className="bg-border/50 h-4 w-[1px]" />
 
         <div className="flex items-center gap-2">
-          <span className="text-muted-foreground hidden text-[12px] font-medium md:block">
-            {getLabel("already_member", language)}
-          </span>
-          <Link href="/login">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="hover:bg-primary/5 hover:text-primary group text-[13px] font-bold"
-            >
-              {getLabel("btn_login", language)}
-              <ArrowRight className="ml-1 h-4 w-4 -translate-x-2 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100" />
-            </Button>
-          </Link>
+          {currentUser ? (
+            <div className="flex items-center gap-3">
+              <span className="text-muted-foreground hidden text-[13px] font-bold md:block">
+                {currentUser.firstName || "Profilim"}
+              </span>
+              <Link href="/profile">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="hover:bg-primary/5 hover:text-primary group border-border/50 relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border p-0"
+                >
+                  {currentUser.images?.[0]?.url ? (
+                    <Image
+                      src={currentUser.images[0].url}
+                      alt="Profile"
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <User className="h-5 w-5" />
+                  )}
+                </Button>
+              </Link>
+            </div>
+          ) : (
+            <>
+              <span className="text-muted-foreground hidden text-[12px] font-medium md:block">
+                {getLabel("already_member", language)}
+              </span>
+              <Link href="/login">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="hover:bg-primary/5 hover:text-primary group text-[13px] font-bold"
+                >
+                  {getLabel("btn_login", language)}
+                  <ArrowRight className="ml-1 h-4 w-4 -translate-x-2 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100" />
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </header>

@@ -75,14 +75,43 @@ export default function ProfilePage() {
     const loadContent = async () => {
       const data = await getProfileMetadata();
       setHobbiesList(data.hobbies || []);
-      setBioTemplates(data.bioTemplates || []);
+      const templates = data.bioTemplates || [];
+      setBioTemplates(templates);
       setMaritalStatusesList(data.maritalStatuses || []);
       setEducationsList(data.educations || []);
       setIntentionsList(data.intentions || []);
       setJobsList(data.jobs || []);
 
-      // Load initial AI suggestions
-      const aiData = await fetchBioSuggestions();
+      // Load initial AI suggestions with a random nonce to ensure variety
+      const nonce = Math.random().toString(36).substring(7);
+      let aiData = await fetchBioSuggestions(templates, nonce);
+
+      // If AI fails, use shuffled DB templates as initial suggestions
+      if (!aiData || aiData.length === 0) {
+        const icons = [
+          "Heart",
+          "Sparkles",
+          "Smile",
+          "Camera",
+          "Sun",
+          "User",
+          "BookOpen",
+          "TreePine",
+          "Coffee",
+          "Music",
+        ];
+        // Fisher-Yates shuffle for true randomness
+        const shuffled = [...templates];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+
+        aiData = shuffled.slice(0, 8).map((t, i) => ({
+          text: t,
+          icon: icons[i % icons.length].toLowerCase(),
+        }));
+      }
       setAiSuggestions(aiData);
     };
     loadContent();
@@ -91,7 +120,36 @@ export default function ProfilePage() {
   const refreshAiSuggestions = async () => {
     setIsGeneratingBio(true);
     try {
-      const data = await fetchBioSuggestions();
+      const nonce = Math.random().toString(36).substring(7);
+      let data = await fetchBioSuggestions(bioTemplates, nonce);
+
+      // If AI fails, provide a fresh shuffle of DB templates
+      if (!data || data.length === 0) {
+        const icons = [
+          "Heart",
+          "Sparkles",
+          "Smile",
+          "Camera",
+          "Sun",
+          "User",
+          "BookOpen",
+          "TreePine",
+          "Coffee",
+          "Music",
+        ];
+
+        const shuffledFallback = [...bioTemplates];
+        for (let i = shuffledFallback.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffledFallback[i], shuffledFallback[j]] = [shuffledFallback[j], shuffledFallback[i]];
+        }
+
+        data = shuffledFallback.slice(0, 8).map((t, i) => ({
+          text: t,
+          icon: icons[i % icons.length].toLowerCase(),
+        }));
+      }
+
       setAiSuggestions(data);
     } finally {
       setIsGeneratingBio(false);
@@ -691,44 +749,35 @@ export default function ProfilePage() {
                           className="bg-muted/50 h-12 w-full animate-pulse rounded-2xl"
                         />
                       ))
-                  : aiSuggestions.length > 0
-                    ? aiSuggestions.map((suggestion, idx) => {
-                        const IconComp =
-                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                          (LucideIcons as any)[
-                            suggestion.icon
-                              .split("-")
-                              .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
-                              .join("")
-                          ] || Sparkles;
-                        return (
-                          <button
-                            key={idx}
-                            onClick={() =>
-                              setBio((prev) =>
-                                prev ? `${prev} ${suggestion.text}` : suggestion.text
-                              )
-                            }
-                            className="group bg-background border-muted-foreground/10 hover:border-primary/30 flex items-center gap-3 rounded-2xl border p-4 text-left shadow-sm transition-all hover:shadow-md active:scale-[0.98]"
-                          >
-                            <div className="bg-primary/5 text-primary group-hover:bg-primary flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors group-hover:text-white">
-                              <IconComp className="h-4 w-4" />
-                            </div>
-                            <span className="text-muted-foreground group-hover:text-foreground text-xs leading-tight font-medium transition-colors">
-                              {suggestion.text}
-                            </span>
-                          </button>
-                        );
-                      })
-                    : bioTemplates.slice(0, 4).map((t, idx) => (
+                  : aiSuggestions.map((suggestion, idx) => {
+                      const iconName = suggestion.icon
+                        .split("-")
+                        .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+                        .join("");
+                      const IconComp =
+                        (LucideIcons as unknown as Record<string, React.ComponentType<any>>)[
+                          iconName
+                        ] || Sparkles;
+
+                      return (
                         <button
                           key={idx}
-                          onClick={() => setBio((prev) => (prev ? `${prev} ${t}` : t))}
-                          className="bg-muted/30 hover:bg-muted/50 rounded-2xl p-4 text-left text-xs font-medium transition-all"
+                          onClick={() =>
+                            setBio((prev) =>
+                              prev ? `${prev} ${suggestion.text}` : suggestion.text
+                            )
+                          }
+                          className="group bg-background border-muted-foreground/10 hover:border-primary/30 flex items-center gap-3 rounded-2xl border p-4 text-left shadow-sm transition-all hover:shadow-md active:scale-[0.98]"
                         >
-                          {t}
+                          <div className="bg-primary/5 text-primary group-hover:bg-primary flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors group-hover:text-white">
+                            <IconComp className="h-4 w-4" />
+                          </div>
+                          <span className="text-muted-foreground group-hover:text-foreground text-xs leading-tight font-medium transition-colors">
+                            {suggestion.text}
+                          </span>
                         </button>
-                      ))}
+                      );
+                    })}
               </div>
             </div>
           </div>

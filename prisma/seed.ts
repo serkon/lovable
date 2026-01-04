@@ -39,13 +39,24 @@ const HOBBIES = [
 const BIO_TEMPLATES = [
   "Huzurlu bir hayat süren, doğa aşığı biriyim.",
   "Yeni yerler keşfetmeyi ve seyahat etmeyi seviyorum.",
-  "Dürüstlük, samimiyet ve güven benim için her şeyden önce gelir.",
+  "Dürüstlük, samimiyet and güven benim için her şeyden önce gelir.",
   "Hayatın bu döneminde gerçek bir dost ve hayat arkadaşı arıyorum.",
   "Mutfakta vakit geçirmeyi ve güzel sofralar kurmayı severim.",
   "Kitap okumak, sinemaya gitmek ve derin sohbetler etmekten keyif alırım.",
   "Aile değerlerine önem veren, sevdikleriyle vakit geçirmeyi seven biriyim.",
   "Hayata pozitif bakmayı, gülmeyi ve anı yaşamayı seviyorum.",
   "Sağlık, spor ve zinde kalmak benim için değerli.",
+  "Sabah yürüyüşleri ve taze kahve kokusu günümü aydınlatır.",
+  "Bahçemle ilgilenmek benim için bir tür terapi.",
+  "Torunlarımla vakit geçirmek en büyük mutluluk kaynağım.",
+  "Klasik Türk müziği ve nostaljik plaklar vazgeçilmezimdir.",
+  "Yeni lezzetler denemek için gurme turlarına katılmayı severim.",
+  "Sakin bir Ege kasabasında yaşlanma hayalim var.",
+  "Hayat tecrübelerimi paylaşabileceğim, olgun bir ruh arıyorum.",
+  "Sanat galerilerini gezmek ve sergileri takip etmek ruhumu besler.",
+  "Tavla oynamak ve dostlarla sahilde vakit geçirmek paha biçilemez.",
+  "Emekliliğin tadını çıkarırken yeni hobiler edinmeye çalışıyorum.",
+  "Yalnızlık güzel ama hayat paylaştıkça daha da anlamlı.",
 ];
 
 const MARITAL_STATUSES = [
@@ -497,7 +508,7 @@ async function main() {
         images: {
           create: images.map((url: string, index: number) => ({ url, order: index })),
         },
-      },
+      } as any,
     });
   }
 

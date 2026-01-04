@@ -1,54 +1,127 @@
 "use server";
 
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
 export interface Suggestion {
   text: string;
   icon: string;
 }
 
-export const fetchBioSuggestions = async (): Promise<Suggestion[]> => {
+export const fetchBioSuggestions = async (existingTemplates?: string[]): Promise<Suggestion[]> => {
+  console.log("##### GEMINI_API_KEY present:", process.env.GEMINI_API_KEY);
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const prompt = `
+You are generating profile bio sentences for a dating and friendship app.
 
-    const prompt = `Generate 9 unique, short, and heartwarming 'About Me' sentence starters in Turkish for a dating/friendship app dedicated to people over 50. 
-    Each starter should reflect a hobby, value, or personality trait. 
-    Return them as a JSON object with a 'suggestions' array. 
-    Each item should have 'text' and a 'icon' (a valid Lucide React icon name in lowercase like 'heart', 'book', 'camera', 'tree-pine', 'utensils', etc.).`;
+Goal:
+Help users express themselves naturally during signup with zero writing effort.
 
-    const result = await model.generateContent({
+Language:
+Generate all output strictly in {{LANGUAGE}}.
+
+Critical linguistic rule:
+- Write in first person singular.
+- Follow natural sentence patterns of native speakers in {{LANGUAGE}}.
+- If the language commonly omits the subject (e.g. Turkish, Spanish, Italian), do NOT repeatedly start sentences with the explicit subject.
+- Avoid starting multiple sentences with the same word or structure.
+- Use the explicit subject ("I", "Ben", "Ich", etc.) only when it sounds natural in that language.
+
+Instructions:
+- Generate exactly 9 SHORT but COMPLETE sentences.
+- Each sentence must be ready to paste directly into a dating profile.
+- Sentences must sound like natural self-descriptions, not written profiles.
+- Do NOT ask questions.
+- Do NOT use emojis.
+- Avoid clichés and generic motivational phrases.
+
+Content guidance:
+Each sentence should subtly express at least one of:
+- personality trait
+- value
+- lifestyle habit
+- interest that invites conversation
+
+Tone:
+Warm, sincere, human.
+Not poetic.
+Not exaggerated.
+Not salesy.
+
+Output format (JSON only):
+{
+  "suggestions": [
+    {
+      "text": "...",
+      "icon": "valid_material_icon_name"
+    }
+  ]
+}
+
+Icon rules:
+- Icons should symbolically match the meaning of the sentence.
+- Use valid Material Design icon names only.
+`;
+
+    const result = await ai.models.generateContent({
+      model: "gemini-2.5-flash-lite",
       contents: [{ role: "user", parts: [{ text: prompt }] }],
-      generationConfig: {
+      config: {
         responseMimeType: "application/json",
+        temperature: 0.9, // Higher temperature for more variety
       },
     });
 
-    const response = await result.response;
-    const data = JSON.parse(response.text() || '{"suggestions": []}');
-    return data.suggestions;
+    const response = await result.text;
+    if (!response) {
+      console.error("AI returned empty text");
+      return [];
+    }
+
+    try {
+      const data = JSON.parse(response);
+      console.log("AI response:", data);
+      return data.suggestions || [];
+    } catch (parseErr) {
+      console.error("AI JSON parse error:", parseErr, "Text:", response);
+      return [];
+    }
   } catch (error) {
-    console.error("Error fetching suggestions:", error);
-    // Fallback static suggestions with Lucide icons
-    return [
-      { text: "Huzurlu bir hayat süren, doğa aşığı biriyim.", icon: "tree-pine" },
-      { text: "Yeni yerler keşfetmeyi severim.", icon: "plane" },
-      { text: "Dürüstlük ve güven her şeyden önce gelir.", icon: "shield-check" },
-      { text: "Gerçek bir dost ve hayat arkadaşı arıyorum.", icon: "heart" },
-      { text: "Mutfakta vakit geçirmeyi ve güzel sofralar severim.", icon: "utensils" },
-      { text: "Kitap okumak ve derin sohbetler keyif verir.", icon: "book-open" },
-      { text: "Aile değerlerine önem veren biriyim.", icon: "users" },
-      { text: "Hayata pozitif bakmayı severim.", icon: "smile" },
-      { text: "Sağlık ve zinde kalmak önemlidir.", icon: "activity" },
-    ];
+    console.error("Error fetching AI suggestions:", error);
+
+    // Fallback: Use existingTemplates (DB templates) if AI fails
+    if (existingTemplates && existingTemplates.length > 0) {
+      const icons = [
+        "heart",
+        "sparkles",
+        "smile",
+        "camera",
+        "sun",
+        "user",
+        "book-open",
+        "tree-pine",
+        "coffee",
+        "music",
+        "star",
+        "brain",
+      ];
+
+      return existingTemplates
+        .sort(() => 0.5 - Math.random()) // Shuffle
+        .slice(0, 9)
+        .map((text, i) => ({
+          text,
+          icon: icons[i % icons.length],
+        }));
+    }
+
+    return [];
   }
 };
 
 export async function checkProfilePhoto(imageBuffer: Buffer, mimeType: string) {
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
     const prompt = `Analyze this profile photo for a dating app. 
     Check if:
     1. It is a clear, high-quality image (Good lighting).
@@ -68,18 +141,31 @@ export async function checkProfilePhoto(imageBuffer: Buffer, mimeType: string) {
       }
     }`;
 
-    const result = await model.generateContent([
-      prompt,
-      {
+    const result = await ai.models.generateContent({
+      model: "gemini-1.5-flash",
+      contents: prompt,
+      config: {
         inlineData: {
           data: imageBuffer.toString("base64"),
           mimeType,
         },
       },
-    ]);
+    });
 
-    const response = await result.response;
-    return JSON.parse(response.text());
+    const response = await result.text;
+    if (!response) {
+      console.error("AI returned empty text");
+      return [];
+    }
+
+    try {
+      const data = JSON.parse(response);
+      console.log("AI response:", data);
+      return data;
+    } catch (parseErr) {
+      console.error("AI JSON parse error:", parseErr, "Text:", response);
+      return [];
+    }
   } catch (error) {
     console.error("AI Photo check error:", error);
     // Silent fail - return approved to not block user

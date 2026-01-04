@@ -9,6 +9,14 @@ export interface HeroProfile {
   img: string; // We'll take the first image
 }
 
+interface UserResult {
+  firstName: string | null;
+  lastName: string | null;
+  age: number | null;
+  city: string | null;
+  images: { url: string }[];
+}
+
 export async function getHeroProfiles(): Promise<HeroProfile[]> {
   try {
     // Fetch roughly 12 random users.
@@ -19,7 +27,8 @@ export async function getHeroProfiles(): Promise<HeroProfile[]> {
       take: 20,
       orderBy: { createdAt: "desc" },
       select: {
-        name: true,
+        firstName: true,
+        lastName: true,
         age: true,
         city: true,
         images: {
@@ -27,7 +36,7 @@ export async function getHeroProfiles(): Promise<HeroProfile[]> {
           orderBy: { order: "asc" },
           select: { url: true },
         },
-      },
+      } as Record<string, boolean | object>,
       where: {
         images: {
           some: {}, // Only users with images
@@ -39,11 +48,11 @@ export async function getHeroProfiles(): Promise<HeroProfile[]> {
     const shuffled = users.sort(() => 0.5 - Math.random());
     const selected = shuffled.slice(0, 10);
 
-    return selected.map((u) => ({
-      name: u.name || "Misafir",
+    return (selected as unknown as UserResult[]).map((u) => ({
+      name: u.firstName || "Misafir",
       age: u.age || 0,
       loc: (u.city || "Bilinmiyor,").split(",")[0].trim(), // "İstanbul, Kadıköy" -> "İstanbul"
-      img: u.images[0]?.url || "https://via.placeholder.com/300",
+      img: u.images?.[0]?.url || "https://via.placeholder.com/300",
     }));
   } catch (error) {
     console.error("Error fetching hero profiles:", error);
