@@ -53,17 +53,9 @@ export function Hero({ language, onStart, loading, profiles = [] }: HeroProps) {
         </div>
 
         <h1 className="leading-[1.05]">
-          {language === "tr" ? (
-            <>
-              Hayatın <span className="text-emphasized">İkinci Baharı</span>
-              <br className="hidden sm:block" /> Sizi Bekliyor
-            </>
-          ) : (
-            <>
-              Your <span className="text-emphasized">Second Spring</span>
-              <br className="hidden sm:block" /> is Waiting
-            </>
-          )}
+          {getLabel("hero_h1_start", language)}{" "}
+          <span className="text-emphasized">{getLabel("hero_h1_highlight", language)}</span>
+          <br className="hidden sm:block" /> {getLabel("hero_h1_end", language)}
         </h1>
 
         <p className="text-muted-foreground mx-auto max-w-xl text-xl tracking-tight">
@@ -100,7 +92,7 @@ export function Hero({ language, onStart, loading, profiles = [] }: HeroProps) {
                 >
                   <Image
                     src={profile.img}
-                    alt="Member"
+                    alt={getLabel("member_photo_alt", language)}
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-110"
                   />

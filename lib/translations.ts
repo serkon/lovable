@@ -80,6 +80,9 @@ export const translations = {
 
     // Landing Page
     hero_title: "Hayatın İkinci Baharı Sizi Bekliyor",
+    hero_h1_start: "Hayatın",
+    hero_h1_highlight: "İkinci Baharı",
+    hero_h1_end: "Sizi Bekliyor",
     hero_subtitle:
       "Karmaşık menüler yok. Sahte profiller yok. Sadece sizin gibi samimiyet arayan gerçek insanlar.",
     cta_button: "Hemen Başlayın – Ücretsiz",
@@ -115,6 +118,7 @@ export const translations = {
     faq_q4: "Sahte hesaplarla nasıl mücadele ediyorsunuz?",
     faq_a4:
       "Yapay zeka ve moderatör ekibimizle sahte hesapları anında tespit edip engelliyoruz. Sadece gerçek insanlar burada.",
+    member_photo_alt: "Üye Fotoğrafı",
 
     // Onboarding
     welcome: "Hoş Geldiniz",
@@ -313,6 +317,9 @@ export const translations = {
 
     // Landing Page
     hero_title: "The Second Spring of Life Awaits You",
+    hero_h1_start: "Your",
+    hero_h1_highlight: "Second Spring",
+    hero_h1_end: "is Waiting",
     hero_subtitle:
       "No complex menus. No fake profiles. Just real people looking for sincerity like you.",
     cta_button: "Get Started Now – Free",
@@ -349,6 +356,7 @@ export const translations = {
     faq_q4: "How do you deal with fake accounts?",
     faq_a4:
       "We use AI and our moderator team to instantly detect and block fake accounts. Only real people are here.",
+    member_photo_alt: "Member Photo",
 
     // Onboarding
     welcome: "Welcome",
