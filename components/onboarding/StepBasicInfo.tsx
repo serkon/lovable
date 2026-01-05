@@ -79,13 +79,18 @@ export function StepBasicInfo({
           </FormGroup>
 
           <FormGroup label={getLabel("label_age", language)}>
-            <Input
-              id="age"
-              type="number"
-              value={data.age}
-              onChange={(e) => setData({ ...data, age: e.target.value })}
-              placeholder={getLabel("placeholder_age", language)}
-            />
+            <Select value={data.age} onValueChange={(val) => setData({ ...data, age: val })}>
+              <SelectTrigger id="age" className="w-full">
+                <SelectValue placeholder={getLabel("placeholder_age", language)} />
+              </SelectTrigger>
+              <SelectContent>
+                {Array.from({ length: 63 }, (_, i) => (i + 18).toString()).map((age) => (
+                  <SelectItem key={age} value={age}>
+                    {age}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </FormGroup>
         </div>
 

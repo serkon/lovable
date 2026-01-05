@@ -47,12 +47,12 @@ export function Hero({ language, onStart, loading, profiles = [] }: HeroProps) {
         data-testid="hero-content"
         className="relative z-10 mx-auto max-w-5xl space-y-12 text-center"
       >
-        <div className="bg-primary/5 border-primary/20 text-primary animate-in fade-in slide-in-from-bottom-3 inline-flex items-center gap-2 rounded-full border px-5 py-2 text-sm tracking-wider duration-1000">
+        <div className="bg-primary/5 border-primary/20 text-primary inline-flex items-center gap-2 rounded-full border px-5 py-2 text-sm tracking-wider">
           <Sparkles className="h-4 w-4" />
           <span>{getLabel("hero_badge", language)}</span>
         </div>
 
-        <h1 className="animate-in fade-in slide-in-from-bottom-5 leading-[1.05] delay-150 duration-1000">
+        <h1 className="leading-[1.05]">
           {language === "tr" ? (
             <>
               Hayatın <span className="text-emphasized">İkinci Baharı</span>
@@ -66,11 +66,11 @@ export function Hero({ language, onStart, loading, profiles = [] }: HeroProps) {
           )}
         </h1>
 
-        <p className="text-muted-foreground animate-in fade-in slide-in-from-bottom-7 mx-auto max-w-xl text-xl tracking-tight delay-300 duration-1000">
+        <p className="text-muted-foreground mx-auto max-w-xl text-xl tracking-tight">
           {getLabel("hero_subtitle", language)}
         </p>
 
-        <div className="animate-in fade-in slide-in-from-bottom-10 flex flex-col items-center justify-center gap-8 delay-500 duration-1000">
+        <div className="flex flex-col items-center justify-center gap-8">
           <Button
             onClick={onStart}
             disabled={loading}
