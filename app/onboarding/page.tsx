@@ -127,13 +127,6 @@ export default function OnboardingPage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      // Ensure a valid session exists as soon as the page loads
-      const user = await getCurrentUser();
-      if (!user) {
-        console.log("No valid session found on mount, creating guest user...");
-        await createGuestUser();
-      }
-
       const [dbBioTemplates, dbHobbies, dbMarital, dbEdu, dbIntention, dbJobs, dbGenders] =
         await Promise.all([
           getBioTemplates(),
