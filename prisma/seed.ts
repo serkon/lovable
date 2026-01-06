@@ -228,7 +228,7 @@ const MOCK_USERS = [
     bio: "Emekliliğin tadını çıkarıyorum. Balık tutmak ve tarihi yerleri gezmek hobilerim.",
     hobbies: ["hobby_fishing", "hobby_nature"],
     images: [
-      "https://images.unsplash.com/photo-1566616213894-2dcdcf8afc5d?auto=format&fit=crop&q=80&w=800&h=1000",
+      "https://images.unsplash.com/photo-1767111392691-fdbb6a000bfe?auto=format&fit=crop&q=80&w=800&h=1000",
     ],
     genderId: "gender_male",
   },

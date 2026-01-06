@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { Profile } from "@/lib/constants";
+import { Profile, UserStatus } from "@/lib/constants";
 import { getCurrentUser } from "@/lib/actions/userActions";
 
 export const fetchProfilesFromAPI = async (count: number = 20): Promise<Profile[]> => {
@@ -55,6 +55,8 @@ export const fetchProfilesFromAPI = async (count: number = 20): Promise<Profile[
             : [],
         iceBreaker: "Merhaba, nasılsın?",
         gender: user.gender?.id,
+        userStatus: user.userStatus as UserStatus,
+        lastActiveAt: user.lastActiveAt,
       } as Profile;
     });
   } catch (error) {

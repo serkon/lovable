@@ -13,7 +13,7 @@ import { getLabel } from "@/lib/translations";
 import { toast } from "sonner";
 
 export function Form() {
-  const { language } = useAppStore();
+  const { language, refreshCurrentUser } = useAppStore();
   const [errors, setErrors] = useState<{ root?: string; email?: string; password?: string }>({});
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -27,6 +27,7 @@ export function Form() {
     const result = await loginUser(formData);
 
     if (result.success) {
+      await refreshCurrentUser();
       router.push("/dashboard");
     } else {
       setErrors({ root: result.error || getLabel("login_error_generic", language) });

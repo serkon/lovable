@@ -23,6 +23,8 @@ model User {
   educationId     String?
   maritalStatusId String?
   intentionId     String?
+  userStatus      String         @default("ONLINE") // ONLINE, AWAY, INVISIBLE
+  lastActiveAt    DateTime       @default(now())
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
   likesReceived   Like[]         @relation("LikesReceived")

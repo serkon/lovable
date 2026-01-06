@@ -1,10 +1,18 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
-import { Profile } from "@/lib/constants";
+import { Profile, USER_STATUS, HEARTBEAT_INTERVAL, UserStatus } from "@/lib/constants";
 import { fetchProfilesFromAPI } from "@/lib/services/userService";
-import { getCurrentUser, sendLike as dbSendLike } from "@/lib/actions/userActions";
+import {
+  getCurrentUser,
+  sendLike as dbSendLike,
+  logoutUser,
+  updateHeartbeat,
+  updateStatus as dbUpdateStatus,
+} from "@/lib/actions/userActions";
+import { useSessionManager } from "@/hooks/useSessionManager";
 import { Prisma } from "@prisma/client";
+import { toast } from "sonner";
 
 export type ExtendedUser = Prisma.UserGetPayload<{
   include: {
@@ -48,6 +56,8 @@ export type ExtendedUser = Prisma.UserGetPayload<{
   firstName?: string | null;
   lastName?: string | null;
   phone?: string | null;
+  userStatus?: string | null;
+  lastActiveAt?: Date | null;
   hobbiesArray?: string[];
 };
 
@@ -65,9 +75,12 @@ interface AppContextType {
   cancelRequest: (profileId: string | number) => void;
   resetProfiles: () => Promise<void>;
   refreshCurrentUser: () => Promise<void>;
+  logout: () => Promise<void>;
+  setStatus: (status: UserStatus) => Promise<void>;
 
   language: "tr" | "en";
   setLanguage: (lang: "tr" | "en") => void;
+  getLastActivity: () => number;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -80,19 +93,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<ExtendedUser | null>(null);
   const [language, setLanguage] = useState<"tr" | "en">("tr");
 
+  // Session Management via Web Worker
+  const autoAwayMs = (Number(process.env.NEXT_PUBLIC_AUTO_AWAY_MINUTES) || 5) * 60 * 1000;
+  // Default 15 mins for warning
+  const warningMs = (Number(process.env.NEXT_PUBLIC_AUTO_LOGOUT_MINUTES) || 15) * 60 * 1000;
+  // Default 30 secs countdown
+  const logoutCountdownMs = (Number(process.env.NEXT_PUBLIC_LOGOUT_WARNING_SECONDS) || 30) * 1000;
+
   const refreshCurrentUser = async () => {
     try {
       const user = (await getCurrentUser()) as unknown as ExtendedUser;
 
       if (user) {
-        // Transform hobbies from Relation[] to string[] if needed for display helper
         if (Array.isArray(user.hobbies)) {
           user.hobbiesArray = user.hobbies.map((h: { id: string }) => h.id);
         } else {
           user.hobbiesArray = [];
         }
 
-        // Transform likesSent to Profile objects for sentRequests
         const dbSentRequests =
           user.likesSent
             ?.map((like) => {
@@ -133,6 +151,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const setStatus = async (status: UserStatus) => {
+    try {
+      await dbUpdateStatus(status);
+      await refreshCurrentUser();
+    } catch (error) {
+      console.error("Failed to update status:", error);
+    }
+  };
+
   useEffect(() => {
     const loadData = async () => {
       await refreshCurrentUser();
@@ -142,14 +169,71 @@ export function AppProvider({ children }: { children: ReactNode }) {
     loadData();
   }, []);
 
+  const { resetTimer, getLastActivity } = useSessionManager({
+    awayTimeoutMs: autoAwayMs,
+    warningTimeoutMs: warningMs,
+    logoutTimeoutMs: warningMs + logoutCountdownMs,
+    onStatusChange: (newStatus) => {
+      if (!currentUser) return;
+      // Only auto-update if not invisible & not manual offline (though manual offline usually means logged out)
+      if (
+        currentUser.userStatus !== USER_STATUS.INVISIBLE &&
+        currentUser.userStatus !== USER_STATUS.OFFLINE
+      ) {
+        // If we are coming back ONLINE from AWAY, or going AWAY
+        // We trust the manager's state transition
+        const targetStatus = newStatus === "ONLINE" ? USER_STATUS.ONLINE : USER_STATUS.AWAY;
+        if (currentUser.userStatus !== targetStatus) {
+          setStatus(targetStatus).catch(console.error);
+        }
+      }
+    },
+    onLogoutWarning: () => {
+      if (!currentUser) return;
+      toast.warning("Hareketsiz kaldınız.", {
+        description: "Oturumunuz 30 saniye içinde kapatılacak.",
+        action: {
+          label: "Uzat",
+          onClick: () => {
+            resetTimer(); // Reset the timer on user action
+            toast.success("Oturum süreniz uzatıldı.");
+          },
+        },
+        duration: logoutCountdownMs, // Show exactly for the duration of the countdown
+      });
+    },
+    onLogout: () => {
+      if (!currentUser) return;
+      toast.dismiss(); // Close any potential warning toasts
+      toast.error("Oturum süreniz doldu.");
+      logout();
+    },
+  });
+
+  // Heartbeat mechanism
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const interval = setInterval(async () => {
+      // Don't send heartbeat if invisible or offline
+      if (
+        currentUser.userStatus !== USER_STATUS.INVISIBLE &&
+        currentUser.userStatus !== USER_STATUS.OFFLINE
+      ) {
+        // cast to UserStatus to be safe, though USER_STATUS constants should align
+        await updateHeartbeat(currentUser.userStatus as UserStatus);
+      }
+    }, HEARTBEAT_INTERVAL);
+
+    return () => clearInterval(interval);
+  }, [currentUser]);
+
   const sendLike = async (profile: Profile) => {
     try {
       await dbSendLike({
         ...profile,
         city: profile.location,
       });
-      // We don't need to manually update sentRequests here because revalidatePath and refreshCurrentUser (if called) would handle it,
-      // but for instant UI let's keep local update:
       setSentRequests((prev) => [...prev, profile]);
       setProfiles((prev) => prev.filter((p) => p.id !== profile.id));
     } catch (error) {
@@ -180,6 +264,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setProfiles(newProfiles);
   };
 
+  const logout = async () => {
+    try {
+      await logoutUser();
+    } catch {
+      // logoutUser calls redirect, but we'll also force a hard reload below
+    } finally {
+      setCurrentUser(null);
+      setSentRequests([]);
+      setMatches([]);
+      setLikesReceived([]);
+      window.location.href = "/";
+    }
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -195,8 +293,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
         cancelRequest,
         resetProfiles,
         refreshCurrentUser,
+        logout,
+        setStatus,
         language,
         setLanguage,
+        getLastActivity,
+        // Note: The hook returns resetTimer, currentState, getLastActivity.
+        // We need to destructure correctly from useSessionManager.
       }}
     >
       {children}

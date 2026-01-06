@@ -15,7 +15,7 @@ import { getHeroProfiles, HeroProfile } from "@/lib/actions/publicActions";
 import { useEffect } from "react";
 
 export default function Home() {
-  const { language } = useAppStore();
+  const { language, refreshCurrentUser } = useAppStore();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [profiles, setProfiles] = useState<HeroProfile[]>([]);
@@ -28,6 +28,7 @@ export default function Home() {
     setLoading(true);
     try {
       await createGuestUser();
+      await refreshCurrentUser();
       router.push("/onboarding");
     } finally {
       // Keep loading to prevent flicker

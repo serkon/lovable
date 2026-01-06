@@ -47,7 +47,7 @@ export type OnboardingData = {
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const { language } = useAppStore();
+  const { language, refreshCurrentUser } = useAppStore();
   const [step, setStep] = useState(1);
   const [jobsList, setJobsList] = useState<string[]>([]);
   const [gendersList, setGendersList] = useState<string[]>([]);
@@ -116,6 +116,7 @@ export default function OnboardingPage() {
         }
       }
 
+      await refreshCurrentUser();
       router.push("/dashboard");
     } catch (error) {
       console.error("Failed to save profile:", error);

@@ -25,7 +25,7 @@ import Link from "next/link";
 import { Logo } from "@/components/ui/logo";
 import { Header } from "@/components/layout/Header";
 import { getLabel } from "@/lib/translations";
-import { Profile } from "@/lib/constants";
+import { Profile, USER_STATUS } from "@/lib/constants";
 import Image from "next/image";
 
 export default function DashboardPage() {
@@ -382,8 +382,28 @@ export default function DashboardPage() {
             </div>
 
             <div className="bg-background/80 absolute right-0 bottom-0 left-0 border-t p-6">
-              <h2 className="text-2xl font-bold">
+              <h2 className="flex items-center gap-2 text-2xl font-bold">
                 {currentProfile.firstName} {currentProfile.lastName}, {currentProfile.age}
+                <span
+                  className={cn(
+                    "ml-2 inline-block h-4 w-4 rounded-full shadow-sm ring-2 ring-white",
+                    {
+                      "bg-green-500": currentProfile.userStatus === USER_STATUS.ONLINE,
+                      "bg-orange-500": currentProfile.userStatus === USER_STATUS.AWAY,
+                      "bg-red-500":
+                        currentProfile.userStatus === USER_STATUS.OFFLINE ||
+                        currentProfile.userStatus === USER_STATUS.INVISIBLE ||
+                        !currentProfile.userStatus,
+                    }
+                  )}
+                  title={
+                    currentProfile.userStatus === USER_STATUS.ONLINE
+                      ? getLabel("status_online", language) || "Çevrimiçi"
+                      : currentProfile.userStatus === USER_STATUS.AWAY
+                        ? getLabel("status_away", language) || "Uzakta"
+                        : getLabel("status_offline", language) || "Çevrimdışı"
+                  }
+                />
               </h2>
               <div className="text-muted-foreground mt-1 flex items-center gap-1 text-sm">
                 <MapPin className="h-3 w-3" />

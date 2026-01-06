@@ -9,7 +9,10 @@ export interface Suggestion {
   icon: string;
 }
 
-export const fetchBioSuggestions = async (existingTemplates?: string[]): Promise<Suggestion[]> => {
+export const fetchBioSuggestions = async (
+  existingTemplates?: string[],
+  nonce?: string
+): Promise<Suggestion[]> => {
   console.log("##### GEMINI_API_KEY present:", process.env.GEMINI_API_KEY);
   try {
     const prompt = `
@@ -143,13 +146,20 @@ export async function checkProfilePhoto(imageBuffer: Buffer, mimeType: string) {
 
     const result = await ai.models.generateContent({
       model: "gemini-1.5-flash",
-      contents: prompt,
-      config: {
-        inlineData: {
-          data: imageBuffer.toString("base64"),
-          mimeType,
+      contents: [
+        {
+          role: "user",
+          parts: [
+            { text: prompt },
+            {
+              inlineData: {
+                data: imageBuffer.toString("base64"),
+                mimeType,
+              },
+            },
+          ],
         },
-      },
+      ],
     });
 
     const response = await result.text;

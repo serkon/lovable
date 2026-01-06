@@ -5,6 +5,9 @@ import { revalidatePath } from "next/cache";
 import { writeFile, unlink } from "fs/promises";
 import path from "path";
 import { checkProfilePhoto } from "./aiActions";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { USER_STATUS, UserStatus } from "@/lib/constants";
 
 const USER_INCLUDE = {
   job: true,
@@ -15,9 +18,6 @@ const USER_INCLUDE = {
   maritalStatus: true,
   intention: true,
 } as const;
-
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 
 export async function getCurrentUser() {
   const cookieStore = await cookies();
@@ -88,6 +88,12 @@ export async function loginUser(formData: FormData) {
   });
 
   if (user && user.password === password) {
+    // Set status to ONLINE upon login
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { userStatus: USER_STATUS.ONLINE } as any,
+    });
+
     (await cookies()).set("userId", user.id, {
       path: "/",
       httpOnly: true,
@@ -102,7 +108,17 @@ export async function loginUser(formData: FormData) {
 }
 
 export async function logoutUser() {
-  (await cookies()).delete("userId");
+  const currentUser = await getCurrentUser();
+  if (currentUser) {
+    await prisma.user.update({
+      where: { id: currentUser.id },
+      data: { userStatus: USER_STATUS.OFFLINE } as any,
+    });
+  }
+
+  (await cookies()).set("userId", "", { path: "/", maxAge: 0 });
+  revalidatePath("/");
+  revalidatePath("/dashboard");
   redirect("/");
 }
 
@@ -310,6 +326,7 @@ export async function uploadImage(formData: FormData) {
     return null;
   }
 }
+
 export async function deleteImage(imageUrl: string) {
   if (!imageUrl.startsWith("/uploads/")) return { success: false };
 
@@ -322,4 +339,33 @@ export async function deleteImage(imageUrl: string) {
     console.error("Delete error:", error);
     return { success: false };
   }
+}
+
+export async function updateStatus(status: UserStatus) {
+  const currentUser = await getCurrentUser();
+  if (!currentUser) return null;
+
+  return await prisma.user.update({
+    where: { id: currentUser.id },
+    data: { userStatus: status, lastActiveAt: new Date() },
+  });
+}
+
+export async function updateHeartbeat(currentStatus: UserStatus) {
+  const currentUser = await getCurrentUser();
+  if (!currentUser) return null;
+
+  // If invisible, keep invisible (or whatever status is passed, essentially strictly trusting client triggers within reason)
+  // But generally we don't heartbeat if offline.
+  if (currentStatus === USER_STATUS.INVISIBLE) {
+    return await prisma.user.update({
+      where: { id: currentUser.id },
+      data: { lastActiveAt: new Date() }, // Just update time, keep status as is (INVISIBLE)
+    });
+  }
+
+  return await prisma.user.update({
+    where: { id: currentUser.id },
+    data: { lastActiveAt: new Date(), userStatus: currentStatus },
+  });
 }

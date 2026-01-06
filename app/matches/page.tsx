@@ -23,51 +23,55 @@ export default function MatchesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20" data-testid="matches-page-container">
-
+    <div className="bg-background min-h-screen pb-20" data-testid="matches-page-container">
       {/* Header */}
-      <header className="bg-background p-4 border-b flex items-center gap-4 px-6 sticky top-0 z-10">
+      <header className="bg-background sticky top-0 z-10 flex items-center gap-4 border-b p-4 px-6">
         <Link href="/dashboard">
           <Button variant="ghost" size="icon" className="rounded-full">
-            <ArrowLeft className="w-6 h-6" />
+            <ArrowLeft className="h-6 w-6" />
           </Button>
         </Link>
-        <h3 className="text-xl font-bold">
-          {getLabel('my_matches', language)}
-        </h3>
+        <h3 className="text-xl font-bold">{getLabel("my_matches", language)}</h3>
       </header>
 
-      <main className="max-w-md mx-auto w-full p-4 space-y-4" data-testid="matches-main">
+      <main className="mx-auto w-full max-w-md space-y-4 p-4" data-testid="matches-main">
         {matches.length === 0 ? (
-          <div className="text-center py-20 text-muted-foreground" data-testid="matches-empty-state">
-            <p>{getLabel('no_matches', language)}</p>
-            <p className="text-sm">{getLabel('keep_liking', language)}</p>
+          <div
+            className="text-muted-foreground py-20 text-center"
+            data-testid="matches-empty-state"
+          >
+            <p>{getLabel("no_matches", language)}</p>
+            <p className="text-sm">{getLabel("keep_liking", language)}</p>
           </div>
         ) : null}
 
         {matches.map((profile) => (
-          <Card key={profile.id} className="p-4 flex items-center gap-4 shadow-sm border hover:shadow-md transition-shadow" data-testid="match-card">
+          <Card
+            key={profile.id}
+            className="flex items-center gap-4 border p-4 shadow-sm transition-shadow hover:shadow-md"
+            data-testid="match-card"
+          >
             {/* Photo Avatar */}
-            <div className="relative w-16 h-16 rounded-full overflow-hidden bg-muted flex-shrink-0">
+            <div className="bg-muted relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-full">
               <Image
                 src={profile.imageUrl}
-                alt={profile.name}
+                alt={`${profile.firstName} ${profile.lastName}`}
                 fill
                 className={cn(
                   "object-cover transition-all duration-700",
                   loadingImages[profile.id] !== false ? "blur-xl" : "blur-0"
                 )}
-                onLoad={() => setLoadingImages(prev => ({ ...prev, [profile.id]: false }))}
+                onLoad={() => setLoadingImages((prev) => ({ ...prev, [profile.id]: false }))}
               />
             </div>
 
             {/* Info */}
-            <div className="flex-1 min-w-0">
-              <h3 className="text-base font-semibold truncate">
-                {profile.name}
+            <div className="min-w-0 flex-1">
+              <h3 className="truncate text-base font-semibold">
+                {profile.firstName} {profile.lastName}
               </h3>
-              <p className="text-sm text-muted-foreground truncate">
-                {getLabel(profile.job, language)} • {profile.location.split(',')[0]}
+              <p className="text-muted-foreground truncate text-sm">
+                {getLabel(profile.job, language)} • {profile.location.split(",")[0]}
               </p>
             </div>
 
@@ -75,16 +79,16 @@ export default function MatchesPage() {
             <div className="flex items-center gap-2">
               <Link href={`/chat/${profile.id}`}>
                 <Button size="icon" variant="ghost">
-                  <MessageCircle className="w-6 h-6" />
+                  <MessageCircle className="h-6 w-6" />
                 </Button>
               </Link>
               <Button
                 size="icon"
-                onClick={() => handleVideoClick(profile.name)}
+                onClick={() => handleVideoClick(`${profile.firstName} ${profile.lastName}`)}
                 variant="secondary"
-                className="rounded-full w-10 h-10"
+                className="h-10 w-10 rounded-full"
               >
-                <Video className="w-5 h-5" />
+                <Video className="h-5 w-5" />
               </Button>
             </div>
           </Card>
