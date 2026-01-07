@@ -194,17 +194,24 @@ export async function updateUserProfile(data: {
     };
   }
 
-  const updated = await prisma.user.update({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    where: { id: (currentUser as any).id },
-    data: changes,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    include: USER_INCLUDE as any,
-  });
+  try {
+    const updated = await prisma.user.update({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      where: { id: (currentUser as any).id },
+      data: changes,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      include: USER_INCLUDE as any,
+    });
 
-  revalidatePath("/profile");
-  revalidatePath("/dashboard");
-  return updated;
+    revalidatePath("/profile");
+    revalidatePath("/dashboard");
+    return updated;
+  } catch (error: any) {
+    if (error.code === "P2002" && error.meta?.target?.includes("email")) {
+      throw new Error("Bu e-posta adresi zaten kullanımda.");
+    }
+    throw error;
+  }
 }
 
 export async function sendLike(targetProfile: {

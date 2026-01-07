@@ -11,8 +11,6 @@ export const USER_STATUS = {
 
 export type UserStatus = (typeof USER_STATUS)[keyof typeof USER_STATUS];
 
-export const HEARTBEAT_INTERVAL = Number(process.env.NEXT_PUBLIC_HEARTBEAT_INTERVAL) || 120000;
-
 export interface Profile {
   id: string | number;
   firstName: string;

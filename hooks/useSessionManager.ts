@@ -28,9 +28,15 @@ export function useSessionManager({
     const now = Date.now();
     // Only process activity if enough time passed or state needs resetting
     if (now - lastActivityRef.current > 1000) {
+      // If we are in WARNING state, DO NOT reset the activity or state automatically.
+      // We must wait for the user to explicitly click "Uzat" (Extend) in the toast.
+      if (currentState === "WARNING") {
+        return;
+      }
+
       lastActivityRef.current = now;
 
-      // If user was AWAY or WARNING, bring them back to ONLINE
+      // If user was AWAY, bring them back to ONLINE
       if (currentState !== "ONLINE") {
         setCurrentState("ONLINE");
         onStatusChange?.("ONLINE");

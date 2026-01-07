@@ -118,9 +118,13 @@ export default function OnboardingPage() {
 
       await refreshCurrentUser();
       router.push("/dashboard");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to save profile:", error);
-      alert(getLabel("error_generic", language));
+      if (error?.message === "Bu e-posta adresi zaten kullanımda.") {
+        alert(error.message);
+      } else {
+        alert(getLabel("error_generic", language));
+      }
       setLoading(false);
     }
   };

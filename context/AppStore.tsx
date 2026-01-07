@@ -1,13 +1,12 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
-import { Profile, USER_STATUS, HEARTBEAT_INTERVAL, UserStatus } from "@/lib/constants";
+import { Profile, USER_STATUS, UserStatus } from "@/lib/constants";
 import { fetchProfilesFromAPI } from "@/lib/services/userService";
 import {
   getCurrentUser,
   sendLike as dbSendLike,
   logoutUser,
-  updateHeartbeat,
   updateStatus as dbUpdateStatus,
 } from "@/lib/actions/userActions";
 import { useSessionManager } from "@/hooks/useSessionManager";
@@ -83,6 +82,27 @@ interface AppContextType {
   getLastActivity: () => number;
 }
 
+// Helper component for countdown
+const LogoutCountdown = ({ durationMs }: { durationMs: number; onExpire?: () => void }) => {
+  const [timeLeft, setTimeLeft] = useState(Math.ceil(durationMs / 1000));
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  return <span>Oturumunuz {timeLeft} saniye içinde kapatılacak.</span>;
+};
+
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: ReactNode }) {
@@ -94,7 +114,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [language, setLanguage] = useState<"tr" | "en">("tr");
 
   // Session Management via Web Worker
-  const autoAwayMs = (Number(process.env.NEXT_PUBLIC_AUTO_AWAY_MINUTES) || 5) * 60 * 1000;
+  const autoAwayMs = (Number(process.env.NEXT_PUBLIC_AUTO_AWAY_MINUTES) || 1) * 60 * 1000;
   // Default 15 mins for warning
   const warningMs = (Number(process.env.NEXT_PUBLIC_AUTO_LOGOUT_MINUTES) || 15) * 60 * 1000;
   // Default 30 secs countdown
@@ -191,15 +211,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
     onLogoutWarning: () => {
       if (!currentUser) return;
       toast.warning("Hareketsiz kaldınız.", {
-        description: "Oturumunuz 30 saniye içinde kapatılacak.",
+        description: (
+          <LogoutCountdown
+            durationMs={logoutCountdownMs}
+            onExpire={() => {
+              // Toast duration handles the auto-close, but we can double ensure logic here if needed
+            }}
+          />
+        ),
         action: {
           label: "Uzat",
           onClick: () => {
             resetTimer(); // Reset the timer on user action
+            // Force state update since hook ignores activity in WARNING state
+            setStatus(USER_STATUS.ONLINE);
             toast.success("Oturum süreniz uzatıldı.");
           },
         },
-        duration: logoutCountdownMs, // Show exactly for the duration of the countdown
+        duration: logoutCountdownMs,
+        position: "top-center",
+        // Prevent auto-close interaction issues
       });
     },
     onLogout: () => {
@@ -209,24 +240,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       logout();
     },
   });
-
-  // Heartbeat mechanism
-  useEffect(() => {
-    if (!currentUser) return;
-
-    const interval = setInterval(async () => {
-      // Don't send heartbeat if invisible or offline
-      if (
-        currentUser.userStatus !== USER_STATUS.INVISIBLE &&
-        currentUser.userStatus !== USER_STATUS.OFFLINE
-      ) {
-        // cast to UserStatus to be safe, though USER_STATUS constants should align
-        await updateHeartbeat(currentUser.userStatus as UserStatus);
-      }
-    }, HEARTBEAT_INTERVAL);
-
-    return () => clearInterval(interval);
-  }, [currentUser]);
 
   const sendLike = async (profile: Profile) => {
     try {
