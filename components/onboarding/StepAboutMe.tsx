@@ -1,11 +1,11 @@
 import { getLabel } from "@/lib/translations";
-import { Label } from "@radix-ui/react-label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useAppStore } from "@/context/AppStore";
 import { OnboardingData } from "@/app/onboarding/page";
-import { Check } from "lucide-react";
-import { Dispatch, SetStateAction } from "react";
+import LifestyleCardComponent, { LifestyleCard } from "@/components/ui/card-carousel";
+import { Dispatch, SetStateAction, useState } from "react";
+import { FormGroup } from "@/components/ui/form-group";
 
 interface StepAboutMeProps {
   data: OnboardingData;
@@ -16,6 +16,9 @@ interface StepAboutMeProps {
 
 export function StepAboutMe({ data, setData, bioTemplates, nextStep }: StepAboutMeProps) {
   const { language } = useAppStore();
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [direction, setDirection] = useState(0);
+
   const toggleBioTemplate = (template: string) => {
     setData((prev) => {
       const exists = prev.bio.includes(template);
@@ -29,51 +32,66 @@ export function StepAboutMe({ data, setData, bioTemplates, nextStep }: StepAbout
     });
   };
 
+  const handleNext = () => {
+    if (bioTemplates.length === 0) return;
+    setDirection(1);
+    setActiveIndex((prev) => (prev + 1) % bioTemplates.length);
+  };
+
+  const handlePrev = () => {
+    if (bioTemplates.length === 0) return;
+    setDirection(-1);
+    setActiveIndex((prev) => (prev - 1 + bioTemplates.length) % bioTemplates.length);
+  };
+
+  const currentTemplate = bioTemplates[activeIndex] || "";
+  const isSelected = data.bio.includes(currentTemplate);
+
+  const currentCard: LifestyleCard = {
+    id: currentTemplate,
+    category: getLabel("suggested_sentences", language),
+    content: currentTemplate,
+  };
+
   return (
-    <div className="space-y-6">
-      <div className="space-y-2 text-center">
-        <h2 className="text-3xl font-bold tracking-tight">{getLabel("about_me", language)}</h2>
-        <p className="text-muted-foreground">{getLabel("ready_sentences", language)}</p>
+    <>
+      <div className="mb-10 space-y-3 text-center">
+        <h1 className="text-foreground text-4xl font-bold tracking-tight md:text-5xl">
+          {getLabel("about_me", language)}
+        </h1>
+        <p className="text-muted-foreground mx-auto max-w-lg text-lg leading-relaxed">
+          {getLabel("ready_sentences", language)}
+        </p>
       </div>
 
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="bio">{getLabel("bio", language)}</Label>
+      <div className="mb-10 w-full">
+        <FormGroup label={getLabel("bio", language)}>
           <Textarea
             id="bio"
             value={data.bio}
             onChange={(e) => setData({ ...data, bio: e.target.value })}
             placeholder={getLabel("input_placeholder_bio", language)}
+            className="min-h-[120px]"
           />
-        </div>
+        </FormGroup>
 
-        <div className="bg-muted space-y-3 rounded-lg p-4">
-          <span className="text-muted-foreground text-xs font-semibold">
-            {getLabel("suggested_sentences", language)}
-          </span>
-          <div className="flex flex-wrap gap-2">
-            {bioTemplates.map((t, i) => {
-              const isSelected = data.bio.includes(t);
-              return (
-                <Button
-                  key={i}
-                  variant={isSelected ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => toggleBioTemplate(t)}
-                  className="text-xs"
-                >
-                  {isSelected && <Check className="mr-1 h-3 w-3" />}
-                  {t}
-                </Button>
-              );
-            })}
+        {bioTemplates.length > 0 && (
+          <div className="flex w-full justify-center py-4">
+            <LifestyleCardComponent
+              card={currentCard}
+              onAdd={() => toggleBioTemplate(currentTemplate)}
+              onNext={handleNext}
+              onPrev={handlePrev}
+              isAdded={isSelected}
+              direction={direction}
+            />
           </div>
-        </div>
+        )}
       </div>
 
       <Button onClick={nextStep} className="w-full">
         {getLabel("btn_continue", language)}
       </Button>
-    </div>
+    </>
   );
 }

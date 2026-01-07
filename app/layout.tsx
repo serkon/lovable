@@ -29,6 +29,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="tr">
+      <head>
+        <link
+          href="https://fonts.googleapis.com/icon?family=Material+Icons+Round"
+          rel="stylesheet"
+        />
+      </head>
       <body className={`${dm_sans.variable} ${playfair.variable} antialiased`}>
         <AppProvider>
           {children}
