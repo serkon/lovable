@@ -81,7 +81,7 @@ const LifestyleCardComponent: React.FC<LifestyleCardProps> = ({
 
   return (
     <div
-      className="flex w-full flex-col items-center justify-center py-4"
+      className="flex w-full flex-col items-center justify-center"
       data-test-id="lifestyle-card-carousel"
     >
       <div className="relative flex w-[352px] items-center justify-center">

@@ -5,8 +5,9 @@ import { BioTemplateMetadata } from "@/lib/constants";
 
 export type Suggestion = BioTemplateMetadata;
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+const model = process.env.GEMINI_MODEL || "gemini-2.5-flash-lite";
 
-export const fetchBioSuggestions = async (
+export const aiActionFetchBioSuggestions = async (
   existingTemplates?: Suggestion[],
   hobbies?: string[],
   language: string = "tr"
@@ -40,7 +41,7 @@ Output format (JSON):
 
   try {
     const result = await ai.models.generateContent({
-      model: "gemini-2.5-flash-lite",
+      model,
       contents: [{ role: "user", parts: [{ text: prompt }] }],
       config: {
         responseMimeType: "application/json",
@@ -75,14 +76,14 @@ Output format (JSON):
   }
 };
 
-export async function checkProfilePhoto(imageBuffer: Buffer, mimeType: string) {
+export async function aiActionCheckProfilePhoto(imageBuffer: Buffer, mimeType: string) {
   try {
     const prompt = `Analyze this profile photo for a dating app. 
     Check lighting, solo person, face visibility, and safety.
     Return JSON: { "isApproved": boolean, "score": number, "feedback": { "message": "Turkish feedback" } }`;
 
     const result = await ai.models.generateContent({
-      model: "gemini-2.5-flash-lite",
+      model,
       contents: [
         {
           role: "user",
@@ -116,5 +117,41 @@ export async function checkProfilePhoto(imageBuffer: Buffer, mimeType: string) {
       score: 0,
       feedback: { message: "Sistem şu an meşgul, lütfen az sonra tekrar dene." },
     };
+  }
+}
+
+export async function aiActionImproveBio(bio: string): Promise<{ bio: string }> {
+  try {
+    const prompt = `Improve this bio for a dating app. Bio is "${bio}". 
+    Return JSON: { "bio": string }`;
+
+    const result = await ai.models.generateContent({
+      model,
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      config: {
+        responseMimeType: "application/json",
+        temperature: 0.8,
+      },
+    });
+
+    console.log("AI result:", result);
+
+    const response = await result.text;
+    if (!response) {
+      console.error("AI returned empty text");
+      return { bio: "AI returned empty text" };
+    }
+
+    try {
+      const data = JSON.parse(response);
+      console.log("AI response:", data);
+      return data;
+    } catch (parseErr) {
+      console.error("AI JSON parse error:", parseErr, "Text:", response);
+      return { bio: "AI JSON parse error" };
+    }
+  } catch (error) {
+    console.error("Bio improve error:", error);
+    return { bio: "Bio improve error" };
   }
 }

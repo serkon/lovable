@@ -6,7 +6,7 @@ import { OnboardingData } from "@/app/onboarding/page";
 import LifestyleCardComponent from "@/components/ui/card-carousel";
 import { Dispatch, SetStateAction, useState } from "react";
 import { FormGroup } from "@/components/ui/form-group";
-import { fetchBioSuggestions } from "@/lib/actions/aiActions";
+import { aiActionFetchBioSuggestions, aiActionImproveBio } from "@/lib/actions/aiActions";
 import { BioTemplateMetadata } from "@/lib/constants";
 
 interface StepAboutMeProps {
@@ -24,17 +24,13 @@ export function StepAboutMe({ data, bioTemplates, hobbies, setData, nextStep }: 
   const [shuffledTemplates, setShuffledTemplates] = useState(bioTemplates);
   const [isImproving, setIsImproving] = useState(false);
   const [isSuggesting, setIsSuggesting] = useState(false);
-
-  console.log("hobbies", hobbies);
-
-  const handleAIImprove = () => {
+  const improveBioWithAI = async () => {
     setIsImproving(true);
     // Mock AI improvement delay which would call an endpoint
-    setTimeout(() => {
-      setIsImproving(false);
-      // In a real app, this would update data.bio with the improved version
-      // For now, we simulate the action completing
-    }, 1500);
+    const improvedBio = await aiActionImproveBio(data.bio);
+    setIsImproving(false);
+    console.log("improvedBio", improvedBio);
+    setData({ ...data, bio: improvedBio.bio });
   };
 
   const handleAISuggestmore = async () => {
@@ -42,7 +38,7 @@ export function StepAboutMe({ data, bioTemplates, hobbies, setData, nextStep }: 
 
     setIsSuggesting(true);
     setShuffledTemplates((prev) => [...prev].sort(() => 0.5 - Math.random()));
-    const bioSuggestions = await fetchBioSuggestions(shuffledTemplates, hobbies, language);
+    const bioSuggestions = await aiActionFetchBioSuggestions(shuffledTemplates, hobbies, language);
     setShuffledTemplates(bioSuggestions);
     console.log("bioSuggestions", bioSuggestions, shuffledTemplates);
     setActiveIndex(0);
@@ -85,24 +81,21 @@ export function StepAboutMe({ data, bioTemplates, hobbies, setData, nextStep }: 
         </p>
       </div>
 
-      <div className="mb-10 w-full">
-        <FormGroup label={getLabel("bio", language)}>
+      <div className="mb-10 flex w-full flex-col gap-6">
+        <FormGroup label={getLabel("bio", language)} className="relative">
           <Textarea
             id="bio"
             value={data.bio}
             onChange={(e) => setData({ ...data, bio: e.target.value })}
             placeholder={getLabel("input_placeholder_bio", language)}
-            className="min-h-[120px]"
+            className="min-h-[120px] pb-5"
           />
-        </FormGroup>
-
-        <div className="mt-[-25px] mb-8 flex justify-end">
           <Button
             variant="ghost"
             size="sm"
-            onClick={handleAIImprove}
+            onClick={improveBioWithAI}
             disabled={isImproving || !data.bio}
-            className="text-primary hover:bg-primary/5 gap-2 text-xs"
+            className="text-primary absolute right-4 bottom-2 left-2 gap-2 bg-white text-xs"
           >
             {isImproving ? (
               <span className="material-icons-round animate-spin text-sm">autorenew</span>
@@ -111,7 +104,7 @@ export function StepAboutMe({ data, bioTemplates, hobbies, setData, nextStep }: 
             )}
             {getLabel("ai_improve", language) || "AI ile İyileştir"}
           </Button>
-        </div>
+        </FormGroup>
 
         {/* Category Label - Separator Style */}
         <div className="m-auto flex w-full max-w-[20rem] items-center gap-4 sm:max-w-[24rem]">
@@ -123,7 +116,7 @@ export function StepAboutMe({ data, bioTemplates, hobbies, setData, nextStep }: 
         </div>
 
         {shuffledTemplates.length > 0 && (
-          <div className="flex w-full flex-col items-center justify-center py-4">
+          <div className="flex w-full flex-col items-center justify-center">
             <LifestyleCardComponent
               items={shuffledTemplates}
               activeIndex={activeIndex}
@@ -141,16 +134,17 @@ export function StepAboutMe({ data, bioTemplates, hobbies, setData, nextStep }: 
               direction={direction}
             />
             <Button
-              variant="ghost"
+              variant="link"
               size="sm"
               onClick={handleAISuggestmore}
               disabled={isSuggesting}
-              className="text-muted-foreground hover:text-primary mt-2 gap-2 text-xs"
+              className="mt-6 text-xs"
+              data-test-id="ai-suggest-more-button"
             >
               {isSuggesting ? (
-                <span className="material-icons-round animate-spin text-sm">refresh</span>
+                <span className="material-icons-round animate-spin">refresh</span>
               ) : (
-                <span className="material-icons-round text-sm">tips_and_updates</span>
+                <span className="material-icons-round">tips_and_updates</span>
               )}
               {getLabel("ai_suggest_more", language) || "AI ile Daha Fazla Öner"}
             </Button>

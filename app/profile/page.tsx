@@ -6,7 +6,7 @@ import { Camera, X, Plus, Sun, User, Smile, Sparkles, RefreshCw } from "lucide-r
 import { useAppStore } from "@/context/AppStore";
 import { getLabel } from "@/lib/translations";
 import { updateUserProfile, uploadImage, deleteImage } from "@/lib/actions/userActions";
-import { fetchBioSuggestions } from "@/lib/actions/aiActions";
+import { aiActionFetchBioSuggestions } from "@/lib/actions/aiActions";
 import { useRef } from "react";
 import * as LucideIcons from "lucide-react";
 import { getProfileMetadata } from "@/lib/actions/contentActions";
@@ -77,7 +77,7 @@ export default function ProfilePage() {
       setJobsList(data.jobs || []);
 
       // Load initial AI suggestions
-      let aiData = await fetchBioSuggestions(templates, selectedHobbies, language);
+      let aiData = await aiActionFetchBioSuggestions(templates, selectedHobbies, language);
 
       // If AI fails, use shuffled DB templates as initial suggestions
       if (!aiData || aiData.length === 0) {
@@ -91,7 +91,7 @@ export default function ProfilePage() {
   const refreshAiSuggestions = async () => {
     setIsGeneratingBio(true);
     try {
-      let data = await fetchBioSuggestions(bioTemplates, selectedHobbies, language);
+      let data = await aiActionFetchBioSuggestions(bioTemplates, selectedHobbies, language);
 
       // If AI fails, provide a fresh shuffle of DB templates
       if (!data || data.length === 0) {

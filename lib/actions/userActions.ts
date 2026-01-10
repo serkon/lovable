@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { writeFile, unlink } from "fs/promises";
 import path from "path";
-import { checkProfilePhoto } from "./aiActions";
+import { aiActionCheckProfilePhoto } from "./aiActions";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { USER_STATUS, UserStatus } from "@/lib/constants";
@@ -316,7 +316,7 @@ export async function uploadImage(formData: FormData) {
     const buffer = Buffer.from(bytes);
 
     // AI Photo Check
-    const aiCheck = await checkProfilePhoto(buffer, file.type);
+    const aiCheck = await aiActionCheckProfilePhoto(buffer, file.type);
 
     const filename = `${Date.now()}-${file.name.replace(/\s+/g, "-")}`;
     const publicDir = path.join(process.cwd(), "public/uploads");
