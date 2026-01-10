@@ -4,14 +4,12 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  /* Typography & Basics */
   --font-playfair: var(--font-playfair);
   --font-dm-sans: var(--font-dm-sans);
   --font-default-family: var(--font-dm-sans);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
-  /* Component Colors */
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
@@ -27,19 +25,16 @@
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
 
-  /* UI Elements */
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  /* Charts */
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
 
-  /* Sidebar */
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -49,7 +44,6 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  /* Radius System */
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -58,16 +52,14 @@
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
 
-  /* Shadows */
   --shadow-2xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 
-  /* Neutral Palette Override (maps Tailwind `neutral-*` to desired RGB scale) */
   --color-neutral-50: 249 250 251;
   --color-neutral-100: 243 244 246;
   --color-neutral-200: 229 231 235;
   --color-neutral-300: 209 213 219;
   --color-neutral-400: 156 163 175;
-  --color-neutral-500: 107 114 128; /* requested base */
+  --color-neutral-500: 107 114 128;
   --color-neutral-600: 75 85 99;
   --color-neutral-700: 55 65 81;
   --color-neutral-800: 31 41 55;

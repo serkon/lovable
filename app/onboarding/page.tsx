@@ -17,6 +17,7 @@ import {
   getGenders,
 } from "@/lib/actions/contentActions";
 import { getCurrentUser, createGuestUser } from "@/lib/actions/userActions";
+import { JobMetadata, BioTemplateMetadata } from "@/lib/constants";
 
 import { StepGender } from "@/components/onboarding/StepGender";
 import { StepBasicInfo } from "@/components/onboarding/StepBasicInfo";
@@ -49,9 +50,9 @@ export default function OnboardingPage() {
   const router = useRouter();
   const { language, refreshCurrentUser } = useAppStore();
   const [step, setStep] = useState(1);
-  const [jobsList, setJobsList] = useState<string[]>([]);
+  const [jobsList, setJobsList] = useState<JobMetadata[]>([]);
   const [gendersList, setGendersList] = useState<string[]>([]);
-  const [bioTemplates, setBioTemplates] = useState<string[]>([]);
+  const [bioTemplates, setBioTemplates] = useState<BioTemplateMetadata[]>([]);
   const [hobbiesList, setHobbiesList] = useState<string[]>([]);
   const [maritalStatusesList, setMaritalStatusesList] = useState<string[]>([]);
   const [educationsList, setEducationsList] = useState<string[]>([]);
@@ -118,10 +119,11 @@ export default function OnboardingPage() {
 
       await refreshCurrentUser();
       router.push("/dashboard");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to save profile:", error);
-      if (error?.message === "Bu e-posta adresi zaten kullanımda.") {
-        alert(error.message);
+      const err = error as Error & { message?: string };
+      if (err?.message === "Bu e-posta adresi zaten kullanımda.") {
+        alert(err.message);
       } else {
         alert(getLabel("error_generic", language));
       }
@@ -141,13 +143,15 @@ export default function OnboardingPage() {
           getJobs(),
           getGenders(),
         ]);
-      setBioTemplates(dbBioTemplates || []);
+      setBioTemplates(dbBioTemplates ? [...dbBioTemplates].sort(() => 0.5 - Math.random()) : []);
       setHobbiesList(dbHobbies || []);
       setMaritalStatusesList(dbMarital || []);
       setEducationsList(dbEdu || []);
       setIntentionsList(dbIntention || []);
       setJobsList(dbJobs || []);
       setGendersList(dbGenders || []);
+
+      console.log("dbJobs", dbJobs);
 
       if (dbGenders && dbGenders.length > 0) {
         setData((prev) => ({
@@ -207,7 +211,9 @@ export default function OnboardingPage() {
           {/* STEP 3: BIO / ABOUT ME */}
           {step === 3 && (
             <StepAboutMe
+              key={bioTemplates.length}
               data={data}
+              hobbies={hobbiesList}
               setData={setData}
               bioTemplates={bioTemplates}
               nextStep={nextStep}

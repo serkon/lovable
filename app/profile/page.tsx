@@ -6,11 +6,11 @@ import { Camera, X, Plus, Sun, User, Smile, Sparkles, RefreshCw } from "lucide-r
 import { useAppStore } from "@/context/AppStore";
 import { getLabel } from "@/lib/translations";
 import { updateUserProfile, uploadImage, deleteImage } from "@/lib/actions/userActions";
-import { fetchBioSuggestions, Suggestion } from "@/lib/actions/aiActions";
+import { fetchBioSuggestions } from "@/lib/actions/aiActions";
 import { useRef } from "react";
 import * as LucideIcons from "lucide-react";
 import { getProfileMetadata } from "@/lib/actions/contentActions";
-import { MaritalStatusId, EducationId, IntentionId } from "@/lib/constants";
+import { JobMetadata, BioTemplateMetadata } from "@/lib/constants";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -41,102 +41,62 @@ export default function ProfilePage() {
   const [job, setJob] = useState("");
   const [bio, setBio] = useState("");
   const [selectedHobbies, setSelectedHobbies] = useState<string[]>([]);
-  const [maritalStatus, setMaritalStatus] = useState<MaritalStatusId>("ms_private");
-  const [education, setEducation] = useState<EducationId>("edu_elementary");
-  const [intention, setIntention] = useState<IntentionId>("int_chat");
+  const [maritalStatus, setMaritalStatus] = useState<string>("ms_private");
+  const [education, setEducation] = useState<string>("edu_elementary");
+  const [intention, setIntention] = useState<string>("int_chat");
   const [userImages, setUserImages] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isGeneratingBio, setIsGeneratingBio] = useState(false);
-  const [aiSuggestions, setAiSuggestions] = useState<Suggestion[]>([]);
+  const [aiSuggestions, setAiSuggestions] = useState<BioTemplateMetadata[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Dynamic content state
   const [hobbiesList, setHobbiesList] = useState<string[]>([]);
-  const [bioTemplates, setBioTemplates] = useState<string[]>([]);
+  const [bioTemplates, setBioTemplates] = useState<BioTemplateMetadata[]>([]);
   const [maritalStatusesList, setMaritalStatusesList] = useState<string[]>([]);
   const [educationsList, setEducationsList] = useState<string[]>([]);
   const [intentionsList, setIntentionsList] = useState<string[]>([]);
-  const [jobsList, setJobsList] = useState<string[]>([]);
+  const [jobsList, setJobsList] = useState<JobMetadata[]>([]);
 
   // Fetch dynamic content on mount
   useEffect(() => {
     const loadContent = async () => {
       const data = await getProfileMetadata();
       setHobbiesList(data.hobbies || []);
-      const templates = data.bioTemplates || [];
+      const templates = (data.bioTemplates || []).map(
+        (t: { content: string; category: string }) => ({
+          content: t.content,
+          category: t.category,
+        })
+      );
       setBioTemplates(templates);
       setMaritalStatusesList(data.maritalStatuses || []);
       setEducationsList(data.educations || []);
       setIntentionsList(data.intentions || []);
       setJobsList(data.jobs || []);
 
-      // Load initial AI suggestions with a random nonce to ensure variety
-      const nonce = Math.random().toString(36).substring(7);
-      let aiData = await fetchBioSuggestions(templates, nonce);
+      // Load initial AI suggestions
+      let aiData = await fetchBioSuggestions(templates, selectedHobbies, language);
 
       // If AI fails, use shuffled DB templates as initial suggestions
       if (!aiData || aiData.length === 0) {
-        const icons = [
-          "Heart",
-          "Sparkles",
-          "Smile",
-          "Camera",
-          "Sun",
-          "User",
-          "BookOpen",
-          "TreePine",
-          "Coffee",
-          "Music",
-        ];
-        // Fisher-Yates shuffle for true randomness
-        const shuffled = [...templates];
-        for (let i = shuffled.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-        }
-
-        aiData = shuffled.slice(0, 8).map((t, i) => ({
-          text: t,
-          icon: icons[i % icons.length].toLowerCase(),
-        }));
+        aiData = [...templates].sort(() => 0.5 - Math.random()).slice(0, 8);
       }
       setAiSuggestions(aiData);
     };
     loadContent();
-  }, []);
+  }, [language, selectedHobbies]);
 
   const refreshAiSuggestions = async () => {
     setIsGeneratingBio(true);
     try {
-      const nonce = Math.random().toString(36).substring(7);
-      let data = await fetchBioSuggestions(bioTemplates, nonce);
+      let data = await fetchBioSuggestions(bioTemplates, selectedHobbies, language);
 
       // If AI fails, provide a fresh shuffle of DB templates
       if (!data || data.length === 0) {
-        const icons = [
-          "Heart",
-          "Sparkles",
-          "Smile",
-          "Camera",
-          "Sun",
-          "User",
-          "BookOpen",
-          "TreePine",
-          "Coffee",
-          "Music",
-        ];
-
-        const shuffledFallback = [...bioTemplates];
-        for (let i = shuffledFallback.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [shuffledFallback[i], shuffledFallback[j]] = [shuffledFallback[j], shuffledFallback[i]];
-        }
-
-        data = shuffledFallback.slice(0, 8).map((t, i) => ({
-          text: t,
-          icon: icons[i % icons.length].toLowerCase(),
-        }));
+        const shuffledFallback = [...bioTemplates].sort(() => 0.5 - Math.random());
+        data = shuffledFallback.slice(0, 8);
       }
 
       setAiSuggestions(data);
@@ -156,10 +116,10 @@ export default function ProfilePage() {
       setEmail(currentUser.email || "");
       setPhone(currentUser.phone || "");
       setJob(currentUser.job?.id || "");
-      setBio(currentUser.bio || "");
-      setMaritalStatus((currentUser.maritalStatus?.id as MaritalStatusId) || "ms_private");
-      setEducation((currentUser.education?.id as EducationId) || "edu_elementary");
-      setIntention((currentUser.intention?.id as IntentionId) || "int_chat");
+      setBio((currentUser.bio as string) || "");
+      setMaritalStatus((currentUser.maritalStatus?.id as string) || "ms_private");
+      setEducation((currentUser.education?.id as string) || "edu_elementary");
+      setIntention((currentUser.intention?.id as string) || "int_chat");
 
       if (currentUser.images && currentUser.images.length > 0) {
         setUserImages(currentUser.images.map((img) => img.url));
@@ -608,7 +568,7 @@ export default function ProfilePage() {
                   </span>
                 }
               >
-                <Select value={education} onValueChange={(v) => setEducation(v as EducationId)}>
+                <Select value={education} onValueChange={(v) => setEducation(v as string)}>
                   <SelectTrigger className="w-full">
                     <SelectValue />
                   </SelectTrigger>
@@ -632,8 +592,8 @@ export default function ProfilePage() {
                   </SelectTrigger>
                   <SelectContent>
                     {jobsList.map((j) => (
-                      <SelectItem key={j} value={j}>
-                        {getLabel(j, language)}
+                      <SelectItem key={j.id} value={j.id}>
+                        {getLabel(j.id, language)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -647,10 +607,7 @@ export default function ProfilePage() {
                   </span>
                 }
               >
-                <Select
-                  value={maritalStatus}
-                  onValueChange={(v) => setMaritalStatus(v as MaritalStatusId)}
-                >
+                <Select value={maritalStatus} onValueChange={(v) => setMaritalStatus(v as string)}>
                   <SelectTrigger className="w-full">
                     <SelectValue />
                   </SelectTrigger>
@@ -686,7 +643,7 @@ export default function ProfilePage() {
                   </span>
                 }
               >
-                <Select value={intention} onValueChange={(v) => setIntention(v as IntentionId)}>
+                <Select value={intention} onValueChange={(v) => setIntention(v as string)}>
                   <SelectTrigger className="w-full">
                     <SelectValue />
                   </SelectTrigger>
@@ -751,21 +708,21 @@ export default function ProfilePage() {
                         />
                       ))
                   : aiSuggestions.map((suggestion, idx) => {
-                      const iconName = suggestion.icon
-                        .split("-")
-                        .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
-                        .join("");
+                      const iconName = "Sparkles";
                       const IconComp =
-                        (LucideIcons as unknown as Record<string, React.ComponentType<any>>)[
-                          iconName
-                        ] || Sparkles;
+                        (
+                          LucideIcons as unknown as Record<
+                            string,
+                            React.ComponentType<{ className?: string }>
+                          >
+                        )[iconName] || Sparkles;
 
                       return (
                         <button
                           key={idx}
                           onClick={() =>
                             setBio((prev) =>
-                              prev ? `${prev} ${suggestion.text}` : suggestion.text
+                              prev ? `${prev} ${suggestion.content}` : suggestion.content
                             )
                           }
                           className="group bg-background border-muted-foreground/10 hover:border-primary/30 flex items-center gap-3 rounded-2xl border p-4 text-left shadow-sm transition-all hover:shadow-md active:scale-[0.98]"
@@ -774,7 +731,7 @@ export default function ProfilePage() {
                             <IconComp className="h-4 w-4" />
                           </div>
                           <span className="text-muted-foreground group-hover:text-foreground text-xs leading-tight font-medium transition-colors">
-                            {suggestion.text}
+                            {suggestion.content}
                           </span>
                         </button>
                       );

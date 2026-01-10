@@ -23,17 +23,17 @@ model User {
   educationId     String?
   maritalStatusId String?
   intentionId     String?
-  userStatus      String         @default("ONLINE") // ONLINE, AWAY, INVISIBLE
+  userStatus      String         @default("ONLINE")
   lastActiveAt    DateTime       @default(now())
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
   likesReceived   Like[]         @relation("LikesReceived")
   likesSent       Like[]         @relation("LikesSent")
-  intention       Intention?     @relation(fields: [intentionId], references: [id])
-  maritalStatus   MaritalStatus? @relation(fields: [maritalStatusId], references: [id])
-  education       Education?     @relation(fields: [educationId], references: [id])
-  gender          Gender?        @relation(fields: [genderId], references: [id])
   job             Job?           @relation(fields: [jobId], references: [id])
+  gender          Gender?        @relation(fields: [genderId], references: [id])
+  education       Education?     @relation(fields: [educationId], references: [id])
+  maritalStatus   MaritalStatus? @relation(fields: [maritalStatusId], references: [id])
+  intention       Intention?     @relation(fields: [intentionId], references: [id])
   images          UserImage[]
   hobbies         Hobby[]        @relation("HobbyToUser")
 }
@@ -60,15 +60,17 @@ model Like {
 }
 
 model Hobby {
-  id        String @id
-  name      String @unique
-  sortOrder Int    @default(0)
-  users     User[] @relation("HobbyToUser")
+  id           String        @id
+  name         String        @unique
+  sortOrder    Int           @default(0)
+  bioTemplates BioTemplate[]
+  users        User[]        @relation("HobbyToUser")
 }
 
 model Job {
   id        String @id
   name      String @unique
+  field     String @default("other")
   sortOrder Int    @default(0)
   users     User[]
 }
@@ -81,9 +83,11 @@ model Gender {
 }
 
 model BioTemplate {
-  id        String @id
-  content   String @unique
-  sortOrder Int    @default(0)
+  id        String  @id
+  content   String  @unique
+  sortOrder Int     @default(0)
+  hobbyId   String?
+  hobby     Hobby?  @relation(fields: [hobbyId], references: [id])
 }
 
 model IceBreaker {

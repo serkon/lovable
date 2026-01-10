@@ -3,60 +3,191 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 const JOBS = [
-  { id: "job_retired_teacher", name: "Emekli Öğretmen" },
-  { id: "job_engineer", name: "Mühendis" },
-  { id: "job_doctor", name: "Doktor" },
-  { id: "job_nurse", name: "Hemşire" },
-  { id: "job_banker", name: "Bankacı" },
-  { id: "job_accountant", name: "Muhasebeci" },
-  { id: "job_lawyer", name: "Avukat" },
-  { id: "job_architect", name: "Mimar" },
-  { id: "job_retired_officer", name: "Emekli Subay" },
-  { id: "job_writer", name: "Yazar" },
-  { id: "job_academic", name: "Akademisyen" },
-  { id: "job_pharmacist", name: "Eczacı" },
-  { id: "job_tailor", name: "Terzi" },
-  { id: "job_chef", name: "Aşçı" },
-  { id: "job_artisan", name: "Esnaf" },
+  // Sağlık
+  { id: "job_doctor", name: "Doktor", field: "health" },
+  { id: "job_dentist", name: "Diş Hekimi", field: "health" },
+  { id: "job_nurse", name: "Hemşire", field: "health" },
+  { id: "job_pharmacist", name: "Eczacı", field: "health" },
+  { id: "job_psychologist", name: "Psikolog / Terapist", field: "health" },
+  { id: "job_healthcare", name: "Sağlık Çalışanı", field: "health" },
+
+  // Eğitim & Akademi
+  { id: "job_teacher", name: "Öğretmen", field: "education" },
+  { id: "job_academic", name: "Akademisyen", field: "education" },
+  { id: "job_trainer", name: "Eğitmen", field: "education" },
+  { id: "job_researcher", name: "Araştırmacı", field: "education" },
+
+  // Hukuk
+  { id: "job_lawyer", name: "Avukat", field: "law" },
+  { id: "job_legal_consultant", name: "Hukuk Danışmanı", field: "law" },
+
+  // Teknoloji & Mühendislik
+  { id: "job_software", name: "Yazılım / Teknoloji", field: "technology" },
+  { id: "job_engineer", name: "Mühendis", field: "engineering" },
+  { id: "job_data", name: "Veri / Analitik Uzmanı", field: "technology" },
+  { id: "job_technician", name: "Teknik Uzman", field: "engineering" },
+
+  // Mimarlık & İnşaat
+  { id: "job_architect", name: "Mimar", field: "architecture" },
+  { id: "job_construction", name: "İnşaat / Yapı Uzmanı", field: "architecture" },
+
+  // Finans & İş
+  { id: "job_accountant", name: "Muhasebeci", field: "finance" },
+  { id: "job_banker", name: "Bankacı", field: "finance" },
+  { id: "job_finance", name: "Finans Uzmanı", field: "finance" },
+
+  // Kurumsal & Ofis
+  { id: "job_manager", name: "Yönetici", field: "corporate" },
+  { id: "job_hr", name: "İK Uzmanı", field: "corporate" },
+  { id: "job_project", name: "Proje Yöneticisi", field: "corporate" },
+  { id: "job_office", name: "Ofis Çalışanı", field: "corporate" },
+
+  // Kamu & Güvenlik
+  { id: "job_public", name: "Kamu Görevlisi", field: "public" },
+  { id: "job_security", name: "Askerî / Güvenlik", field: "public" },
+
+  // Sanat & Medya
+  { id: "job_writer", name: "Yazar", field: "art" },
+  { id: "job_designer", name: "Tasarımcı", field: "art" },
+  { id: "job_artist", name: "Sanatçı", field: "art" },
+  { id: "job_media", name: "Medya / İçerik Üreticisi", field: "media" },
+
+  // Hizmet & Zanaat
+  { id: "job_chef", name: "Aşçı", field: "service" },
+  { id: "job_tradesman", name: "Esnaf", field: "trade" },
+  { id: "job_craftsman", name: "Zanaatkâr / Usta", field: "trade" },
+
+  // Modern & Esnek Çalışma
+  { id: "job_freelancer", name: "Serbest Çalışan", field: "independent" },
+  { id: "job_entrepreneur", name: "Girişimci", field: "independent" },
+  { id: "job_consultant", name: "Danışman", field: "independent" },
+
+  // Diğer
+  { id: "job_student", name: "Öğrenci", field: "other" },
+  { id: "job_retired", name: "Emekli", field: "other" },
+  { id: "job_unemployed", name: "Çalışmıyor", field: "other" },
 ];
 
 const HOBBIES = [
-  { id: "hobby_nature", name: "Gezi, Doğa & Kamp" },
-  { id: "hobby_culture", name: "Kültür, Sanat & Kitap" },
-  { id: "hobby_cinema", name: "Sinema & Tiyatro" },
+  { id: "hobby_nature", name: "Doğa & Kamp" },
+  { id: "hobby_travel", name: "Seyahat & Keşif" },
+  { id: "hobby_culture", name: "Kültür & Etkinlikler" },
   { id: "hobby_music", name: "Müzik & Dans" },
-  { id: "hobby_food", name: "Yemek & Gurme" },
-  { id: "hobby_sport", name: "Spor, Yoga & Pilates" },
-  { id: "hobby_psychology", name: "Psikoloji & Kişisel Gelişim" },
-  { id: "hobby_games", name: "Tavla & Sosyal Oyunlar" },
-  { id: "hobby_gardening", name: "Bahçe İşleri" },
-  { id: "hobby_fishing", name: "Balık Tutma" },
-  { id: "hobby_crafts", name: "El Sanatları" },
-  { id: "hobby_technology", name: "Teknoloji" },
-  { id: "hobby_travel", name: "Seyahat" },
+  { id: "hobby_food", name: "Yeme-İçme & Gurme" },
+  { id: "hobby_sport", name: "Spor & İyi Yaşam" },
+  { id: "hobby_mind", name: "Psikoloji & Kişisel Gelişim" },
+  { id: "hobby_games", name: "Oyun & Sosyal Oyunlar" },
+  { id: "hobby_creative", name: "Üretim & El Becerileri" },
+  { id: "hobby_tech", name: "Teknoloji & Dijital Üretim" },
 ];
 
 const BIO_TEMPLATES = [
-  "Huzurlu bir hayat süren, doğa aşığı biriyim.",
-  "Yeni yerler keşfetmeyi ve seyahat etmeyi seviyorum.",
-  "Dürüstlük, samimiyet and güven benim için her şeyden önce gelir.",
-  "Hayatın bu döneminde gerçek bir dost ve hayat arkadaşı arıyorum.",
-  "Mutfakta vakit geçirmeyi ve güzel sofralar kurmayı severim.",
-  "Kitap okumak, sinemaya gitmek ve derin sohbetler etmekten keyif alırım.",
-  "Aile değerlerine önem veren, sevdikleriyle vakit geçirmeyi seven biriyim.",
-  "Hayata pozitif bakmayı, gülmeyi ve anı yaşamayı seviyorum.",
-  "Sağlık, spor ve zinde kalmak benim için değerli.",
-  "Sabah yürüyüşleri ve taze kahve kokusu günümü aydınlatır.",
-  "Bahçemle ilgilenmek benim için bir tür terapi.",
-  "Torunlarımla vakit geçirmek en büyük mutluluk kaynağım.",
-  "Klasik Türk müziği ve nostaljik plaklar vazgeçilmezimdir.",
-  "Yeni lezzetler denemek için gurme turlarına katılmayı severim.",
-  "Sakin bir Ege kasabasında yaşlanma hayalim var.",
-  "Hayat tecrübelerimi paylaşabileceğim, olgun bir ruh arıyorum.",
-  "Sanat galerilerini gezmek ve sergileri takip etmek ruhumu besler.",
-  "Tavla oynamak ve dostlarla sahilde vakit geçirmek paha biçilemez.",
-  "Emekliliğin tadını çıkarırken yeni hobiler edinmeye çalışıyorum.",
-  "Yalnızlık güzel ama hayat paylaştıkça daha da anlamlı.",
+  // Doğa & Kamp (hobby_nature)
+  {
+    content:
+      "Doğada vakit geçirmeyi ve uzun yürüyüşleri seviyorum, açık havada olmak beni her zaman tazeler.",
+    hobbyId: "hobby_nature",
+  },
+  {
+    content:
+      "Hafta sonlarını doğayla iç içe geçirmekten ve yeni kamp yerleri keşfetmekten keyif alırım.",
+    hobbyId: "hobby_nature",
+  },
+
+  // Seyahat & Keşif (hobby_travel)
+  {
+    content: "Yeni yerler keşfetmek ve farklı kültürleri tanımak benim için büyük bir tutku.",
+    hobbyId: "hobby_travel",
+  },
+  {
+    content: "Seyahat etmek ruhumu özgürleştiriyor, her yeni rota yeni bir hikaye demek.",
+    hobbyId: "hobby_travel",
+  },
+
+  // Kültür & Etkinlikler (hobby_culture)
+  {
+    content:
+      "Sanat etkinliklerini ve kültürel gezileri takip etmekten, yeni perspektifler kazanmaktan hoşlanırım.",
+    hobbyId: "hobby_culture",
+  },
+  {
+    content: "Müzeler, sergiler ve şehirdeki kültürel etkinlikler yaşam enerjimi besliyor.",
+    hobbyId: "hobby_culture",
+  },
+
+  // Müzik & Dans (hobby_music)
+  {
+    content: "Müzik hayatımın her anında, farklı melodilerde kendimi bulmayı seviyorum.",
+    hobbyId: "hobby_music",
+  },
+  {
+    content: "Müziğin ritmine kapılmak ve dans etmek benim için en güzel deşarj yöntemi.",
+    hobbyId: "hobby_music",
+  },
+
+  // Yeme-İçme & Gurme (hobby_food)
+  {
+    content: "Yeni lezzetler denemeyi ve mutfakta farklı tariflerle denemeler yapmayı seviyorum.",
+    hobbyId: "hobby_food",
+  },
+  {
+    content: "Güzel bir yemeğin ve yanındaki samimi sohbetin yerini hiçbir şey tutamaz.",
+    hobbyId: "hobby_food",
+  },
+
+  // Spor & İyi Yaşam (hobby_sport)
+  {
+    content: "Düzenli spor yapmak ve sağlıklı yaşamak benim için bir yaşam tarzı.",
+    hobbyId: "hobby_sport",
+  },
+  {
+    content:
+      "Aktif bir hayatı seviyorum, hem bedensel hem de zihinsel olarak zinde kalmaya önem veririm.",
+    hobbyId: "hobby_sport",
+  },
+
+  // Psikoloji & Kişisel Gelişim (hobby_mind)
+  {
+    content:
+      "Kişisel farkındalığımı artıracak okumalar yapmayı ve insan ruhu üzerine düşünmeyi seviyorum.",
+    hobbyId: "hobby_mind",
+  },
+  {
+    content: "Hayatı anlamlandırma çabası ve sürekli gelişim peşinde olmak beni heyecanlandırıyor.",
+    hobbyId: "hobby_mind",
+  },
+
+  // Oyun & Sosyal Oyunlar (hobby_games)
+  {
+    content: "Arkadaşlarla bir araya gelip oyun oynamak ve o tatlı rekabeti yaşamak çok eğlenceli.",
+    hobbyId: "hobby_games",
+  },
+  {
+    content: "Strateji oyunlarını ve sosyal ortamlarda oyunlarla vakit geçirmeyi severim.",
+    hobbyId: "hobby_games",
+  },
+
+  // Üretim & El Becerileri (hobby_creative)
+  {
+    content:
+      "Kendi ellerimle bir şeyler üretmek ve yaratıcılığımı kullanmak beni çok dinlendiriyor.",
+    hobbyId: "hobby_creative",
+  },
+  {
+    content:
+      "El emeğiyle ortaya çıkan her ürünün bir ruhu olduğuna inanıyorum, üretmeyi seviyorum.",
+    hobbyId: "hobby_creative",
+  },
+
+  // Teknoloji & Dijital Üretim (hobby_tech)
+  {
+    content: "Dijital dünyadaki yenilikleri ve teknolojiyi yakından takip etmekten keyif alıyorum.",
+    hobbyId: "hobby_tech",
+  },
+  {
+    content: "Teknolojiyle üretmek ve yeni araçları hayatıma entegre etmek benim için bir hobi.",
+    hobbyId: "hobby_tech",
+  },
 ];
 
 const MARITAL_STATUSES = [
@@ -103,12 +234,12 @@ const MOCK_USERS = [
     lastName: "Yılmaz",
     age: 48,
     city: "İstanbul, Kadıköy",
-    jobId: "job_retired_teacher",
+    jobId: "job_retired",
     educationId: "edu_bachelors",
     maritalStatusId: "ms_divorced",
     intentionId: "int_chat",
     bio: "Kitap okumayı, doğa yürüyüşlerini ve kedileri severim. Hayatı paylaşacak samimi birini arıyorum.",
-    hobbies: ["hobby_culture", "hobby_nature", "hobby_gardening"],
+    hobbies: ["hobby_culture", "hobby_nature"],
     images: [
       "https://images.unsplash.com/photo-1544005313-94ddf0286df2??auto=format&fit=crop&q=80&w=800&h=1000",
       "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=800&h=1000",
@@ -143,7 +274,7 @@ const MOCK_USERS = [
     maritalStatusId: "ms_single",
     intentionId: "int_friendship",
     bio: "Deniz kenarında yürüyüş yapmaya bayılırım. Dürüstlük benim için en önemli şey.",
-    hobbies: ["hobby_sport", "hobby_cinema", "hobby_psychology"],
+    hobbies: ["hobby_sport", "hobby_culture", "hobby_mind"],
     images: [
       "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=800&h=1000",
       "https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?auto=format&fit=crop&q=80&w=800&h=1000",
@@ -161,7 +292,7 @@ const MOCK_USERS = [
     maritalStatusId: "ms_divorced",
     intentionId: "int_chat",
     bio: "Bahçe işleriyle uğraşmak beni dinlendiriyor. Huzurlu bir ikinci bahar arıyorum.",
-    hobbies: ["hobby_gardening", "hobby_fishing", "hobby_music"],
+    hobbies: ["hobby_nature", "hobby_music"],
     images: [
       "https://images.unsplash.com/photo-1651684215020-f7a5b6610f23?auto=format&fit=crop&q=80&w=800&h=1000",
       "https://plus.unsplash.com/premium_photo-1758836220332-bf5872281aa2?auto=format&fit=crop&q=80&w=800&h=1000",
@@ -189,7 +320,7 @@ const MOCK_USERS = [
     lastName: "Aras",
     age: 55,
     city: "İstanbul, Üsküdar",
-    jobId: "job_retired_officer",
+    jobId: "job_retired",
     educationId: "edu_bachelors",
     maritalStatusId: "ms_divorced",
     intentionId: "int_friendship",
@@ -221,12 +352,12 @@ const MOCK_USERS = [
     lastName: "Güneş",
     age: 60,
     city: "İzmir, Urla",
-    jobId: "job_retired_officer",
+    jobId: "job_retired",
     educationId: "edu_bachelors",
     maritalStatusId: "ms_divorced",
     intentionId: "int_chat",
     bio: "Emekliliğin tadını çıkarıyorum. Balık tutmak ve tarihi yerleri gezmek hobilerim.",
-    hobbies: ["hobby_fishing", "hobby_nature"],
+    hobbies: ["hobby_nature"],
     images: [
       "https://images.unsplash.com/photo-1767111392691-fdbb6a000bfe?auto=format&fit=crop&q=80&w=800&h=1000",
     ],
@@ -237,12 +368,12 @@ const MOCK_USERS = [
     lastName: "Yıldız",
     age: 53,
     city: "Bursa, Nilüfer",
-    jobId: "job_retired_teacher",
+    jobId: "job_retired",
     educationId: "edu_bachelors",
     maritalStatusId: "ms_divorced",
     intentionId: "int_friendship",
     bio: "Çiçeklerim ve ben çok mutluyuz ama bir hayat arkadaşı fena olmazdı.",
-    hobbies: ["hobby_gardening", "hobby_food"],
+    hobbies: ["hobby_nature", "hobby_food"],
     images: [
       "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=800&h=1000",
     ],
@@ -274,7 +405,7 @@ const MOCK_USERS = [
     maritalStatusId: "ms_single",
     intentionId: "int_chat",
     bio: "Bilim ve sanat tutkunuyum. Kaliteli sohbetler arıyorum.",
-    hobbies: ["hobby_culture", "hobby_cinema"],
+    hobbies: ["hobby_culture"],
     images: [
       "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=800&h=1000",
     ],
@@ -285,12 +416,12 @@ const MOCK_USERS = [
     lastName: "Şahin",
     age: 62,
     city: "Muğla, Bodrum",
-    jobId: "job_artisan",
+    jobId: "job_tradesman",
     educationId: "edu_highschool",
     maritalStatusId: "ms_divorced",
     intentionId: "int_friendship",
     bio: "Bodrum'da sakin bir hayatım var. Denizi seven bir yol arkadaşı arıyorum.",
-    hobbies: ["hobby_nature", "hobby_fishing"],
+    hobbies: ["hobby_nature"],
     images: [
       "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=800&h=1000",
     ],
@@ -306,7 +437,7 @@ const MOCK_USERS = [
     maritalStatusId: "ms_divorced",
     intentionId: "int_chat",
     bio: "Yoğun bir meslek hayatım oldu, şimdi kendime zaman ayırıyorum. Tiyatroya gitmeyi severim.",
-    hobbies: ["hobby_cinema", "hobby_culture"],
+    hobbies: ["hobby_culture"],
     images: [
       "https://images.unsplash.com/photo-1551843073-4a9a5b6fcd5f?auto=format&fit=crop&q=80&w=800&h=1000",
     ],
@@ -322,7 +453,7 @@ const MOCK_USERS = [
     maritalStatusId: "ms_divorced",
     intentionId: "int_friendship",
     bio: "Teknolojiye meraklıyım ama eski kafalıyım. Klasik müzik vazgeçilmezim.",
-    hobbies: ["hobby_music", "hobby_technology"],
+    hobbies: ["hobby_music", "hobby_tech"],
     images: [
       "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=800&h=1000",
     ],
@@ -338,7 +469,7 @@ const MOCK_USERS = [
     maritalStatusId: "ms_single",
     intentionId: "int_chat",
     bio: "Kelimelerin gücüne inanırım. Şiir okumayı ve yazmayı severim.",
-    hobbies: ["hobby_culture", "hobby_cinema"],
+    hobbies: ["hobby_culture"],
     images: [
       "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=800&h=1000",
     ],
@@ -365,12 +496,12 @@ const MOCK_USERS = [
     lastName: "Sönmez",
     age: 61,
     city: "Adana, Çukurova",
-    jobId: "job_retired_teacher",
+    jobId: "job_retired",
     educationId: "edu_associates",
     maritalStatusId: "ms_divorced",
     intentionId: "int_friendship",
     bio: "Torunlarımı severim ama kendi hayatımı da yaşamak istiyorum.",
-    hobbies: ["hobby_food", "hobby_gardening"],
+    hobbies: ["hobby_food", "hobby_nature"],
     images: [
       "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=800&h=1000",
     ],
@@ -381,12 +512,12 @@ const MOCK_USERS = [
     lastName: "Pala",
     age: 65,
     city: "Trabzon, Ortahisar",
-    jobId: "job_retired_officer",
+    jobId: "job_retired",
     educationId: "edu_highschool",
     maritalStatusId: "ms_divorced",
     intentionId: "int_chat",
     bio: "Karadeniz'in hırçın dalgaları gibiydim duruldum. Huzur arıyorum.",
-    hobbies: ["hobby_fishing", "hobby_nature"],
+    hobbies: ["hobby_nature"],
     images: [
       "https://images.unsplash.com/photo-1492288991661-058aa541ff43?auto=format&fit=crop&q=80&w=800&h=1000",
     ],
@@ -424,6 +555,7 @@ async function main() {
     data: JOBS.map((job, index) => ({
       id: job.id,
       name: `Internal: ${job.name}`,
+      field: job.field,
       sortOrder: (index + 1) * 10,
     })),
   });
@@ -439,9 +571,10 @@ async function main() {
 
   console.log("Seeding templates...");
   await prisma.bioTemplate.createMany({
-    data: BIO_TEMPLATES.map((content, index) => ({
+    data: BIO_TEMPLATES.map((item, index) => ({
       id: `bio_${(index + 1).toString().padStart(2, "0")}`,
-      content,
+      content: item.content,
+      hobbyId: item.hobbyId,
       sortOrder: (index + 1) * 10,
     })),
   });

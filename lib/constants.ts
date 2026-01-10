@@ -1,6 +1,22 @@
-export type MaritalStatusId = string;
-export type EducationId = string;
-export type IntentionId = string;
+export interface JobMetadata {
+  id: string;
+  field: string;
+}
+
+export interface BioTemplateMetadata {
+  content: string;
+  category: string;
+}
+
+export interface ProfileMetadata {
+  hobbies: string[];
+  bioTemplates: BioTemplateMetadata[];
+  maritalStatuses: string[];
+  educations: string[];
+  intentions: string[];
+  jobs: JobMetadata[];
+  genders: string[];
+}
 
 export const USER_STATUS = {
   ONLINE: "ONLINE",
@@ -19,9 +35,9 @@ export interface Profile {
   location: string;
   distance: number;
   job: string;
-  education: EducationId;
-  maritalStatus: MaritalStatusId;
-  intention: IntentionId;
+  education: string;
+  maritalStatus: string;
+  intention: string;
   bio: string;
   hobbies: string[];
   imageUrl: string;

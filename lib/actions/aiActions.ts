@@ -1,124 +1,76 @@
 "use server";
 
 import { GoogleGenAI } from "@google/genai";
+import { BioTemplateMetadata } from "@/lib/constants";
 
+export type Suggestion = BioTemplateMetadata;
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
-export interface Suggestion {
-  text: string;
-  icon: string;
-}
-
 export const fetchBioSuggestions = async (
-  existingTemplates?: string[],
-  nonce?: string
+  existingTemplates?: Suggestion[],
+  hobbies?: string[],
+  language: string = "tr"
 ): Promise<Suggestion[]> => {
-  console.log("##### GEMINI_API_KEY present:", process.env.GEMINI_API_KEY);
-  try {
-    const prompt = `
-You are generating profile bio sentences for a dating and friendship app.
+  const categoriesContext = hobbies?.join(", ") || "";
 
-Goal:
-Help users express themselves naturally during signup with zero writing effort.
+  const prompt = `
+Generate profile bio sentences for a dating app.
 
-Language:
-Generate all output strictly in {{LANGUAGE}}.
+Goal: Natural self-expressions in first-person singular.
+Language: Strictly ${language}.
 
-Critical linguistic rule:
-- Write in first person singular.
-- Follow natural sentence patterns of native speakers in {{LANGUAGE}}.
-- If the language commonly omits the subject (e.g. Turkish, Spanish, Italian), do NOT repeatedly start sentences with the explicit subject.
-- Avoid starting multiple sentences with the same word or structure.
-- Use the explicit subject ("I", "Ben", "Ich", etc.) only when it sounds natural in that language.
+Rules:
+- Generate exactly 9 SHORT and COMPLETE sentences.
+- Each sentence MUST be assigned to exactly one category from this list: [${categoriesContext}].
+- Avoid starting sentences with the same word (especially "Ben" in Turkish).
+- No emojis, no questions, no clichés.
 
-Instructions:
-- Generate exactly 9 SHORT but COMPLETE sentences.
-- Each sentence must be ready to paste directly into a dating profile.
-- Sentences must sound like natural self-descriptions, not written profiles.
-- Do NOT ask questions.
-- Do NOT use emojis.
-- Avoid clichés and generic motivational phrases.
+Tone: Warm, human, sincere.
 
-Content guidance:
-Each sentence should subtly express at least one of:
-- personality trait
-- value
-- lifestyle habit
-- interest that invites conversation
-
-Tone:
-Warm, sincere, human.
-Not poetic.
-Not exaggerated.
-Not salesy.
-
-Output format (JSON only):
+Output format (JSON):
 {
   "suggestions": [
     {
-      "text": "...",
-      "icon": "valid_material_icon_name"
+      "content": "Cümle buraya",
+      "category": "hobby_..." 
     }
   ]
 }
-
-Icon rules:
-- Icons should symbolically match the meaning of the sentence.
-- Use valid Material Design icon names only.
 `;
 
+  try {
     const result = await ai.models.generateContent({
       model: "gemini-2.5-flash-lite",
       contents: [{ role: "user", parts: [{ text: prompt }] }],
       config: {
         responseMimeType: "application/json",
-        temperature: 0.9, // Higher temperature for more variety
+        temperature: 0.8,
       },
     });
 
-    const response = await result.text;
-    if (!response) {
+    const responseText = await result.text;
+
+    if (!responseText) {
       console.error("AI returned empty text");
       return [];
     }
+    const data = JSON.parse(responseText);
 
-    try {
-      const data = JSON.parse(response);
-      console.log("AI response:", data);
-      return data.suggestions || [];
-    } catch (parseErr) {
-      console.error("AI JSON parse error:", parseErr, "Text:", response);
-      return [];
-    }
+    // AI'dan gelen veriyi zenginleştiriyoruz (İkon ekleme)
+    return (data.suggestions || []).map((s: Suggestion) => ({
+      content: s.content,
+      category: s.category,
+    }));
   } catch (error) {
-    console.error("Error fetching AI suggestions:", error);
+    console.error("AI Fetch Error:", error);
 
-    // Fallback: Use existingTemplates (DB templates) if AI fails
-    if (existingTemplates && existingTemplates.length > 0) {
-      const icons = [
-        "heart",
-        "sparkles",
-        "smile",
-        "camera",
-        "sun",
-        "user",
-        "book-open",
-        "tree-pine",
-        "coffee",
-        "music",
-        "star",
-        "brain",
-      ];
-
-      return existingTemplates
-        .sort(() => 0.5 - Math.random()) // Shuffle
-        .slice(0, 9)
-        .map((text, i) => ({
-          text,
-          icon: icons[i % icons.length],
-        }));
+    // Fallback logic
+    if (existingTemplates?.length) {
+      return existingTemplates.slice(0, 9).map(({ content, category }) => ({
+        content,
+        category,
+      }));
     }
-
     return [];
   }
 };
@@ -126,37 +78,17 @@ Icon rules:
 export async function checkProfilePhoto(imageBuffer: Buffer, mimeType: string) {
   try {
     const prompt = `Analyze this profile photo for a dating app. 
-    Check if:
-    1. It is a clear, high-quality image (Good lighting).
-    2. It contains exactly one person (Solo shot).
-    3. The face is clearly visible (Clear face).
-    4. It is appropriate/safe.
-
-    Return a JSON object:
-    {
-      "isApproved": boolean,
-      "score": number (0-100),
-      "feedback": {
-        "lighting": "good" | "bad",
-        "solo": boolean,
-        "faceVisible": boolean,
-        "message": "Short encouraging message in Turkish"
-      }
-    }`;
+    Check lighting, solo person, face visibility, and safety.
+    Return JSON: { "isApproved": boolean, "score": number, "feedback": { "message": "Turkish feedback" } }`;
 
     const result = await ai.models.generateContent({
-      model: "gemini-1.5-flash",
+      model: "gemini-2.5-flash-lite",
       contents: [
         {
           role: "user",
           parts: [
             { text: prompt },
-            {
-              inlineData: {
-                data: imageBuffer.toString("base64"),
-                mimeType,
-              },
-            },
+            { inlineData: { data: imageBuffer.toString("base64"), mimeType } },
           ],
         },
       ],
@@ -177,12 +109,12 @@ export async function checkProfilePhoto(imageBuffer: Buffer, mimeType: string) {
       return [];
     }
   } catch (error) {
-    console.error("AI Photo check error:", error);
-    // Silent fail - return approved to not block user
+    console.error("Photo check error:", error);
+    // Mimari karar: Hata durumunda onay vermek yerine "manuel inceleme" gerektiren bir yapı dönmek daha güvenlidir.
     return {
-      isApproved: true,
-      score: 100,
-      feedback: { lighting: "good", solo: true, faceVisible: true, message: "" },
+      isApproved: false,
+      score: 0,
+      feedback: { message: "Sistem şu an meşgul, lütfen az sonra tekrar dene." },
     };
   }
 }

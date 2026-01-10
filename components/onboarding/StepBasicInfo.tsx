@@ -7,18 +7,21 @@ import { FormGroup } from "@/components/ui/form-group";
 import {
   Select,
   SelectContent,
+  SelectGroup,
+  SelectLabel,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 import { Heart, GraduationCap, BookOpen, Phone, Mail } from "lucide-react";
-import React, { Dispatch, SetStateAction } from "react";
+import React, { Dispatch, SetStateAction, useMemo } from "react";
+import { JobMetadata } from "@/lib/constants";
 
 interface StepBasicInfoProps {
   data: OnboardingData;
   setData: Dispatch<SetStateAction<OnboardingData>>;
   nextStep: () => void;
-  jobsList: string[];
+  jobsList: JobMetadata[];
   intentionsList: string[];
   educationsList: string[];
   maritalStatusesList: string[];
@@ -35,6 +38,12 @@ export function StepBasicInfo({
 }: StepBasicInfoProps) {
   const { language } = useAppStore();
 
+  const fields = useMemo(() => {
+    const uniqueFields = Array.from(new Set(jobsList.map((j) => j.field || "other")));
+    console.log("StepBasicInfo rendered with jobsList count:", jobsList.length);
+    console.log("Computed fields:", uniqueFields);
+    return uniqueFields;
+  }, [jobsList]);
   const isFormValid =
     data.firstName &&
     data.lastName &&
@@ -173,10 +182,17 @@ export function StepBasicInfo({
                 <SelectValue placeholder={getLabel("select_default", language)} />
               </SelectTrigger>
               <SelectContent>
-                {jobsList.map((j) => (
-                  <SelectItem key={j} value={j}>
-                    {getLabel(j, language)}
-                  </SelectItem>
+                {fields.map((field) => (
+                  <SelectGroup key={field}>
+                    <SelectLabel>{getLabel(`field_${field}`, language)}</SelectLabel>
+                    {jobsList
+                      .filter((j) => j.field === field)
+                      .map((job) => (
+                        <SelectItem key={job.id} value={job.id}>
+                          {getLabel(job.id, language)}
+                        </SelectItem>
+                      ))}
+                  </SelectGroup>
                 ))}
               </SelectContent>
             </Select>
