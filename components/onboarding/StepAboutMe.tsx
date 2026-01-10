@@ -88,14 +88,14 @@ export function StepAboutMe({ data, bioTemplates, hobbies, setData, nextStep }: 
             value={data.bio}
             onChange={(e) => setData({ ...data, bio: e.target.value })}
             placeholder={getLabel("input_placeholder_bio", language)}
-            className="min-h-[120px] pb-5"
+            className="min-h-[120px] pb-12"
           />
           <Button
             variant="ghost"
             size="sm"
             onClick={improveBioWithAI}
             disabled={isImproving || !data.bio}
-            className="text-primary absolute right-4 bottom-2 left-2 gap-2 bg-white text-xs"
+            className="text-primary absolute right-4 bottom-[1px] left-2 gap-2 bg-white text-xs"
           >
             {isImproving ? (
               <span className="material-icons-round animate-spin text-sm">autorenew</span>
