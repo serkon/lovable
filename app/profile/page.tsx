@@ -155,14 +155,16 @@ export default function ProfilePage() {
         // Show AI Feedback
         if (result.aiCheck) {
           const { feedback, isApproved } = result.aiCheck;
-          alert(`${isApproved ? "✅" : "⚠️"} AI Görsel Analizi:\n${feedback.message}`);
+          alert(
+            `${isApproved ? "✅" : "⚠️"} ${getLabel("ai_analysis", language)}:\n${feedback.message}`
+          );
         }
       } else {
-        alert("Görsel yüklenemedi. Lütfen tekrar deneyin.");
+        alert(getLabel("error_upload_failed", language));
       }
     } catch (error) {
       console.error("Upload handler error:", error);
-      alert("Bir hata oluştu.");
+      alert(getLabel("error_generic", language));
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -211,7 +213,7 @@ export default function ProfilePage() {
         intention,
       });
       await refreshCurrentUser();
-      alert(getLabel("profile_updated_success", language));
+      alert(getLabel("profile_updated", language));
     } catch (error) {
       console.error("Save failed:", error);
       alert(getLabel("error_generic", language));
@@ -225,8 +227,8 @@ export default function ProfilePage() {
       <Header
         variant="simple"
         backHref="/dashboard"
-        className="h-20" // Match previous height if needed, though simple defaults to 16 (h-16). Custom header was h-20.
-        title="Profil Düzenle"
+        className="h-20"
+        title={getLabel("edit_profile", language)}
         showLogo={false}
         action={
           <div className="flex items-center gap-4">
@@ -280,17 +282,17 @@ export default function ProfilePage() {
             </div>
             <div className="relative flex justify-center uppercase">
               <span className="bg-background text-muted-foreground/60 px-6 text-[10px] font-bold tracking-[0.2em]">
-                PROFİL FOTOĞRAFLARI
+                {getLabel("profile_photos", language)}
               </span>
             </div>
           </div>
 
           <div className="flex items-center justify-between px-1">
             <p className="text-muted-foreground text-xs font-medium">
-              Profilinizi tamamlamak için dilediğiniz kadar fotoğraf ekleyebilirsiniz.
+              {getLabel("profile_photos_desc", language)}
             </p>
             <Badge variant="secondary" className="rounded-full px-3 py-1 font-bold">
-              {userImages.length} Fotoğraf
+              {getLabel("n_photos", language, { count: userImages.length })}
             </Badge>
           </div>
 
@@ -320,12 +322,12 @@ export default function ProfilePage() {
                         onClick={() => removeImage(0)}
                         className="w-full rounded-xl font-bold"
                       >
-                        <X className="mr-2 h-4 w-4" /> Kaldır
+                        <X className="mr-2 h-4 w-4" /> {getLabel("btn_remove", language)}
                       </Button>
                     </div>
                     <div className="absolute top-4 left-4">
                       <Badge className="bg-primary/90 border-none px-3 py-1 text-[10px] font-bold tracking-widest text-white uppercase shadow-lg backdrop-blur-sm">
-                        ANA FOTOĞRAF
+                        {getLabel("main_photo", language)}
                       </Badge>
                     </div>
                   </>
@@ -339,7 +341,7 @@ export default function ProfilePage() {
                       <Camera className="h-8 w-8" />
                     </div>
                     <span className="text-primary/70 text-xs font-bold tracking-wider uppercase">
-                      Fotoğraf Yükle
+                      {getLabel("btn_upload_photo", language)}
                     </span>
                   </button>
                 )}
@@ -364,13 +366,13 @@ export default function ProfilePage() {
                       onClick={() => setAsPrimary(idx + 1)}
                       className="text-primary w-[80%] rounded-xl bg-white/90 py-2 text-[10px] font-bold tracking-wider uppercase transition-all hover:bg-white active:scale-95"
                     >
-                      Ana Yap
+                      {getLabel("btn_set_primary", language)}
                     </button>
                     <button
                       onClick={() => removeImage(idx + 1)}
                       className="bg-destructive/90 hover:bg-destructive w-[80%] rounded-xl py-2 text-[10px] font-bold tracking-wider text-white uppercase transition-all active:scale-95"
                     >
-                      Sil
+                      {getLabel("btn_delete", language)}
                     </button>
                   </div>
                 </div>
@@ -391,7 +393,7 @@ export default function ProfilePage() {
                     )}
                   </div>
                   <span className="text-muted-foreground text-[10px] font-bold tracking-wider uppercase">
-                    Ekle
+                    {getLabel("btn_add", language)}
                   </span>
                 </button>
               )}
@@ -404,7 +406,7 @@ export default function ProfilePage() {
                   <div className="border-muted-foreground/10 w-full border-t"></div>
                 </div>
                 <span className="bg-background text-muted-foreground/60 relative px-4 text-[10px] font-bold tracking-[0.2em] uppercase">
-                  MÜKEMMEL FOTOĞRAF TÜYOLARI
+                  {getLabel("photo_tips_title", language)}
                 </span>
               </div>
 
@@ -414,7 +416,7 @@ export default function ProfilePage() {
                     <Sun className="h-5 w-5" />
                   </div>
                   <span className="text-muted-foreground/80 text-center text-[10px] font-medium tracking-tight uppercase">
-                    İyi Işık
+                    {getLabel("tip_light", language)}
                   </span>
                 </div>
                 <div className="flex flex-col items-center gap-3">
@@ -422,7 +424,7 @@ export default function ProfilePage() {
                     <User className="h-5 w-5" />
                   </div>
                   <span className="text-muted-foreground/80 text-center text-[10px] font-medium tracking-tight uppercase">
-                    Yalnız Çekim
+                    {getLabel("tip_solo", language)}
                   </span>
                 </div>
                 <div className="flex flex-col items-center gap-3">
@@ -430,7 +432,7 @@ export default function ProfilePage() {
                     <Smile className="h-5 w-5" />
                   </div>
                   <span className="text-muted-foreground/80 text-center text-[10px] font-medium tracking-tight uppercase">
-                    Net Yüz
+                    {getLabel("tip_face", language)}
                   </span>
                 </div>
               </div>
@@ -454,7 +456,7 @@ export default function ProfilePage() {
             </div>
             <div className="relative flex justify-center uppercase">
               <span className="bg-background text-muted-foreground/60 px-6 text-[10px] font-bold tracking-[0.2em]">
-                KİMLİK BİLGİLERİ
+                {getLabel("basic_info_title", language)}
               </span>
             </div>
           </div>
@@ -495,7 +497,7 @@ export default function ProfilePage() {
               </div>
               <div className="relative flex justify-center uppercase">
                 <span className="bg-background text-muted-foreground/60 px-6 text-[10px] font-bold tracking-[0.2em]">
-                  İLETİŞİM BİLGİLERİ
+                  {getLabel("contact_info_title", language)}
                 </span>
               </div>
             </div>
@@ -540,7 +542,7 @@ export default function ProfilePage() {
               </div>
               <div className="relative flex justify-center uppercase">
                 <span className="bg-background text-muted-foreground/60 px-6 text-[10px] font-bold tracking-[0.2em]">
-                  BİRAZ DAHA DETAY
+                  {getLabel("more_details_title", language)}
                 </span>
               </div>
             </div>
@@ -629,7 +631,7 @@ export default function ProfilePage() {
               </div>
               <div className="relative flex justify-center uppercase">
                 <span className="bg-background text-muted-foreground/60 px-6 text-[10px] font-bold tracking-[0.2em]">
-                  TANIŞMA AMACI
+                  {getLabel("intention_title", language)}
                 </span>
               </div>
             </div>
@@ -667,7 +669,7 @@ export default function ProfilePage() {
             </div>
             <div className="relative flex justify-center uppercase">
               <span className="bg-background text-muted-foreground/60 px-6 text-[10px] font-bold tracking-[0.2em]">
-                KENDİNİZDEN BAHSEDİN
+                {getLabel("about_me_title", language)}
               </span>
             </div>
           </div>
@@ -686,7 +688,7 @@ export default function ProfilePage() {
             <div className="space-y-4">
               <div className="flex items-center justify-between px-1">
                 <span className="text-primary flex items-center gap-2 text-xs font-bold tracking-widest uppercase">
-                  <Sparkles className="h-3 w-3" /> YAPAY ZEKA ÖNERİLERİ
+                  <Sparkles className="h-3 w-3" /> {getLabel("ai_suggestions_title", language)}
                 </span>
                 <button
                   onClick={refreshAiSuggestions}
@@ -749,7 +751,7 @@ export default function ProfilePage() {
             </div>
             <div className="relative flex justify-center uppercase">
               <span className="bg-background text-muted-foreground/60 px-6 text-[10px] font-bold tracking-[0.2em]">
-                İLGİ ALANLARI VE HOBİLER
+                {getLabel("hobbies_title", language)}
               </span>
             </div>
           </div>
@@ -781,7 +783,7 @@ export default function ProfilePage() {
             size="lg"
             className="shadow-primary/20 w-full rounded-2xl py-8 text-lg font-bold shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
           >
-            {isSaving ? getLabel("saving", language) : "Değişiklikleri Kaydet"}
+            {isSaving ? getLabel("btn_saving", language) : getLabel("btn_save_changes", language)}
           </Button>
         </div>
       </main>

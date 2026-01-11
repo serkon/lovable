@@ -66,7 +66,6 @@ export default function OnboardingPage() {
   const [intentionsList, setIntentionsList] = useState<string[]>([]);
   const [countriesList, setCountriesList] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [data, setData] = useState<OnboardingData>({
     firstName: "",
     lastName: "",
@@ -113,7 +112,7 @@ export default function OnboardingPage() {
         hobbies: data.hobbies,
         phone: data.phone,
         email: data.email,
-        // photos can be added to updateUserProfile if supported, for now they are in local state
+        images: data.photos,
       });
 
       if (!skipAuth && data.email && data.password) {
@@ -207,7 +206,6 @@ export default function OnboardingPage() {
       if (dbGenders && dbGenders.length > 0) {
         setData((prev) => ({ ...prev, gender: dbGenders[0] }));
       }
-      setIsDataLoaded(true);
     };
     fetchData();
   }, []);

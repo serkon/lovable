@@ -2,13 +2,15 @@
 
 import { getLabel } from "@/lib/translations";
 import { useAppStore } from "@/context/AppStore";
-import { X, Plus, Image as ImageIcon } from "lucide-react";
+import { X, Plus, Image as ImageIcon, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { OnboardingData } from "@/app/onboarding/page";
-import { Dispatch, SetStateAction, useRef } from "react";
+import { Dispatch, SetStateAction, useRef, useState } from "react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { StepDescription } from "@/components/ui/step-description";
+import { uploadImage } from "@/lib/actions/userActions";
+import Image from "next/image";
 
 interface StepProps {
   data: OnboardingData;
@@ -19,31 +21,54 @@ interface StepProps {
 export function StepPhotos({ data, setData, nextStep }: StepProps) {
   const { language } = useAppStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (!files) return;
+    if (!files || files.length === 0) return;
 
-    Array.from(files).forEach((file) => {
-      if (data.photos.length >= 6) {
-        toast.error(
-          getLabel("error_max_photos", language) || "Maksimum 6 fotoğraf ekleyebilirsiniz."
-        );
-        return;
+    if (data.photos.length + files.length > 6) {
+      toast.error(
+        getLabel("error_max_photos", language) || "Maksimum 6 fotoğraf ekleyebilirsiniz."
+      );
+      return;
+    }
+
+    setIsUploading(true);
+    const uploadPromises = Array.from(files).map(async (file) => {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const result = await uploadImage(formData);
+        if (result && result.url) {
+          return result.url;
+        }
+        return null;
+      } catch (error) {
+        console.error("Upload error:", error);
+        return null;
       }
-
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result as string;
-        setData((prev) => ({
-          ...prev,
-          photos: [...prev.photos, base64String],
-        }));
-      };
-      reader.readAsDataURL(file);
     });
 
-    // Reset input
+    const results = await Promise.all(uploadPromises);
+    const validUrls = results.filter((url): url is string => url !== null);
+
+    if (validUrls.length > 0) {
+      setData((prev) => ({
+        ...prev,
+        photos: [...prev.photos, ...validUrls],
+      }));
+      toast.success(
+        getLabel("photos_uploaded_success", language) || "Fotoğraflar başarıyla yüklendi."
+      );
+    } else {
+      toast.error(
+        getLabel("photos_upload_error", language) || "Fotoğraflar yüklenirken bir hata oluştu."
+      );
+    }
+
+    setIsUploading(false);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -82,20 +107,33 @@ export function StepPhotos({ data, setData, nextStep }: StepProps) {
               {isEmpty ? (
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="hover:border-primary/50 group flex h-full w-full flex-col items-center justify-center gap-2 rounded-3xl border-2 border-dashed border-neutral-300 bg-neutral-50/50 transition-all hover:bg-neutral-50"
+                  disabled={isUploading}
+                  className="hover:border-primary/50 group flex h-full w-full flex-col items-center justify-center gap-2 rounded-3xl border-2 border-dashed border-neutral-300 bg-neutral-50/50 transition-all hover:bg-neutral-50 disabled:opacity-50"
                 >
                   <div className="rounded-full bg-white p-3 shadow-sm transition-transform group-hover:scale-110">
-                    <Plus className="text-primary h-6 w-6" />
+                    {isUploading ? (
+                      <Loader2 className="text-primary h-6 w-6 animate-spin" />
+                    ) : (
+                      <Plus className="text-primary h-6 w-6" />
+                    )}
                   </div>
                   <span className="text-xs font-semibold text-neutral-500">
-                    {slotIndex === 0
-                      ? getLabel("photo_cover", language)
-                      : getLabel("photo_number", language, { number: slotIndex + 1 })}
+                    {isUploading
+                      ? getLabel("uploading", language) || "Yükleniyor..."
+                      : slotIndex === 0
+                        ? getLabel("photo_cover", language)
+                        : getLabel("photo_number", language, { number: slotIndex + 1 })}
                   </span>
                 </button>
               ) : (
                 <div className="group hover:border-primary/50 relative h-full w-full overflow-hidden rounded-3xl border-2 border-transparent bg-neutral-100 shadow-md transition-all">
-                  <img src={photo} alt="" className="h-full w-full object-cover" />
+                  <Image
+                    src={photo}
+                    alt=""
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 50vw, 33vw"
+                  />
                   <button
                     onClick={() => removePhoto(slotIndex)}
                     className="absolute top-2 right-2 rounded-full bg-black/50 p-1.5 text-white opacity-0 backdrop-blur-md transition-opacity group-hover:opacity-100"
@@ -131,7 +169,7 @@ export function StepPhotos({ data, setData, nextStep }: StepProps) {
 
       <Button
         onClick={nextStep}
-        disabled={data.photos.length === 0}
+        disabled={data.photos.length === 0 || isUploading}
         size="lg"
         className="w-full max-w-[400px] shadow-lg transition-all"
       >
