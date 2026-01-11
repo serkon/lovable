@@ -16,6 +16,7 @@ import {
 import { Heart, GraduationCap, BookOpen, Phone, Mail } from "lucide-react";
 import React, { Dispatch, SetStateAction, useMemo } from "react";
 import { JobMetadata } from "@/lib/constants";
+import { SectionSeparator } from "@/components/ui/section-separator";
 
 interface StepBasicInfoProps {
   data: OnboardingData;
@@ -137,16 +138,11 @@ export function StepBasicInfo({
         </div>
 
         {/* Separator */}
-        <div className="relative py-2">
-          <div className="absolute inset-0 flex items-center">
-            <span className="border-muted-foreground/20 w-full border-t" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background text-muted-foreground px-2 font-bold tracking-widest">
-              {getLabel("more_details", language)}
-            </span>
-          </div>
-        </div>
+        <SectionSeparator
+          label={getLabel("more_details", language)}
+          data-test-id="basic-info-separator"
+          className="mb-8"
+        />
 
         {/* Row 2: Eğitim, Mesleği */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

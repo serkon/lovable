@@ -117,3 +117,10 @@ model Intention {
   sortOrder Int    @default(0)
   users     User[]
 }
+
+model Country {
+  id        String @id
+  name      String @unique
+  sortOrder Int    @default(0)
+}
+

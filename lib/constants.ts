@@ -16,6 +16,7 @@ export interface ProfileMetadata {
   intentions: string[];
   jobs: JobMetadata[];
   genders: string[];
+  countries: string[];
 }
 
 export const USER_STATUS = {

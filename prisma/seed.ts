@@ -228,6 +228,16 @@ const ICE_BREAKERS = [
   "Mutfakta aran nasıldır? Spesiyal yemeğin var mı?",
 ];
 
+const COUNTRIES = [
+  { id: "tr", name: "Türkiye" },
+  { id: "de", name: "Germany" },
+  { id: "gb", name: "United Kingdom" },
+  { id: "us", name: "United States" },
+  { id: "nl", name: "Netherlands" },
+  { id: "fr", name: "France" },
+  { id: "other", name: "Other" },
+];
+
 const MOCK_USERS = [
   {
     firstName: "Ayşe",
@@ -538,6 +548,7 @@ async function main() {
   await prisma.maritalStatus.deleteMany({});
   await prisma.education.deleteMany({});
   await prisma.intention.deleteMany({});
+  await prisma.country.deleteMany({});
 
   console.info("Seeding genders...");
   const genderData: Array<{ id: string; name: string; sortOrder: number }> = [
@@ -611,6 +622,15 @@ async function main() {
     data: INTENTIONS.map((item, index) => ({
       id: item.id,
       name: `Internal: ${item.name}`,
+      sortOrder: (index + 1) * 10,
+    })),
+  });
+
+  console.info("Seeding countries...");
+  await prisma.country.createMany({
+    data: COUNTRIES.map((item, index) => ({
+      id: item.id,
+      name: item.name,
       sortOrder: (index + 1) * 10,
     })),
   });

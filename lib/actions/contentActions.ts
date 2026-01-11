@@ -76,8 +76,28 @@ export async function getIntentions(): Promise<string[]> {
   return intentions.map((i) => i.id);
 }
 
+export async function getCountries(): Promise<string[]> {
+  try {
+    const countries = await (prisma as any).country.findMany({
+      orderBy: { sortOrder: "asc" },
+    });
+    return countries.map((c: any) => c.name);
+  } catch (error) {
+    console.error("Error in getCountries:", error);
+    return [
+      "Türkiye",
+      "Germany",
+      "United Kingdom",
+      "United States",
+      "Netherlands",
+      "France",
+      "Other",
+    ];
+  }
+}
+
 export async function getProfileMetadata(): Promise<ProfileMetadata> {
-  const [hobbies, bioTemplates, maritalStatuses, educations, intentions, jobs, genders] =
+  const [hobbies, bioTemplates, maritalStatuses, educations, intentions, jobs, genders, countries] =
     await Promise.all([
       getHobbies(),
       getBioTemplates(),
@@ -86,6 +106,7 @@ export async function getProfileMetadata(): Promise<ProfileMetadata> {
       getIntentions(),
       getJobs(),
       getGenders(),
+      getCountries(),
     ]);
 
   return {
@@ -96,5 +117,6 @@ export async function getProfileMetadata(): Promise<ProfileMetadata> {
     intentions,
     jobs,
     genders,
+    countries,
   };
 }

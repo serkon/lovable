@@ -4,6 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAppStore } from "@/context/AppStore";
 import { OnboardingData } from "@/app/onboarding/page";
 import LifestyleCardComponent from "@/components/ui/card-carousel";
+import { SectionSeparator } from "@/components/ui/section-separator";
 import { Dispatch, SetStateAction, useState } from "react";
 import { FormGroup } from "@/components/ui/form-group";
 import { aiActionFetchBioSuggestions, aiActionImproveBio } from "@/lib/actions/aiActions";
@@ -77,7 +78,7 @@ export function StepAboutMe({ data, bioTemplates, hobbies, setData, nextStep }: 
         </p>
       </div>
 
-      <div className="mb-10 flex w-full flex-col gap-6">
+      <div className="mb-10 flex w-full flex-col gap-8">
         <FormGroup label={getLabel("bio", language)} className="relative">
           <Textarea
             id="bio"
@@ -103,13 +104,11 @@ export function StepAboutMe({ data, bioTemplates, hobbies, setData, nextStep }: 
         </FormGroup>
 
         {/* Category Label - Separator Style */}
-        <div className="m-auto flex w-full max-w-[20rem] items-center gap-4 sm:max-w-[24rem]">
-          <div className="h-px flex-1 bg-gray-200 dark:bg-gray-800"></div>
-          <span className="text-[10px] font-bold tracking-widest text-gray-400 uppercase">
-            {getLabel("suggested_sentences", language)}
-          </span>
-          <div className="h-px flex-1 bg-gray-200 dark:bg-gray-800"></div>
-        </div>
+        <SectionSeparator
+          label={getLabel("suggested_sentences", language)}
+          maxWidth="sm"
+          data-test-id="about-me-separator"
+        />
 
         {shuffledTemplates.length > 0 && (
           <div className="flex w-full flex-col items-center justify-center">

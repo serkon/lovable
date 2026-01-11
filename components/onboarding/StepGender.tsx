@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ChoiceCard, ChoiceOption } from "@/components/ui/choice-card";
 import { OnboardingData } from "@/app/onboarding/page";
 import { Dispatch, SetStateAction, useMemo } from "react";
+import { StepDescription } from "@/components/ui/step-description";
 
 interface StepProps {
   data: OnboardingData;
@@ -56,10 +57,11 @@ export function StepGender({ data, setData, nextStep, getGendersList }: StepProp
         ))}
       </div>
 
-      <div className="mb-8 flex items-center justify-center gap-2 text-xs font-medium text-neutral-400">
-        <Lock className="h-4 w-4" />
-        <span>{getLabel("gender_visible_notice", language)}</span>
-      </div>
+      <StepDescription
+        text={getLabel("gender_visible_notice", language)}
+        icon={<Lock className="h-4 w-4" />}
+        data-test-id="gender-notice"
+      />
 
       <Button
         onClick={nextStep}
