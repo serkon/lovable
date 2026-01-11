@@ -1,9 +1,11 @@
-import type { Metadata } from "next";
+"use client";
+
 import { Playfair_Display, DM_Sans } from "next/font/google";
 import "./globals.css";
 import "./custom.scss";
 import { AppProvider } from "@/context/AppStore";
 import { Toaster } from "sonner";
+import { LayoutFooter } from "@/components/layout/LayoutFooter";
 
 export const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -16,11 +18,6 @@ const dm_sans = DM_Sans({
   subsets: ["latin"],
   variable: "--font-dm-sans",
 });
-
-export const metadata: Metadata = {
-  title: "Next Chapter - 40+ Tanışma Platformu",
-  description: "Ciddi ve güvenilir arkadaşlıklar için doğru yerdesiniz.",
-};
 
 export default function RootLayout({
   children,
@@ -35,9 +32,12 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className={`${dm_sans.variable} ${playfair.variable} pb-8 antialiased`}>
+      <body className={`${dm_sans.variable} ${playfair.variable} antialiased`}>
         <AppProvider>
-          {children}
+          <div className="flex min-h-screen flex-col">
+            <div className="flex-1">{children}</div>
+            <LayoutFooter />
+          </div>
           <Toaster />
         </AppProvider>
       </body>

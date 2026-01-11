@@ -2,7 +2,6 @@
 
 import React from "react";
 import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/landing/Footer";
 import { useAppStore } from "@/context/AppStore";
 
 export default function TermsPage() {
@@ -86,9 +85,6 @@ export default function TermsPage() {
           ))}
         </div>
       </main>
-      <div className="container mx-auto px-4">
-        <Footer language={language} />
-      </div>
     </div>
   );
 }

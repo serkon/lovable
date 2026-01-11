@@ -10,8 +10,8 @@ interface FooterProps {
 
 export function Footer({ language }: FooterProps) {
   return (
-    <div
-      className="mt-10 flex flex-col items-center justify-between gap-6 border-t pt-10 md:flex-row"
+    <footer
+      className="mt-8 flex flex-col items-center justify-between gap-6 border-t px-12 py-8 md:flex-row"
       data-testid="footer-container"
     >
       <div className="text-muted-foreground text-xs opacity-70">
@@ -28,6 +28,6 @@ export function Footer({ language }: FooterProps) {
           {getLabel("footer_help", language)}
         </Link>
       </div>
-    </div>
+    </footer>
   );
 }
