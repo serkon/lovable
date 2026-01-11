@@ -16,8 +16,10 @@ import { toast } from "sonner";
 import { FormGroup } from "@/components/ui/form-group";
 import { AutoComplete } from "@/components/ui/auto-complete";
 import { TURKEY_DATA } from "@/lib/data/turkey";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { SectionSeparator } from "@/components/ui/section-separator";
+import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 interface StepPreviewProps {
   data: OnboardingData;
@@ -29,6 +31,37 @@ interface StepPreviewProps {
 export function StepPreview({ data, setData, nextStep, countriesList }: StepPreviewProps) {
   const { language } = useAppStore();
   const [isDetecting, setIsDetecting] = useState(false);
+  const [imageIndex, setImageIndex] = useState(0);
+  const [direction, setDirection] = useState(0);
+  const [isImageLoading, setIsImageLoading] = useState(false);
+
+  const slideVariants = {
+    enter: (direction: number) => ({
+      x: direction > 0 ? 300 : -300,
+      opacity: 0,
+    }),
+    center: {
+      zIndex: 1,
+      x: 0,
+      opacity: 1,
+    },
+    exit: (direction: number) => ({
+      zIndex: 0,
+      x: direction < 0 ? 300 : -300,
+      opacity: 0,
+    }),
+  };
+
+  const paginate = (newDirection: number) => {
+    setDirection(newDirection);
+    setImageIndex((prev) => {
+      let next = prev + newDirection;
+      if (next < 0) next = data.photos.length - 1;
+      if (next >= data.photos.length) next = 0;
+      return next;
+    });
+    setIsImageLoading(true);
+  };
 
   const handleDetectLocation = () => {
     setIsDetecting(true);
@@ -81,7 +114,6 @@ export function StepPreview({ data, setData, nextStep, countriesList }: StepPrev
   };
 
   const isLocationValid = data.city && data.district && data.country;
-  const mainPhoto = data.photos[0];
 
   return (
     <>
@@ -106,26 +138,95 @@ export function StepPreview({ data, setData, nextStep, countriesList }: StepPrev
         >
           <Card className="group overflow-hidden pt-0" data-test-id="preview-profile-card">
             <div className="relative h-[22rem] w-full overflow-hidden">
-              {mainPhoto ? (
-                <img
-                  src={mainPhoto}
-                  alt="Profile"
-                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
+              {data.photos.length > 0 ? (
+                <>
+                  {/* Image indicators */}
+                  {data.photos.length > 1 && (
+                    <div className="absolute top-4 right-0 left-0 z-10 flex justify-center gap-1 px-4">
+                      {data.photos.map((_, idx) => (
+                        <div
+                          key={idx}
+                          className={cn(
+                            "h-1 rounded-full transition-all duration-300",
+                            idx === imageIndex ? "w-6 bg-white" : "w-2 bg-white/40"
+                          )}
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Click areas for navigation */}
+                  {data.photos.length > 1 && (
+                    <div className="absolute inset-0 z-20 flex">
+                      <div
+                        className="h-full w-1/2 cursor-pointer"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          paginate(-1);
+                        }}
+                      />
+                      <div
+                        className="h-full w-1/2 cursor-pointer"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          paginate(1);
+                        }}
+                      />
+                    </div>
+                  )}
+
+                  {/* Image */}
+                  <div className="relative h-full w-full">
+                    <AnimatePresence initial={false} custom={direction}>
+                      <motion.div
+                        key={`preview-${imageIndex}`}
+                        custom={direction}
+                        variants={slideVariants}
+                        initial="enter"
+                        animate="center"
+                        exit="exit"
+                        transition={{
+                          x: { type: "spring", stiffness: 300, damping: 30 },
+                          opacity: { duration: 0.2 },
+                        }}
+                        drag="x"
+                        dragConstraints={{ left: 0, right: 0 }}
+                        dragElastic={1}
+                        onDragEnd={(_, { offset, velocity }) => {
+                          const swipeThreshold = 50;
+                          const swipe = offset.x;
+
+                          if (swipe < -swipeThreshold) {
+                            paginate(1);
+                          } else if (swipe > swipeThreshold) {
+                            paginate(-1);
+                          }
+                        }}
+                        className="absolute h-full w-full cursor-grab active:cursor-grabbing"
+                      >
+                        <Image
+                          src={data.photos[imageIndex]}
+                          alt="Profile"
+                          fill
+                          className={cn(
+                            "pointer-events-none object-cover transition-all duration-700 group-hover:scale-105",
+                            isImageLoading ? "blur-xl" : "blur-0"
+                          )}
+                          sizes="(max-width: 768px) 100vw, 512px"
+                          priority
+                          onLoad={() => setIsImageLoading(false)}
+                        />
+                      </motion.div>
+                    </AnimatePresence>
+                  </div>
+                </>
               ) : (
                 <div className="flex h-full items-center justify-center bg-neutral-100">
                   <Camera className="text-muted-foreground/40 h-16 w-16" />
                 </div>
               )}
 
-              {/* Photo indicator if multiple */}
-              {data.photos.length > 1 && (
-                <div className="absolute top-4 right-4 rounded-full bg-black/40 px-2 py-1 text-[10px] font-bold text-white backdrop-blur-md">
-                  1 / {data.photos.length}
-                </div>
-              )}
-
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-8 text-left">
+              <div className="absolute inset-x-0 bottom-0 z-30 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-8 text-left">
                 <h3 className="text-3xl font-bold text-white drop-shadow-md">
                   {data.firstName || data.lastName
                     ? `${data.firstName} ${data.lastName}`

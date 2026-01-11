@@ -28,7 +28,6 @@ import { StepPreview } from "@/components/onboarding/StepPreview";
 import StepPassword from "@/components/onboarding/StepPassword";
 import { StepPhotos } from "@/components/onboarding/StepPhotos";
 import { StepIndicator } from "@/components/ui/step-indicator";
-import { Skeleton } from "@/components/ui/skeleton";
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
@@ -233,102 +232,87 @@ export default function OnboardingPage() {
           className="flex w-full max-w-lg flex-col items-center"
           data-testid="onboarding-content"
         >
-          {!isDataLoaded ? (
-            <div className="w-full animate-pulse space-y-8">
-              <div className="flex flex-col items-center space-y-3">
-                <Skeleton className="h-10 w-2/3 rounded-full" />
-                <Skeleton className="h-6 w-1/2 rounded-full" />
-              </div>
-              <div className="w-full space-y-4">
-                <Skeleton className="h-24 w-full rounded-3xl" />
-                <Skeleton className="h-24 w-full rounded-3xl" />
-                <Skeleton className="h-24 w-full rounded-3xl" />
-              </div>
-              <Skeleton className="mt-10 h-12 w-full rounded-2xl" />
-            </div>
-          ) : (
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={step}
-                initial={{ x: 20, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                exit={{ x: -20, opacity: 0 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-                className="flex w-full flex-col items-center"
-              >
-                {step === 1 && (
-                  <StepGender
-                    data={data}
-                    setData={setData}
-                    nextStep={nextStep}
-                    getGendersList={() => gendersList}
-                  />
-                )}
-                {step === 2 && (
-                  <StepBasicInfo
-                    data={data}
-                    setData={setData}
-                    nextStep={nextStep}
-                    jobsList={jobsList}
-                    intentionsList={intentionsList}
-                    educationsList={educationsList}
-                    maritalStatusesList={maritalStatusesList}
-                  />
-                )}
-                {step === 3 && <StepPhotos data={data} setData={setData} nextStep={nextStep} />}
-                {step === 4 && (
-                  <StepAboutMe
-                    key={bioTemplates.length}
-                    data={data}
-                    hobbies={hobbiesList}
-                    setData={setData}
-                    bioTemplates={bioTemplates}
-                    nextStep={nextStep}
-                  />
-                )}
-                {step === 5 && (
-                  <StepHobbies
-                    data={data}
-                    setData={setData}
-                    hobbiesList={hobbiesList}
-                    nextStep={nextStep}
-                  />
-                )}
-                {step === 6 && (
-                  <StepPreview
-                    data={data}
-                    setData={setData}
-                    nextStep={nextStep}
-                    countriesList={countriesList}
-                  />
-                )}
-                {step === step_count && (
-                  <>
-                    <StepPassword data={data} setData={setData} nextStep={nextStep} />
-                    <div className="w-full space-y-3 pt-6">
-                      <Button
-                        onClick={() => handleFinish(false)}
-                        disabled={loading || !data.email || !data.password}
-                        className="w-full"
-                      >
-                        {loading
-                          ? getLabel("saving", language)
-                          : getLabel("btn_complete_auth", language)}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        onClick={() => handleFinish(true)}
-                        disabled={loading}
-                        className="w-full"
-                      >
-                        {getLabel("btn_skip_auth", language)}
-                      </Button>
-                    </div>
-                  </>
-                )}
-              </motion.div>
-            </AnimatePresence>
-          )}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={step}
+              initial={{ x: 20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -20, opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="flex w-full flex-col items-center"
+            >
+              {step === 1 && (
+                <StepGender
+                  data={data}
+                  setData={setData}
+                  nextStep={nextStep}
+                  getGendersList={() => gendersList}
+                />
+              )}
+              {step === 2 && (
+                <StepBasicInfo
+                  data={data}
+                  setData={setData}
+                  nextStep={nextStep}
+                  jobsList={jobsList}
+                  intentionsList={intentionsList}
+                  educationsList={educationsList}
+                  maritalStatusesList={maritalStatusesList}
+                />
+              )}
+              {step === 3 && <StepPhotos data={data} setData={setData} nextStep={nextStep} />}
+              {step === 4 && (
+                <StepAboutMe
+                  key={bioTemplates.length}
+                  data={data}
+                  hobbies={hobbiesList}
+                  setData={setData}
+                  bioTemplates={bioTemplates}
+                  nextStep={nextStep}
+                />
+              )}
+              {step === 5 && (
+                <StepHobbies
+                  data={data}
+                  setData={setData}
+                  hobbiesList={hobbiesList}
+                  nextStep={nextStep}
+                />
+              )}
+              {step === 6 && (
+                <StepPreview
+                  data={data}
+                  setData={setData}
+                  nextStep={nextStep}
+                  countriesList={countriesList}
+                />
+              )}
+              {step === step_count && (
+                <>
+                  <StepPassword data={data} setData={setData} nextStep={nextStep} />
+                  <div className="w-full space-y-3 pt-6">
+                    <Button
+                      onClick={() => handleFinish(false)}
+                      disabled={loading || !data.email || !data.password}
+                      className="w-full"
+                    >
+                      {loading
+                        ? getLabel("saving", language)
+                        : getLabel("btn_complete_auth", language)}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleFinish(true)}
+                      disabled={loading}
+                      className="w-full"
+                    >
+                      {getLabel("btn_skip_auth", language)}
+                    </Button>
+                  </div>
+                </>
+              )}
+            </motion.div>
+          </AnimatePresence>
 
           <div className="pt-8 text-center">
             <p className="text-muted-foreground text-xs font-medium">

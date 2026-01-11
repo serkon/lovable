@@ -5,7 +5,7 @@ import "./globals.css";
 import "./custom.scss";
 import { AppProvider } from "@/context/AppStore";
 import { Toaster } from "sonner";
-import { LayoutFooter } from "@/components/layout/LayoutFooter";
+import { Footer } from "@/components/layout/Footer";
 
 export const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -36,7 +36,7 @@ export default function RootLayout({
         <AppProvider>
           <div className="flex min-h-screen flex-col">
             <div className="flex-1">{children}</div>
-            <LayoutFooter />
+            <Footer />
           </div>
           <Toaster />
         </AppProvider>

@@ -1,14 +1,25 @@
 "use client";
 
-import React from "react";
-import Link from "next/link";
+import { useAppStore } from "@/context/AppStore";
 import { getLabel } from "@/lib/translations";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
-interface FooterProps {
-  language: "tr" | "en";
-}
+export function Footer() {
+  const { language } = useAppStore();
+  const pathname = usePathname();
 
-export function Footer({ language }: FooterProps) {
+  // Hide footer on authentication pages
+  const hideFooter =
+    pathname === "/login" ||
+    pathname === "/forgot-password" ||
+    pathname === "/reset-password" ||
+    pathname?.startsWith("/reset-password/");
+
+  if (hideFooter) {
+    return null;
+  }
+
   return (
     <footer
       className="mt-8 flex flex-col items-center justify-between gap-6 border-t px-12 py-8 md:flex-row"
