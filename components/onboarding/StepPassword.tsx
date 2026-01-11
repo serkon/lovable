@@ -1,11 +1,11 @@
 import { getLabel } from "@/lib/translations";
 import { Shield, Check, AlertCircle } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import { FormGroup } from "@/components/ui/form-group";
 import { useAppStore } from "@/context/AppStore";
 import { OnboardingData } from "@/app/onboarding/page";
 import { useMemo } from "react";
 import { cn } from "@/lib/utils";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 
 interface StepPasswordProps {
   data: OnboardingData;
@@ -66,17 +66,22 @@ export default function StepPassword({ data, setData }: StepPasswordProps) {
 
       <div className="w-full space-y-6">
         <FormGroup label={getLabel("label_password", language)}>
-          <div className="group relative">
-            <Input
+          <InputGroup className="transition-all">
+            <InputGroupAddon className="group-focus-within/input-group:text-primary pl-4 transition-colors">
+              <Shield className="h-5 w-5" />
+            </InputGroupAddon>
+            <InputGroupInput
               id="password"
               type="password"
-              className="focus:border-primary h-14 rounded-2xl border-2 pl-12 text-lg shadow-sm transition-all"
+              className="text-md"
               value={data.password}
               onChange={(e) => setData({ ...data, password: e.target.value })}
               placeholder={getLabel("placeholder_password", language)}
             />
-            <Shield className="group-focus-within:text-primary absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-neutral-400 transition-colors" />
-          </div>
+            <InputGroupAddon align="inline-end" className="pr-4 text-xs font-medium">
+              12 results
+            </InputGroupAddon>
+          </InputGroup>
         </FormGroup>
 
         {/* Strength Indicator */}

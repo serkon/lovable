@@ -216,7 +216,7 @@ export const translations = {
     error_max_photos: "En fazla 6 fotoğraf ekleyebilirsiniz.",
     profile_ready_badge: "Profilin Parlıyor!",
     secure_account_badge: "Hesabını Güvenceye Al",
-    auth_title: "Hesabınızı Güvenceye Alın",
+    auth_title: "Hesabınızı Kaydedin",
     auth_desc:
       "Profilleri kaybetmemek ve istediğiniz zaman giriş yapmak için bir şifre belirleyin.",
     label_country: "Ülke",
