@@ -88,7 +88,9 @@ export function StepPhotos({ data, setData, nextStep }: StepProps) {
                     <Plus className="text-primary h-6 w-6" />
                   </div>
                   <span className="text-xs font-semibold text-neutral-500">
-                    {slotIndex === 0 ? "Kapak Fotoğrafı" : `Fotoğraf ${slotIndex + 1}`}
+                    {slotIndex === 0
+                      ? getLabel("photo_cover", language)
+                      : getLabel("photo_number", language, { number: slotIndex + 1 })}
                   </span>
                 </button>
               ) : (
@@ -102,7 +104,7 @@ export function StepPhotos({ data, setData, nextStep }: StepProps) {
                   </button>
                   {slotIndex === 0 && (
                     <div className="bg-primary/90 absolute bottom-2 left-2 rounded-lg px-2 py-1 text-[10px] font-bold text-white backdrop-blur-sm">
-                      Kapak
+                      {getLabel("photo_cover_badge", language)}
                     </div>
                   )}
                 </div>

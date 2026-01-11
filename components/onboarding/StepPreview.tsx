@@ -76,7 +76,7 @@ export function StepPreview({ data, setData, nextStep, countriesList }: StepPrev
       );
     } else {
       setIsDetecting(false);
-      toast.error("Geolocation is not supported by your browser.");
+      toast.error(getLabel("geolocation_not_supported", language));
     }
   };
 
@@ -104,10 +104,7 @@ export function StepPreview({ data, setData, nextStep, countriesList }: StepPrev
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
-          <Card
-            className="group overflow-hidden rounded-[2.5rem] border-0 shadow-[0_20px_50px_rgba(0,0,0,0.1)] transition-all hover:shadow-[0_20px_60px_rgba(0,0,0,0.15)]"
-            data-test-id="preview-profile-card"
-          >
+          <Card className="group overflow-hidden pt-0" data-test-id="preview-profile-card">
             <div className="relative h-[22rem] w-full overflow-hidden">
               {mainPhoto ? (
                 <img
@@ -145,12 +142,12 @@ export function StepPreview({ data, setData, nextStep, countriesList }: StepPrev
                 </div>
               </div>
             </div>
-            <div className="border-t border-neutral-50 bg-white p-8 text-left dark:border-neutral-800 dark:bg-neutral-900">
-              <div className="text-primary mb-2 text-xs font-bold tracking-widest uppercase">
-                Hakkımda
+            <div className="px-8" data-test-id="preview-bio">
+              <div className="text-primary mb-4 text-xs font-bold tracking-widest uppercase">
+                {getLabel("about_me", language)}
               </div>
-              <p className="text-muted-foreground line-clamp-3 text-lg leading-relaxed italic">
-                &quot;{data.bio || getLabel("no_bio_yet", language)}&quot;
+              <p className="text-muted-foreground">
+                {data.bio || getLabel("no_bio_yet", language)}
               </p>
             </div>
           </Card>
@@ -171,7 +168,7 @@ export function StepPreview({ data, setData, nextStep, countriesList }: StepPrev
           className="w-full space-y-6"
         >
           <p className="text-muted-foreground -mt-2 text-center text-sm">
-            Sana en yakın kişileri bulmamıza yardımcı ol.
+            {getLabel("location_help_text", language)}
           </p>
 
           {/* Location Detect Button */}

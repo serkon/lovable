@@ -27,10 +27,22 @@ export default function StepPassword({ data, setData }: StepPasswordProps) {
   }, [data.password]);
 
   const strengthConfig = [
-    { label: "Çok Zayıf", color: "bg-destructive", text: "text-destructive" },
-    { label: "Zayıf", color: "bg-orange-500", text: "text-orange-500" },
-    { label: "Orta", color: "bg-yellow-500", text: "text-yellow-500" },
-    { label: "Güçlü", color: "bg-emerald-500", text: "text-emerald-500" },
+    {
+      label: getLabel("password_very_weak", language),
+      color: "bg-destructive",
+      text: "text-destructive",
+    },
+    { label: getLabel("password_weak", language), color: "bg-orange-500", text: "text-orange-500" },
+    {
+      label: getLabel("password_medium", language),
+      color: "bg-yellow-500",
+      text: "text-yellow-500",
+    },
+    {
+      label: getLabel("password_strong", language),
+      color: "bg-emerald-500",
+      text: "text-emerald-500",
+    },
   ];
 
   const currentStrength = strength > 0 ? strengthConfig[strength - 1] : null;
@@ -71,7 +83,9 @@ export default function StepPassword({ data, setData }: StepPasswordProps) {
         {data.password && (
           <div className="animate-in fade-in slide-in-from-top-2 space-y-3 duration-300">
             <div className="flex items-center justify-between px-1 text-xs font-bold tracking-widest uppercase">
-              <span className="text-muted-foreground">Şifre Gücü</span>
+              <span className="text-muted-foreground">
+                {getLabel("password_strength", language)}
+              </span>
               <span className={cn(currentStrength?.text)}>{currentStrength?.label}</span>
             </div>
             <div className="flex h-1.5 w-full gap-1.5">
@@ -92,7 +106,7 @@ export default function StepPassword({ data, setData }: StepPasswordProps) {
                 ) : (
                   <AlertCircle className="h-3 w-3" />
                 )}
-                En az 8 karakter
+                {getLabel("password_req_length", language)}
               </li>
               <li className="flex items-center gap-1.5">
                 {/[A-Z]/.test(data.password) ? (
@@ -100,7 +114,7 @@ export default function StepPassword({ data, setData }: StepPasswordProps) {
                 ) : (
                   <AlertCircle className="h-3 w-3" />
                 )}
-                Büyük harf
+                {getLabel("password_req_uppercase", language)}
               </li>
               <li className="flex items-center gap-1.5">
                 {/[0-9]/.test(data.password) ? (
@@ -108,7 +122,7 @@ export default function StepPassword({ data, setData }: StepPasswordProps) {
                 ) : (
                   <AlertCircle className="h-3 w-3" />
                 )}
-                Rakam
+                {getLabel("password_req_number", language)}
               </li>
               <li className="flex items-center gap-1.5">
                 {/[^A-Za-z0-9]/.test(data.password) ? (
@@ -116,7 +130,7 @@ export default function StepPassword({ data, setData }: StepPasswordProps) {
                 ) : (
                   <AlertCircle className="h-3 w-3" />
                 )}
-                Özel karakter
+                {getLabel("password_req_special", language)}
               </li>
             </ul>
           </div>
