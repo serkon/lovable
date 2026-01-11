@@ -50,7 +50,6 @@ export function ChoiceCard({
   iconContainerClassName,
 }: ChoiceCardProps) {
   const sizes = sizeClasses[size];
-  console.log(sizes);
 
   return (
     <div

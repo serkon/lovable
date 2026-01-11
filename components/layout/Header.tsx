@@ -35,6 +35,7 @@ import {
   DropdownMenuGroup,
 } from "@/components/ui/dropdown-menu";
 import { Switch } from "@/components/ui/switch";
+import { toast } from "sonner";
 
 interface HeaderProps {
   variant?: "landing" | "auth" | "simple";
@@ -330,7 +331,10 @@ export function Header({
                         // Prevent dropdown from closing and toggle status
                         e.stopPropagation();
                         setStatus(isInvisible ? USER_STATUS.ONLINE : USER_STATUS.INVISIBLE);
-                        console.log("Toggling ghost mode via div click");
+                        console.info("Toggling ghost mode via div click");
+                        toast.info("Görünmez Mod", {
+                          description: "Görünmez modu açıldı.",
+                        });
                       }}
                     >
                       <div className="flex items-center gap-2">
@@ -345,7 +349,10 @@ export function Header({
                         checked={isInvisible}
                         onCheckedChange={(checked: boolean) => {
                           setStatus(checked ? USER_STATUS.INVISIBLE : USER_STATUS.ONLINE);
-                          console.log("Toggling ghost mode via switch change");
+                          console.info("Toggling ghost mode via switch change");
+                          toast.info("Görünmez Mod", {
+                            description: "Görünmez modu açıldı.",
+                          });
                         }}
                         onClick={(e) => e.stopPropagation()}
                       />

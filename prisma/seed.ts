@@ -526,7 +526,7 @@ const MOCK_USERS = [
 ];
 
 async function main() {
-  console.log("Cleaning database...");
+  console.info("Cleaning database...");
   await prisma.like.deleteMany({});
   await prisma.userImage.deleteMany({});
   await prisma.user.deleteMany({});
@@ -539,7 +539,7 @@ async function main() {
   await prisma.education.deleteMany({});
   await prisma.intention.deleteMany({});
 
-  console.log("Seeding genders...");
+  console.info("Seeding genders...");
   const genderData: Array<{ id: string; name: string; sortOrder: number }> = [
     { id: "gender_female", name: "Internal: Kadın", sortOrder: 10 },
     { id: "gender_male", name: "Internal: Erkek", sortOrder: 20 },
@@ -550,7 +550,7 @@ async function main() {
     data: genderData as any,
   });
 
-  console.log("Seeding jobs...");
+  console.info("Seeding jobs...");
   await prisma.job.createMany({
     data: JOBS.map((job, index) => ({
       id: job.id,
@@ -560,7 +560,7 @@ async function main() {
     })),
   });
 
-  console.log("Seeding hobbies...");
+  console.info("Seeding hobbies...");
   await prisma.hobby.createMany({
     data: HOBBIES.map((hobby, index) => ({
       id: hobby.id,
@@ -569,7 +569,7 @@ async function main() {
     })),
   });
 
-  console.log("Seeding templates...");
+  console.info("Seeding templates...");
   await prisma.bioTemplate.createMany({
     data: BIO_TEMPLATES.map((item, index) => ({
       id: `bio_${(index + 1).toString().padStart(2, "0")}`,
@@ -579,7 +579,7 @@ async function main() {
     })),
   });
 
-  console.log("Seeding ice breakers...");
+  console.info("Seeding ice breakers...");
   await prisma.iceBreaker.createMany({
     data: ICE_BREAKERS.map((content, index) => ({
       id: `ice_${(index + 1).toString().padStart(2, "0")}`,
@@ -588,7 +588,7 @@ async function main() {
     })),
   });
 
-  console.log("Seeding marital statuses...");
+  console.info("Seeding marital statuses...");
   await prisma.maritalStatus.createMany({
     data: MARITAL_STATUSES.map((item, index) => ({
       id: item.id,
@@ -597,7 +597,7 @@ async function main() {
     })),
   });
 
-  console.log("Seeding educations...");
+  console.info("Seeding educations...");
   await prisma.education.createMany({
     data: EDUCATIONS.map((item, index) => ({
       id: item.id,
@@ -606,7 +606,7 @@ async function main() {
     })),
   });
 
-  console.log("Seeding intentions...");
+  console.info("Seeding intentions...");
   await prisma.intention.createMany({
     data: INTENTIONS.map((item, index) => ({
       id: item.id,
@@ -615,7 +615,7 @@ async function main() {
     })),
   });
 
-  console.log("Seeding users...");
+  console.info("Seeding users...");
   let userIndex = 0;
   for (const userData of MOCK_USERS) {
     userIndex++;
@@ -645,7 +645,7 @@ async function main() {
     });
   }
 
-  console.log("Seeding finished.");
+  console.info("Seeding finished.");
 }
 
 main()

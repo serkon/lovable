@@ -33,6 +33,7 @@ export type OnboardingData = {
   lastName: string;
   age: string;
   city: string;
+  district: string;
   country: string;
   job: string;
   gender: string;
@@ -63,6 +64,7 @@ export default function OnboardingPage() {
     lastName: "",
     age: "",
     city: "",
+    district: "",
     country: "Türkiye",
     job: "",
     gender: gendersList[0] || "",
@@ -83,7 +85,7 @@ export default function OnboardingPage() {
       // Ensure we have a valid session before updating
       const user = await getCurrentUser();
       if (!user) {
-        console.log("No session found, creating guest user...");
+        console.info("No session found, creating guest user...");
         await createGuestUser();
       }
 
@@ -92,6 +94,7 @@ export default function OnboardingPage() {
         lastName: data.lastName,
         age: parseInt(data.age),
         city: data.city,
+        district: data.district,
         job: data.job,
         gender: data.gender,
         bio: data.bio,
@@ -150,8 +153,6 @@ export default function OnboardingPage() {
       setIntentionsList(dbIntention || []);
       setJobsList(dbJobs || []);
       setGendersList(dbGenders || []);
-
-      console.log("dbJobs", dbJobs);
 
       if (dbGenders && dbGenders.length > 0) {
         setData((prev) => ({

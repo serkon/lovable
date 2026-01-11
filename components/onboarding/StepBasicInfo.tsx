@@ -40,8 +40,6 @@ export function StepBasicInfo({
 
   const fields = useMemo(() => {
     const uniqueFields = Array.from(new Set(jobsList.map((j) => j.field || "other")));
-    console.log("StepBasicInfo rendered with jobsList count:", jobsList.length);
-    console.log("Computed fields:", uniqueFields);
     return uniqueFields;
   }, [jobsList]);
   const isFormValid =

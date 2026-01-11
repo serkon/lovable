@@ -148,6 +148,7 @@ export async function updateUserProfile(data: {
   lastName?: string;
   age?: number;
   city?: string;
+  district?: string;
   job?: string;
   gender?: string;
   bio?: string;

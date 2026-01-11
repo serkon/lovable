@@ -103,7 +103,6 @@ export async function aiActionCheckProfilePhoto(imageBuffer: Buffer, mimeType: s
 
     try {
       const data = JSON.parse(response);
-      console.log("AI response:", data);
       return data;
     } catch (parseErr) {
       console.error("AI JSON parse error:", parseErr, "Text:", response);
@@ -134,8 +133,6 @@ export async function aiActionImproveBio(bio: string): Promise<{ bio: string }> 
       },
     });
 
-    console.log("AI result:", result);
-
     const response = await result.text;
     if (!response) {
       console.error("AI returned empty text");
@@ -144,7 +141,6 @@ export async function aiActionImproveBio(bio: string): Promise<{ bio: string }> 
 
     try {
       const data = JSON.parse(response);
-      console.log("AI response:", data);
       return data;
     } catch (parseErr) {
       console.error("AI JSON parse error:", parseErr, "Text:", response);

@@ -29,18 +29,14 @@ export function StepAboutMe({ data, bioTemplates, hobbies, setData, nextStep }: 
     // Mock AI improvement delay which would call an endpoint
     const improvedBio = await aiActionImproveBio(data.bio);
     setIsImproving(false);
-    console.log("improvedBio", improvedBio);
     setData({ ...data, bio: improvedBio.bio });
   };
 
   const handleAISuggestmore = async () => {
-    console.log("bioSuggestions", bioTemplates, shuffledTemplates);
-
     setIsSuggesting(true);
     setShuffledTemplates((prev) => [...prev].sort(() => 0.5 - Math.random()));
     const bioSuggestions = await aiActionFetchBioSuggestions(shuffledTemplates, hobbies, language);
     setShuffledTemplates(bioSuggestions);
-    console.log("bioSuggestions", bioSuggestions, shuffledTemplates);
     setActiveIndex(0);
     setIsSuggesting(false);
   };
@@ -152,7 +148,7 @@ export function StepAboutMe({ data, bioTemplates, hobbies, setData, nextStep }: 
         )}
       </div>
 
-      <Button onClick={nextStep} className="w-full">
+      <Button onClick={nextStep} className="w-full max-w-[400px] shadow-lg transition-all">
         {getLabel("btn_continue", language)}
       </Button>
     </>

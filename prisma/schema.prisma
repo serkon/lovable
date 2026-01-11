@@ -16,6 +16,7 @@ model User {
   lastName        String?
   age             Int?
   city            String?
+  district        String?
   country         String?
   jobId           String?
   genderId        String?

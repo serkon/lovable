@@ -26,15 +26,17 @@ export function StepHobbies({ data, setData, nextStep, hobbiesList }: Hobbies) {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-2 text-center">
-        <h2 className="text-3xl font-bold tracking-tight">{getLabel("hobbies", language)}</h2>
-        <p className="text-muted-foreground text-sm">
+    <>
+      <div className="mb-10 space-y-3 text-center">
+        <h1 className="text-foreground text-4xl font-bold tracking-tight md:text-5xl">
+          {getLabel("hobbies", language)}
+        </h1>
+        <p className="text-muted-foreground mx-auto max-w-lg text-lg leading-relaxed">
           {getLabel("min_hobbies_req", language, { min: APP_CONFIG.MIN_HOBBIES_COUNT })}
         </p>
       </div>
 
-      <div className="flex flex-wrap justify-center gap-2 py-4">
+      <div className="mb-10 flex flex-wrap justify-center gap-2 py-4">
         {hobbiesList.map((hobby) => (
           <Badge
             key={hobby}
@@ -50,10 +52,10 @@ export function StepHobbies({ data, setData, nextStep, hobbiesList }: Hobbies) {
       <Button
         onClick={nextStep}
         disabled={data.hobbies.length < APP_CONFIG.MIN_HOBBIES_COUNT}
-        className="w-full"
+        className="w-full max-w-[400px] shadow-lg transition-all"
       >
         {getLabel("btn_looks_great", language)}
       </Button>
-    </div>
+    </>
   );
 }

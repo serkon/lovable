@@ -35,7 +35,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className={`${dm_sans.variable} ${playfair.variable} antialiased`}>
+      <body className={`${dm_sans.variable} ${playfair.variable} pb-8 antialiased`}>
         <AppProvider>
           {children}
           <Toaster />

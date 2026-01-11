@@ -14,13 +14,14 @@ interface StepPasswordProps {
 export default function StepPassword({ data, setData }: StepPasswordProps) {
   const { language } = useAppStore();
   return (
-    <div className="space-y-6">
-      <div className="space-y-2 text-center">
-        <div className="bg-primary/10 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
-          <Shield className="text-primary h-8 w-8" />
-        </div>
-        <h2 className="text-3xl font-bold tracking-tight">{getLabel("auth_title", language)}</h2>
-        <p className="text-muted-foreground">{getLabel("auth_desc", language)}</p>
+    <>
+      <div className="mb-10 space-y-3 text-center">
+        <h1 className="text-foreground text-4xl font-bold tracking-tight md:text-5xl">
+          {getLabel("auth_title", language)}
+        </h1>
+        <p className="text-muted-foreground mx-auto max-w-lg text-lg leading-relaxed">
+          {getLabel("auth_desc", language)}
+        </p>
       </div>
 
       <div className="space-y-4">
@@ -36,6 +37,6 @@ export default function StepPassword({ data, setData }: StepPasswordProps) {
           </FormGroup>
         </div>
       </div>
-    </div>
+    </>
   );
 }
